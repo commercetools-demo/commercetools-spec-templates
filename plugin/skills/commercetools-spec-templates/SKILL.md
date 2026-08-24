@@ -18,7 +18,7 @@ Copies a pre-compiled, industry-specific spec set into the developer's spec-driv
 project. You ask the questions; the `cts` CLI decides and writes every byte. **Never write spec
 files yourself** — determinism is the point, and the CLI leaves a receipt so its work is reversible.
 
-`CTS` below is `npx -y commercetools-spec-templates` (or the bundled `${CLAUDE_PLUGIN_ROOT}/bin/cts.mjs`
+`CTS` below is `npx -y @commercetools-demo/commercetools-spec-templates` (or the bundled `${CLAUDE_PLUGIN_ROOT}/bin/cts.mjs`
 when offline).
 
 ## Workflow

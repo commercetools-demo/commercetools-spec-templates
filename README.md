@@ -9,8 +9,8 @@ Industry vertical specs for commercetools, rendered into your spec-driven develo
 
 ```bash
 # in a project already initialized with `openspec init` (or `specify init`)
-npx commercetools-spec-templates plan --industry grocery --model B2C
-npx commercetools-spec-templates apply --industry grocery --model B2C
+npx @commercetools-demo/commercetools-spec-templates plan --industry grocery --model B2C
+npx @commercetools-demo/commercetools-spec-templates apply --industry grocery --model B2C
 ```
 
 That writes the grocery B2C spec set into `openspec/specs/`, runs the

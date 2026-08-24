@@ -1,21 +1,47 @@
 {
-  "name": "commercetools-spec-templates",
+  "name": "@commercetools-demo/commercetools-spec-templates",
   "version": "0.1.0",
   "description": "Industry vertical spec templates for commercetools, rendered into GitHub Spec Kit or OpenSpec projects.",
   "type": "module",
-  "bin": { "cts": "bin/cts.mjs" },
-  "files": ["bin/", "lib/", "renderers/", "dist/", "rendered/", "registry.json", "README.md", "LICENSE-MIT"],
+  "bin": {
+    "cts": "bin/cts.mjs"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "renderers/",
+    "dist/",
+    "rendered/",
+    "registry.json",
+    "README.md",
+    "LICENSE-MIT"
+  ],
   "scripts": {
     "build": "node bin/ctsx.mjs build",
     "lint": "node bin/ctsx.mjs lint --strict",
     "test": "node --test test/*.test.mjs"
   },
-  "engines": { "node": ">=20.19" },
+  "engines": {
+    "node": ">=20.19"
+  },
   "dependencies": {},
-  "devDependencies": { "yaml": "^2.6.0" },
-  "keywords": ["commercetools", "spec-driven-development", "spec-kit", "openspec", "verticals"],
+  "devDependencies": {
+    "yaml": "^2.6.0"
+  },
+  "keywords": [
+    "commercetools",
+    "spec-driven-development",
+    "spec-kit",
+    "openspec",
+    "verticals"
+  ],
   "license": "MIT",
   "author": "commercetools",
-  "repository": { "type": "git", "url": "https://github.com/commercetools-demo/commercetools-spec-templates.git" },
-  "publishConfig": { "access": "public" }
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/commercetools-demo/commercetools-spec-templates.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }
