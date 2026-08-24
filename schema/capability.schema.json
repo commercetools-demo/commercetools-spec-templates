@@ -1,0 +1,430 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/commercetools-demo/commercetools-spec-templates/schema/capability.schema.json",
+  "title": "commercetools vertical capability",
+  "description": "One file = one capability = exactly one normative requirement. Framework-agnostic: no FR-###, no user stories, no ADDED Requirements. Renderers add framework vocabulary.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "version",
+    "title",
+    "status",
+    "visibility",
+    "industry",
+    "business_models",
+    "priority",
+    "epic",
+    "requirement",
+    "rationale",
+    "scenarios",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+\\.[a-z0-9-]+$",
+      "description": "Immutable forever. The last segment must equal the file stem."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Per-capability semver. MAJOR = the requirement's meaning changed."
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 70
+    },
+    "kind": {
+      "enum": [
+        "page",
+        "journey",
+        "behavior",
+        "data-model",
+        "integration",
+        "policy"
+      ]
+    },
+    "status": {
+      "enum": [
+        "candidate",
+        "published",
+        "deprecated"
+      ]
+    },
+    "stability": {
+      "enum": [
+        "experimental",
+        "beta",
+        "stable"
+      ]
+    },
+    "visibility": {
+      "enum": [
+        "public",
+        "partner",
+        "internal"
+      ],
+      "description": "Build-time publish filter. Anything traceable to a customer engagement is internal."
+    },
+    "industry": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      },
+      "description": "Taxonomy ids, or [\"*\"] for capabilities under catalog/common/."
+    },
+    "business_models": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      },
+      "description": "Narrow to what you can defend. [\"*\"] is almost always wrong; inheritance handles the rest."
+    },
+    "priority": {
+      "enum": [
+        "P1",
+        "P2",
+        "P3"
+      ]
+    },
+    "domains": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "epic": {
+      "type": "string",
+      "description": "Must exist in the vertical's vertical.yaml epics."
+    },
+    "skill": {
+      "type": "string",
+      "description": "Required iff a commercetools block is present. Closed set in taxonomy/skills.yaml."
+    },
+    "supporting_skills": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "requirement": {
+      "type": "string",
+      "maxLength": 400,
+      "description": "Exactly one SHALL/MUST/SHOULD/MAY. Surface-agnostic and observable."
+    },
+    "rationale": {
+      "type": "string"
+    },
+    "user_story": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "actor": {
+          "type": "string"
+        },
+        "goal": {
+          "type": "string"
+        },
+        "benefit": {
+          "type": "string"
+        }
+      }
+    },
+    "components": {
+      "type": "array",
+      "description": "The | Component | Data Source | Notes | table. Per-component business_models is what generates the _Excluded for X_ footer.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "data_source"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "data_source": {
+            "enum": [
+              "STATIC",
+              "CACHED",
+              "MIDDLEWARE"
+            ]
+          },
+          "notes": {
+            "type": "string"
+          },
+          "business_models": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "scenarios": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "when",
+          "then"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          },
+          "given": {
+            "type": "string"
+          },
+          "when": {
+            "type": "string"
+          },
+          "then": {
+            "type": "string"
+          },
+          "business_models": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Scenario-level narrowing; omit when it applies to every model the capability does."
+          }
+        }
+      }
+    },
+    "success_criteria": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "metric"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "metric": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "commercetools": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Omit entirely for a pure-business capability. Present implies `skill` is set.",
+      "properties": {
+        "entities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "api_surface": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "ref",
+              "grounded_by",
+              "doc",
+              "verified_at"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "concept",
+                  "rest",
+                  "graphql",
+                  "update-action",
+                  "constraint"
+                ]
+              },
+              "ref": {
+                "type": "string"
+              },
+              "grounded_by": {
+                "enum": [
+                  "docs-search",
+                  "oas-schemata",
+                  "graphql-schemata",
+                  "rest-validate",
+                  "graphql-validate"
+                ]
+              },
+              "doc": {
+                "type": "string",
+                "format": "uri"
+              },
+              "verified_at": {
+                "type": "string",
+                "format": "date"
+              }
+            }
+          }
+        },
+        "modeling_notes": {
+          "type": "string"
+        }
+      }
+    },
+    "tasks_hint": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The renderer positions the [SKILL:] token itself; do not write it here."
+    },
+    "depends_on": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "conflicts_with": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "replaces": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "open_questions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Where unknowns go. Never invent requirement text to fill a hole."
+    },
+    "deprecation": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "since",
+        "reason",
+        "migrate_to",
+        "remove_after"
+      ],
+      "properties": {
+        "since": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "migrate_to": {
+          "type": "string"
+        },
+        "remove_after": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "contributors"
+      ],
+      "properties": {
+        "source": {
+          "enum": [
+            "pdf",
+            "collector",
+            "authored",
+            "customer-project"
+          ]
+        },
+        "document": {
+          "type": "string",
+          "description": "Required unless source is authored. Must match a sources/<id>.provenance.yaml."
+        },
+        "locator": {
+          "type": "string",
+          "description": "Enough for a human to re-find the passage, e.g. 'p. 34 \u00a74.2'."
+        },
+        "contributors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "reviewed_by": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "reviewed_at": {
+          "type": "string"
+        }
+      }
+    },
+    "render_overrides": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Allowlisted keys only; free text is rejected.",
+      "properties": {
+        "openspec": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "capability": {
+              "type": "string"
+            }
+          }
+        },
+        "speckit": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "feature_slug": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "_file": {
+      "type": "string",
+      "description": "Injected by the loader; not authored."
+    },
+    "journeys": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Journey codes from taxonomy/journeys.yaml that traverse this capability."
+    },
+    "page_group": {
+      "type": "string",
+      "description": "For kind: page \u2014 the source document's page group. Usually mirrors `epic`."
+    }
+  }
+}
