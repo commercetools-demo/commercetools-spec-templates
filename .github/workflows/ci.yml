@@ -1,0 +1,36 @@
+name: ci
+on: [push, pull_request]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20.19, cache: npm }
+      - run: npm ci
+
+      # Gate 1: the generated artifacts in git match what the sources produce right now.
+      # `lint` exits 3 on golden drift, which is a failed PR, not a warning.
+      - name: sources and generated output agree
+        run: node bin/ctsx.mjs lint --strict
+
+      - name: collector forms are current
+        run: |
+          node bin/ctsx.mjs collect:render
+          git diff --exit-code collector/forms/
+
+      - name: nothing generated was left uncommitted
+        run: git diff --exit-code registry.json dist/ rendered/
+
+      # Gate 2: unit + end-to-end, offline (the overlay is a separate package).
+      - run: npm test
+
+      # Gate 3: the output satisfies the target framework's OWN validator, not ours.
+      - name: validate against real OpenSpec
+        run: |
+          mkdir -p /tmp/probe && cp -R fixtures/openspec-init/. /tmp/probe/
+          node bin/cts.mjs apply --cwd /tmp/probe --industry grocery --model B2C --no-overlay
+          npx -y @fission-ai/openspec@latest validate --specs --strict
+        working-directory: ${{ github.workspace }}
+        env: { OPENSPEC_CWD: /tmp/probe }
