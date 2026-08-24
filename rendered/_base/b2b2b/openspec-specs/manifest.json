@@ -1,0 +1,346 @@
+{
+  "manifest_version": 1,
+  "industry": "_base",
+  "model": "B2B2B",
+  "framework": "openspec",
+  "placement": "specs",
+  "content_version": "0.1.0",
+  "files": [
+    {
+      "path": "openspec/specs/journey-b2b-1-company-account-setup/spec.md",
+      "capability": "base.journey-b2b-1-company-account-setup",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "9af3ee9c6d3a77b78e15efeb896f4051872443ca915e9cea0f8dcfaa3ceaa016"
+    },
+    {
+      "path": "openspec/specs/journey-b2b-2-team-members-access/spec.md",
+      "capability": "base.journey-b2b-2-team-members-access",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "a18d142a6ee686015879f7ef3f7fa032e929711fd67ccc35d0e4e9f2eadfec35"
+    },
+    {
+      "path": "openspec/specs/journey-b2b-3-contract-account-pricing/spec.md",
+      "capability": "base.journey-b2b-3-contract-account-pricing",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "f7d563dd624d79df6a1b1803a760310992735a9dca2c9c41a81bc059297f6042"
+    },
+    {
+      "path": "openspec/specs/journey-b2b-4-requisition-shopping-lists/spec.md",
+      "capability": "base.journey-b2b-4-requisition-shopping-lists",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "b9e7dbee0cb711dfef225b584ff4177f44288a51ec850fddb60be3558c920d6c"
+    },
+    {
+      "path": "openspec/specs/journey-b2b-5-quote-request-negotiation/spec.md",
+      "capability": "base.journey-b2b-5-quote-request-negotiation",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "39017f3aaf366c154da57568039c07ff1f7954eb5a7deaa24f913aa5868207b6"
+    },
+    {
+      "path": "openspec/specs/journey-b2b-6-approval-workflows/spec.md",
+      "capability": "base.journey-b2b-6-approval-workflows",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "62664582584d67999e6a3f687d1cd441d7fe7788400021fbe6ea5955793294ec"
+    },
+    {
+      "path": "openspec/specs/journey-b2b-7-purchase-order-payment-terms/spec.md",
+      "capability": "base.journey-b2b-7-purchase-order-payment-terms",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "74d22c60bfa7950ebc8f2d4dd2bee355ce51606874d2b15fd2422c928fdb378a"
+    },
+    {
+      "path": "openspec/specs/journey-b2b-8-bulk-repeat-ordering/spec.md",
+      "capability": "base.journey-b2b-8-bulk-repeat-ordering",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "6092db8238410b1943d95af5dbd07ca8e05473782dff727e089aa0e46b328b23"
+    },
+    {
+      "path": "openspec/specs/journey-b2c-1-discovery-browse/spec.md",
+      "capability": "base.journey-b2c-1-discovery-browse",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "ff4c9de0c2ddca235450c0f223544eb19e808c266df99075b3067531cc6cac49"
+    },
+    {
+      "path": "openspec/specs/journey-b2c-2-cart-management/spec.md",
+      "capability": "base.journey-b2c-2-cart-management",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "561085da447f5e5b627f4b0675344b6bf531bb9512ff1e88507e46b30c0357fa"
+    },
+    {
+      "path": "openspec/specs/journey-b2c-3-authentication-identity/spec.md",
+      "capability": "base.journey-b2c-3-authentication-identity",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "c45c12989db9eb7b3faeedfe9238b7ad05c808baaf0654e8e63996fc692bfad3"
+    },
+    {
+      "path": "openspec/specs/journey-b2c-4-checkout/spec.md",
+      "capability": "base.journey-b2c-4-checkout",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "e71aebbcd0d7d4d61aefa65aba3ff345e5a3dde3008cac41d9908701a30c8314"
+    },
+    {
+      "path": "openspec/specs/journey-b2b-9-account-level-order-history/spec.md",
+      "capability": "base.journey-b2b-9-account-level-order-history",
+      "priority": "P2",
+      "epic": "journeys",
+      "sha256": "e80fc76024ab7806aa9178487f807d41420e5629f6d907edeaf97ec7ff9945b8"
+    },
+    {
+      "path": "openspec/specs/journey-b2c-5-order-management/spec.md",
+      "capability": "base.journey-b2c-5-order-management",
+      "priority": "P2",
+      "epic": "journeys",
+      "sha256": "25958713d1988f5a138b7d7cd4304623f8d5b82e472ca2dc604ac707a306ff7b"
+    },
+    {
+      "path": "openspec/specs/journey-b2c-6-account-self-service/spec.md",
+      "capability": "base.journey-b2c-6-account-self-service",
+      "priority": "P2",
+      "epic": "journeys",
+      "sha256": "88850e9dc85bab678d0365f4dc7b07defe4cbdc67164f9351613bcf7de931c1f"
+    },
+    {
+      "path": "openspec/specs/journey-b2c-7-switching-region-or-language/spec.md",
+      "capability": "base.journey-b2c-7-switching-region-or-language",
+      "priority": "P2",
+      "epic": "journeys",
+      "sha256": "f79451944ac7aa26a7ffbea505fd5f1b7265c53d3740d762dca9b15281f81533"
+    },
+    {
+      "path": "openspec/specs/journey-b2c-8-subscriptions-recurring-orders/spec.md",
+      "capability": "base.journey-b2c-8-subscriptions-recurring-orders",
+      "priority": "P3",
+      "epic": "journeys",
+      "sha256": "1998d090c91b7aefd75811715999a1e1d337d78f65fd91e26c0091d36a432f0c"
+    },
+    {
+      "path": "openspec/specs/cart-page/spec.md",
+      "capability": "base.cart-page",
+      "priority": "P1",
+      "epic": "core-shopping",
+      "sha256": "c2a95f82a141880131d9802d9103a5c040cbce4aacc25ce49ea41214d310c76f"
+    },
+    {
+      "path": "openspec/specs/checkout-page/spec.md",
+      "capability": "base.checkout-page",
+      "priority": "P1",
+      "epic": "core-shopping",
+      "sha256": "4141edfa783b17805d6151bca5cb5b429c8ed312b1f1e38b40790d4381d34608"
+    },
+    {
+      "path": "openspec/specs/home-landing-page/spec.md",
+      "capability": "base.home-landing-page",
+      "priority": "P1",
+      "epic": "core-shopping",
+      "sha256": "d75db3d30caa3f0411ee2bf25c98b43ab5dd59ce6f39dea2d5b84fb3be94710e"
+    },
+    {
+      "path": "openspec/specs/order-confirmation-page/spec.md",
+      "capability": "base.order-confirmation-page",
+      "priority": "P1",
+      "epic": "core-shopping",
+      "sha256": "b7c2d893aa737f3b3b442c43c06b8a4f72a28b88df4c1a8ce9ece56df68e8dde"
+    },
+    {
+      "path": "openspec/specs/product-detail-page/spec.md",
+      "capability": "base.product-detail-page",
+      "priority": "P1",
+      "epic": "core-shopping",
+      "sha256": "1349717785b398a5bfae20c86f852ecbbf05ecfac8af88e7b6cc3fb57b5f1b5d"
+    },
+    {
+      "path": "openspec/specs/product-listing-page/spec.md",
+      "capability": "base.product-listing-page",
+      "priority": "P1",
+      "epic": "core-shopping",
+      "sha256": "9e665b9c0a40fe7e88f3bf96aad4fce7a4bd1edf776b903f74bd6c867c1f260b"
+    },
+    {
+      "path": "openspec/specs/search-results-page/spec.md",
+      "capability": "base.search-results-page",
+      "priority": "P2",
+      "epic": "core-shopping",
+      "sha256": "58a7b1df1eb4f46e3ca06600ddf41f52d0ad8449329edac86062a5266390d7fd"
+    },
+    {
+      "path": "openspec/specs/account-registration-request/spec.md",
+      "capability": "base.account-registration-request",
+      "priority": "P1",
+      "epic": "account-self-service",
+      "sha256": "93f68a21d391c9ad20a40510526f89f388cfbca0f0e0499a6e8953c8b05783d1"
+    },
+    {
+      "path": "openspec/specs/account-sign-in/spec.md",
+      "capability": "base.account-sign-in",
+      "priority": "P1",
+      "epic": "account-self-service",
+      "sha256": "3c1026cd9dbde1e4953bbba829242a69dadf553d1dfc9622b3c6021486aca78b"
+    },
+    {
+      "path": "openspec/specs/address-book/spec.md",
+      "capability": "base.address-book",
+      "priority": "P1",
+      "epic": "account-self-service",
+      "sha256": "00ab0eb8be4dae0a0f8bb60d6d03916ad0a9d3c032b34573bb116b746b0b8e07"
+    },
+    {
+      "path": "openspec/specs/order-history/spec.md",
+      "capability": "base.order-history",
+      "priority": "P1",
+      "epic": "account-self-service",
+      "sha256": "bc8fddc1391711d61d9a2f1447167e8f3c2386c54790bed78340f58c92b3fb3c"
+    },
+    {
+      "path": "openspec/specs/user-and-role-management/spec.md",
+      "capability": "base.user-and-role-management",
+      "priority": "P1",
+      "epic": "account-self-service",
+      "sha256": "535b5999896eab036e08a9d1187192b8e6fc82c15e505c5228bcbe217eb7172e"
+    },
+    {
+      "path": "openspec/specs/account-dashboard/spec.md",
+      "capability": "base.account-dashboard",
+      "priority": "P2",
+      "epic": "account-self-service",
+      "sha256": "6683a97a7b2b6cf0ce5cc75631e278efeebbb7dc9fd6023eefe5fbbaf24b6e30"
+    },
+    {
+      "path": "openspec/specs/approval-workflows/spec.md",
+      "capability": "base.approval-workflows",
+      "priority": "P2",
+      "epic": "account-self-service",
+      "sha256": "04947dea04f2221fd7a0f3b459540bbcbe6ce22667270898c9ca025ae7c44471"
+    },
+    {
+      "path": "openspec/specs/payment-methods/spec.md",
+      "capability": "base.payment-methods",
+      "priority": "P2",
+      "epic": "account-self-service",
+      "sha256": "4417f62283cf54d326931a29bf69f46a84bd321d9ecda75b8918e93d8b7f83da"
+    },
+    {
+      "path": "openspec/specs/quote-negotiation/spec.md",
+      "capability": "base.quote-negotiation",
+      "priority": "P2",
+      "epic": "account-self-service",
+      "sha256": "6fe96eddb7a845ed4f421747b08ccb3101a9d7d19f9c3959185753ae1a8a16ab"
+    },
+    {
+      "path": "openspec/specs/saved-lists/spec.md",
+      "capability": "base.saved-lists",
+      "priority": "P2",
+      "epic": "account-self-service",
+      "sha256": "b09193cc4694cfa0df5de9649c61783e2930c9e996b6933e5f372a75b6b3c6e7"
+    },
+    {
+      "path": "openspec/specs/invoice-and-billing-history/spec.md",
+      "capability": "base.invoice-and-billing-history",
+      "priority": "P1",
+      "epic": "b2b-specific",
+      "sha256": "430840d61fc40d3f9027a5a226dadbf7227c587f4e4d3733c7290f1e3c1f6238"
+    },
+    {
+      "path": "openspec/specs/quick-order-entry/spec.md",
+      "capability": "base.quick-order-entry",
+      "priority": "P1",
+      "epic": "b2b-specific",
+      "sha256": "3aec8cedf0a305bf92ddfc4832e3a607bd873764430a49f7bc42fa707c42dc44"
+    },
+    {
+      "path": "openspec/specs/budget-and-spending-limits/spec.md",
+      "capability": "base.budget-and-spending-limits",
+      "priority": "P2",
+      "epic": "b2b-specific",
+      "sha256": "bf836bb8c8d4fef153d66ab2b53b24ce44a072920f4e67d144d7e88bd1d7125b"
+    },
+    {
+      "path": "openspec/specs/company-profile/spec.md",
+      "capability": "base.company-profile",
+      "priority": "P2",
+      "epic": "b2b-specific",
+      "sha256": "e3cbb4ef9768ceb7edd71851df6e010007cc8ccf92bd3f364b39a05854e2f202"
+    },
+    {
+      "path": "openspec/specs/contract-pricing/spec.md",
+      "capability": "base.contract-pricing",
+      "priority": "P2",
+      "epic": "b2b-specific",
+      "sha256": "5c199ca7f13b7bf110b326c5a861789a186aa5d6af4f38e4ed17a8d60355d772"
+    },
+    {
+      "path": "openspec/specs/cost-center-management/spec.md",
+      "capability": "base.cost-center-management",
+      "priority": "P3",
+      "epic": "b2b-specific",
+      "sha256": "a85b62dd3d0998c62c9121d7fca88e3e1c869a577559a368531193d802f85194"
+    },
+    {
+      "path": "openspec/specs/contact-us/spec.md",
+      "capability": "base.contact-us",
+      "priority": "P1",
+      "epic": "content-support",
+      "sha256": "ca2fd3ab979e8a0f39ae8335efbe1ffee4d037ed61ba7edfc9b59c61dac3c807"
+    },
+    {
+      "path": "openspec/specs/policy-pages/spec.md",
+      "capability": "base.policy-pages",
+      "priority": "P1",
+      "epic": "content-support",
+      "sha256": "e43bbf3e0dc28cb697f0bf7b157cc23e97bf0997174bd04311cc2cbc57be9fbb"
+    },
+    {
+      "path": "openspec/specs/about-us/spec.md",
+      "capability": "base.about-us",
+      "priority": "P2",
+      "epic": "content-support",
+      "sha256": "5262506404dc55b1113db68b54bdca7b918d361c717c5b328917229a55c74263"
+    },
+    {
+      "path": "openspec/specs/faq/spec.md",
+      "capability": "base.faq",
+      "priority": "P2",
+      "epic": "content-support",
+      "sha256": "d52ba2ba7dbf540439e86e15e6bb1ab9f4ffeaf365bc02e5816c345b49a35213"
+    },
+    {
+      "path": "openspec/specs/blog-resources/spec.md",
+      "capability": "base.blog-resources",
+      "priority": "P3",
+      "epic": "content-support",
+      "sha256": "d6015dee39eec0fb7e16b891a2d8ae26b3409918278544b90787924241f6fe94"
+    },
+    {
+      "path": "openspec/specs/error-pages/spec.md",
+      "capability": "base.error-pages",
+      "priority": "P1",
+      "epic": "utility-system",
+      "sha256": "650c9fdcafe875eb88046b4a98b949566e8ae6fabcfd163d3640cbeb03a6d0be"
+    },
+    {
+      "path": "openspec/specs/password-reset/spec.md",
+      "capability": "base.password-reset",
+      "priority": "P1",
+      "epic": "utility-system",
+      "sha256": "764ba74e5458704961286f7d9ffc820877ea0bb3a57ba18266949d332fa0eb4b"
+    },
+    {
+      "path": "openspec/specs/email-verification/spec.md",
+      "capability": "base.email-verification",
+      "priority": "P2",
+      "epic": "utility-system",
+      "sha256": "7b6f9e083c1ae39cb3077778361463085618d9be2a2de96f1f6f2b0fb723843b"
+    }
+  ]
+}

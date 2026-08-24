@@ -1,0 +1,486 @@
+{
+  "manifest_version": 1,
+  "industry": "grocery",
+  "model": "B2B",
+  "framework": "openspec",
+  "placement": "change",
+  "content_version": "0.1.0",
+  "files": [
+    {
+      "path": "openspec/changes/add-grocery-b2b-journeys-1/proposal.md",
+      "capability": null,
+      "priority": "P1",
+      "epic": "journeys-1",
+      "sha256": "ca54506d87cc4c8fc989c57d95d27605584c91171f05f36f2a24c53d8abaa314"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-journeys-1/tasks.md",
+      "capability": null,
+      "priority": "P1",
+      "epic": "journeys-1",
+      "sha256": "fd5683ab9d827bbd46948688feeaf87e1764ec13ae3b1116cee1f294ca7a93e1"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-journeys-1/specs/journey-b2b-1-company-account-setup/spec.md",
+      "capability": "base.journey-b2b-1-company-account-setup",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "4970dcfb8c2b4bfa09ad5746174b085215129642de13b1f432fd60f561984256"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-journeys-1/specs/journey-b2b-2-team-members-access/spec.md",
+      "capability": "base.journey-b2b-2-team-members-access",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "232944f9c69e6daa27f90fd8faf2ced84cb9160e9c5b49992369bb06813b9c64"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-journeys-1/specs/journey-b2b-3-contract-account-pricing/spec.md",
+      "capability": "base.journey-b2b-3-contract-account-pricing",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "ceef2c010cedcee67078ac0f1fa3434dc02f67334c1fe41cb15272867fac2163"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-journeys-1/specs/journey-b2b-4-requisition-shopping-lists/spec.md",
+      "capability": "base.journey-b2b-4-requisition-shopping-lists",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "0ca6fda33b4170a5c74a4d12ba9ee36c0409adda0f310083ed00944065f3d8de"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-journeys-1/specs/journey-b2b-5-quote-request-negotiation/spec.md",
+      "capability": "base.journey-b2b-5-quote-request-negotiation",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "04a3abd3ed863b4764b91d684269771c5308f1833e514dcd4f24056a06df7b91"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-journeys-1/specs/journey-b2b-6-approval-workflows/spec.md",
+      "capability": "base.journey-b2b-6-approval-workflows",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "fa86e08999df53cabc9a3638bcb18f5c118404e216ceb7afbdc97ea12fe66c8f"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-journeys-1/specs/journey-b2b-7-purchase-order-payment-terms/spec.md",
+      "capability": "base.journey-b2b-7-purchase-order-payment-terms",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "8fffb27a65cdabd47846c1ae8bb49316b983aa12260baf75cb5338e06b302e10"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-journeys-1/specs/journey-b2b-8-bulk-repeat-ordering/spec.md",
+      "capability": "base.journey-b2b-8-bulk-repeat-ordering",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "38a78d87da75cd4d175453653718abafe7cec5d6e80d22b19a6f5ab5e3d69693"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-journeys-1/specs/journey-b2c-1-discovery-browse/spec.md",
+      "capability": "base.journey-b2c-1-discovery-browse",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "8ae08a88e424f3f0a147b10ba940b9bf69d1819a583a03aaecda2d74915742d0"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-journeys-1/specs/journey-b2c-2-cart-management/spec.md",
+      "capability": "base.journey-b2c-2-cart-management",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "74fd19804e1fbf6598fef999a7002a340d1b25d50c22f5a015622f68152d618e"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-journeys-2/proposal.md",
+      "capability": null,
+      "priority": "P1",
+      "epic": "journeys-2",
+      "sha256": "a210fdf159f55bd2493605a66379309784e98db9d9b477b37d722a0af41c8cdd"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-journeys-2/tasks.md",
+      "capability": null,
+      "priority": "P1",
+      "epic": "journeys-2",
+      "sha256": "65e8f0729397a4287ed247ea88be770b6e1f8327f9c0eee2a0306ca0ed8a4667"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-journeys-2/specs/journey-b2c-3-authentication-identity/spec.md",
+      "capability": "base.journey-b2c-3-authentication-identity",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "2652eee1ed042a1f71e67f3842fe5f59106a929c0fd92103176509b263d53c31"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-journeys-2/specs/journey-b2c-4-checkout/spec.md",
+      "capability": "base.journey-b2c-4-checkout",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "5eea0a86f215893f723bdaa5f1f89fb155252ca2f5d472ab1d949b02bfaeb0f9"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-journeys-2/specs/journey-b2b-9-account-level-order-history/spec.md",
+      "capability": "base.journey-b2b-9-account-level-order-history",
+      "priority": "P2",
+      "epic": "journeys",
+      "sha256": "cae5945735c84fe196691b3b27f48b59520631d1967c710115b41ebbf98b062c"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-journeys-2/specs/journey-b2c-5-order-management/spec.md",
+      "capability": "base.journey-b2c-5-order-management",
+      "priority": "P2",
+      "epic": "journeys",
+      "sha256": "895a891b84a0d244806ad5f11eac406f1b85f8bb4b98af8a7d8e5e5ef91adcde"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-journeys-2/specs/journey-b2c-6-account-self-service/spec.md",
+      "capability": "base.journey-b2c-6-account-self-service",
+      "priority": "P2",
+      "epic": "journeys",
+      "sha256": "f8e44c70cbdf60788122ed805125c525948e054687cd532a3590f653e4ef4c30"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-journeys-2/specs/journey-b2c-7-switching-region-or-language/spec.md",
+      "capability": "base.journey-b2c-7-switching-region-or-language",
+      "priority": "P2",
+      "epic": "journeys",
+      "sha256": "528674f992ef33e6d693ea0a62a14d531570bbea30fda48997341e88b69fcad3"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-journeys-2/specs/journey-b2c-8-subscriptions-recurring-orders/spec.md",
+      "capability": "base.journey-b2c-8-subscriptions-recurring-orders",
+      "priority": "P3",
+      "epic": "journeys",
+      "sha256": "a3e5a981c6791b2ebce70db379820984bd94331e41d1c9ad56a548540e04ffb6"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-core-shopping/proposal.md",
+      "capability": null,
+      "priority": "P1",
+      "epic": "core-shopping",
+      "sha256": "af2b29b1bc915f0c5fbcb69792d5d5832bb187a7302d42c3cfa6410022c68e7f"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-core-shopping/tasks.md",
+      "capability": null,
+      "priority": "P1",
+      "epic": "core-shopping",
+      "sha256": "9fe8021147a28fc8af8a65b7f9eb4b50acce9b3cdfbc3a65348c15fda20aec1c"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-core-shopping/specs/cart-page/spec.md",
+      "capability": "base.cart-page",
+      "priority": "P1",
+      "epic": "core-shopping",
+      "sha256": "0a2ba2764e236313885815a40b58001ab43becb5212cbedc122404bf4d6d6731"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-core-shopping/specs/checkout-page/spec.md",
+      "capability": "base.checkout-page",
+      "priority": "P1",
+      "epic": "core-shopping",
+      "sha256": "53dd884facf2862b6b62095d1e0c5b702e9fb47ee3f7d1c6e7444d15036c588e"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-core-shopping/specs/home-landing-page/spec.md",
+      "capability": "base.home-landing-page",
+      "priority": "P1",
+      "epic": "core-shopping",
+      "sha256": "4ba60c4f606c86a4a4c72477a8b57f4d218eab3bb986b578762fccea57bfcd4c"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-core-shopping/specs/order-confirmation-page/spec.md",
+      "capability": "base.order-confirmation-page",
+      "priority": "P1",
+      "epic": "core-shopping",
+      "sha256": "d285daaafe9a54c66f08f2fdf9c60bc0d877b6315bf3b145c893c29b09a9a3ac"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-core-shopping/specs/product-detail-page/spec.md",
+      "capability": "base.product-detail-page",
+      "priority": "P1",
+      "epic": "core-shopping",
+      "sha256": "19f59f4cfc1b52b8c82f983a4aec054ec92eded31c5cee0a2be3d9154eb14b60"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-core-shopping/specs/product-listing-page/spec.md",
+      "capability": "base.product-listing-page",
+      "priority": "P1",
+      "epic": "core-shopping",
+      "sha256": "e6b2ee716546b12bbeee6f5f5c4980a4f4262df6dcb0edbc82efad5ede65846d"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-core-shopping/specs/search-results-page/spec.md",
+      "capability": "base.search-results-page",
+      "priority": "P2",
+      "epic": "core-shopping",
+      "sha256": "7d965a1a19e10ba5ac33a66816644e09e96a020bd1ab72d69ec59b3df29e1bfc"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-account-self-service/proposal.md",
+      "capability": null,
+      "priority": "P1",
+      "epic": "account-self-service",
+      "sha256": "fa1db8e5682679640ad69d0b794bdd2940ba395a358f806beb12d289e2368db9"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-account-self-service/tasks.md",
+      "capability": null,
+      "priority": "P1",
+      "epic": "account-self-service",
+      "sha256": "0afce7dd3455f6eb06abb45e46f0dfcf596f726fa05286c7bcd91ffe82724fd2"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-account-self-service/specs/account-registration-request/spec.md",
+      "capability": "base.account-registration-request",
+      "priority": "P1",
+      "epic": "account-self-service",
+      "sha256": "68089719e59aa49b6005fe11fe7dda7d34ee9f66e16a81d094b80784c7a1d362"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-account-self-service/specs/account-sign-in/spec.md",
+      "capability": "base.account-sign-in",
+      "priority": "P1",
+      "epic": "account-self-service",
+      "sha256": "32df1bc4e9bc095710af3c24b5af6951ae5544749540d9058b920ea5b753cb3e"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-account-self-service/specs/address-book/spec.md",
+      "capability": "base.address-book",
+      "priority": "P1",
+      "epic": "account-self-service",
+      "sha256": "017514761e410a4d98514c00a5123ff849c6db2e149a5668090f0b1a12c07ee9"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-account-self-service/specs/order-history/spec.md",
+      "capability": "base.order-history",
+      "priority": "P1",
+      "epic": "account-self-service",
+      "sha256": "50773ce65c578c0d23d39f197a3a60ab2eaac97febeed8f92ded9e4c1f87697c"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-account-self-service/specs/user-and-role-management/spec.md",
+      "capability": "base.user-and-role-management",
+      "priority": "P1",
+      "epic": "account-self-service",
+      "sha256": "b6174ec6491ba3cdace84e2bc7892b265b397f803b9bddce7dbf741300c07fa2"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-account-self-service/specs/account-dashboard/spec.md",
+      "capability": "base.account-dashboard",
+      "priority": "P2",
+      "epic": "account-self-service",
+      "sha256": "18861aa666b60742662d94585e0f85426a728b98b6a7420151cacdb0477ee978"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-account-self-service/specs/approval-workflows/spec.md",
+      "capability": "base.approval-workflows",
+      "priority": "P2",
+      "epic": "account-self-service",
+      "sha256": "c7889c7c3f041aeaf691160325c719b498d63ec234946e29f6b50c2b265320d5"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-account-self-service/specs/payment-methods/spec.md",
+      "capability": "base.payment-methods",
+      "priority": "P2",
+      "epic": "account-self-service",
+      "sha256": "7ac60d6c61e9ef5bc514a85a8735338bfe94c92ce5500e65f05f824637e6ce07"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-account-self-service/specs/quote-negotiation/spec.md",
+      "capability": "base.quote-negotiation",
+      "priority": "P2",
+      "epic": "account-self-service",
+      "sha256": "05b476493c4a56381877bb535e1422b41a25e556cbc2db01250d4898780332cb"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-account-self-service/specs/saved-lists/spec.md",
+      "capability": "base.saved-lists",
+      "priority": "P2",
+      "epic": "account-self-service",
+      "sha256": "474b0814aa98c08834490d3edaafa0b62b5d0c0acb0e4ae313f814971e5dadd3"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-b2b-specific/proposal.md",
+      "capability": null,
+      "priority": "P1",
+      "epic": "b2b-specific",
+      "sha256": "5539a55bbde4e8ccbf6d086347a5da0a49d96427fdbc94329a7886e53b0c073e"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-b2b-specific/tasks.md",
+      "capability": null,
+      "priority": "P1",
+      "epic": "b2b-specific",
+      "sha256": "2132d3c61a46849e2c02aba7795b0ef7a9daffc5c0aee3a9bebcb12408fa9a47"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-b2b-specific/specs/invoice-and-billing-history/spec.md",
+      "capability": "base.invoice-and-billing-history",
+      "priority": "P1",
+      "epic": "b2b-specific",
+      "sha256": "f4c66e7256638bf7b6d1a6c2d5e54fb45afa7e360e437814243412a877f110a2"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-b2b-specific/specs/quick-order-entry/spec.md",
+      "capability": "base.quick-order-entry",
+      "priority": "P1",
+      "epic": "b2b-specific",
+      "sha256": "d2079847b3bf788609bab680b7d508026e99c1b642b7f96594379dc0cc3e14d5"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-b2b-specific/specs/budget-and-spending-limits/spec.md",
+      "capability": "base.budget-and-spending-limits",
+      "priority": "P2",
+      "epic": "b2b-specific",
+      "sha256": "fdd5d6f9275ac5c03bf4c994bf005505b85a67f00860254118ba300d9950ba72"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-b2b-specific/specs/company-profile/spec.md",
+      "capability": "base.company-profile",
+      "priority": "P2",
+      "epic": "b2b-specific",
+      "sha256": "68f11fce325d83b73fe92fa9641db520b4842b5a8f0b4b14ebd68b7382be5d12"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-b2b-specific/specs/contract-pricing/spec.md",
+      "capability": "base.contract-pricing",
+      "priority": "P2",
+      "epic": "b2b-specific",
+      "sha256": "29c37cb707c3fadb4b0bdbd9d9a7fd0b749447f7032d865579d853ca0e9ad796"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-b2b-specific/specs/cost-center-management/spec.md",
+      "capability": "base.cost-center-management",
+      "priority": "P3",
+      "epic": "b2b-specific",
+      "sha256": "6e9b59a367b3d9d1609a279e68345a6233145e78d5ae28f9a2943b154c765118"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-content-support/proposal.md",
+      "capability": null,
+      "priority": "P1",
+      "epic": "content-support",
+      "sha256": "44ec1d4fb10d43b746e9ce3be19866910d7720f74721c0c0c549df8a8112e77f"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-content-support/tasks.md",
+      "capability": null,
+      "priority": "P1",
+      "epic": "content-support",
+      "sha256": "491040add15c9c2c7cb3c215b6a7a47756bf274e61994751c46d8922e649199c"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-content-support/specs/contact-us/spec.md",
+      "capability": "base.contact-us",
+      "priority": "P1",
+      "epic": "content-support",
+      "sha256": "9f667ce34a67bb31605e15bee752700aca35b6a18c56e3fd509d52788aefed52"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-content-support/specs/policy-pages/spec.md",
+      "capability": "base.policy-pages",
+      "priority": "P1",
+      "epic": "content-support",
+      "sha256": "7fcda79e56431b0a584095328bd621b9ec22e5ee5447892940ccdfccf4cc87e3"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-content-support/specs/about-us/spec.md",
+      "capability": "base.about-us",
+      "priority": "P2",
+      "epic": "content-support",
+      "sha256": "e84cfd590eeab18c1d74debf7edb8a39af98dad3cc07dcbab4eb55edfd59cdb6"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-content-support/specs/faq/spec.md",
+      "capability": "base.faq",
+      "priority": "P2",
+      "epic": "content-support",
+      "sha256": "7752020d8ebafa072ea26a7c23c5640f018b0319ae30f2fa4453fea87a101280"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-content-support/specs/blog-resources/spec.md",
+      "capability": "base.blog-resources",
+      "priority": "P3",
+      "epic": "content-support",
+      "sha256": "06e89964a335cf77602b1b7b135ece86f12603d82ba3295f75e044679e0a40df"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-utility-system/proposal.md",
+      "capability": null,
+      "priority": "P1",
+      "epic": "utility-system",
+      "sha256": "075e7e416fe5f77778c0b9b1533858430817e38d6c717366e332080bee721fb0"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-utility-system/tasks.md",
+      "capability": null,
+      "priority": "P1",
+      "epic": "utility-system",
+      "sha256": "82763eda0a55726adae300a0d745e03a3d27c6096ff11fa32ea189bdc57fcbc0"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-utility-system/specs/error-pages/spec.md",
+      "capability": "base.error-pages",
+      "priority": "P1",
+      "epic": "utility-system",
+      "sha256": "01e3f3a2db51e9ec7801d713b0c97fd94488ecee4942e5116555d55ced867c6f"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-utility-system/specs/password-reset/spec.md",
+      "capability": "base.password-reset",
+      "priority": "P1",
+      "epic": "utility-system",
+      "sha256": "115bf501169b2c2ae479da288d134775263a62a99156d0c052cff92a94c67861"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-utility-system/specs/email-verification/spec.md",
+      "capability": "base.email-verification",
+      "priority": "P2",
+      "epic": "utility-system",
+      "sha256": "1e97c25de7ca7a6e866152af8b7260a90c2149a2d80c964afea8b0c671ec51d9"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-basket-and-pricing/proposal.md",
+      "capability": null,
+      "priority": "P1",
+      "epic": "basket-and-pricing",
+      "sha256": "298febb93420629b404435783d962c9ea40989e147f73fbc1094b0a78fd174e0"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-basket-and-pricing/tasks.md",
+      "capability": null,
+      "priority": "P1",
+      "epic": "basket-and-pricing",
+      "sha256": "08bc33bdf05d1db78af32223fe5e9e86baf3201c89fc46b63eb62e300c058564"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-basket-and-pricing/specs/weight-based-pricing/spec.md",
+      "capability": "grocery.weight-based-pricing",
+      "priority": "P1",
+      "epic": "basket-and-pricing",
+      "sha256": "823323d6379a11b57e070264e54d6537c65a9198825ca28da8b46a2f723c6230"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-slots-and-fulfillment/proposal.md",
+      "capability": null,
+      "priority": "P1",
+      "epic": "slots-and-fulfillment",
+      "sha256": "2a376da42c9bcba17189df6b669b05ce81b54e4fd0b1d277aa61753006fade9e"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-slots-and-fulfillment/tasks.md",
+      "capability": null,
+      "priority": "P1",
+      "epic": "slots-and-fulfillment",
+      "sha256": "6d801900c73927b84973716edf708dcb2c8b1d0e1556c6f5741bf3179b33f1f1"
+    },
+    {
+      "path": "openspec/changes/add-grocery-b2b-slots-and-fulfillment/specs/delivery-slot-booking/spec.md",
+      "capability": "grocery.delivery-slot-booking",
+      "priority": "P1",
+      "epic": "slots-and-fulfillment",
+      "sha256": "dac3b8c737f6d173723eed1dfbe00cceaabbb1f0b97744988d57b027cc502068"
+    }
+  ]
+}

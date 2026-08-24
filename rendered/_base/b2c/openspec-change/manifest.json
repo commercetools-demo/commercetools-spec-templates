@@ -1,0 +1,290 @@
+{
+  "manifest_version": 1,
+  "industry": "_base",
+  "model": "B2C",
+  "framework": "openspec",
+  "placement": "change",
+  "content_version": "0.1.0",
+  "files": [
+    {
+      "path": "openspec/changes/add-_base-b2c-journeys/proposal.md",
+      "capability": null,
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "50492b6c014c4029aeb65b0e6f6e305ac0fe109e869d18a8461294e082be15a2"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-journeys/tasks.md",
+      "capability": null,
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "badc79d3fa18316ffd49a0a912e4191a8753531547cb274c1ff2e14ac20d6fef"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-journeys/specs/journey-b2c-1-discovery-browse/spec.md",
+      "capability": "base.journey-b2c-1-discovery-browse",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "d04a7bab62b868c2400feadca421a64d67ffd66796d49ef73381bf03ca6778bb"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-journeys/specs/journey-b2c-2-cart-management/spec.md",
+      "capability": "base.journey-b2c-2-cart-management",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "74fd19804e1fbf6598fef999a7002a340d1b25d50c22f5a015622f68152d618e"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-journeys/specs/journey-b2c-3-authentication-identity/spec.md",
+      "capability": "base.journey-b2c-3-authentication-identity",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "2652eee1ed042a1f71e67f3842fe5f59106a929c0fd92103176509b263d53c31"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-journeys/specs/journey-b2c-4-checkout/spec.md",
+      "capability": "base.journey-b2c-4-checkout",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "4e9491a5e187ca3c08c8bd0ce645e40b83bbcbf021b9ac777734a0a3a7da20ca"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-journeys/specs/journey-b2c-5-order-management/spec.md",
+      "capability": "base.journey-b2c-5-order-management",
+      "priority": "P2",
+      "epic": "journeys",
+      "sha256": "895a891b84a0d244806ad5f11eac406f1b85f8bb4b98af8a7d8e5e5ef91adcde"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-journeys/specs/journey-b2c-6-account-self-service/spec.md",
+      "capability": "base.journey-b2c-6-account-self-service",
+      "priority": "P2",
+      "epic": "journeys",
+      "sha256": "0d8dee78ccc412c4cbffa8bbe1cc3f660520ff5b2375c622a80bf8156a6783ed"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-journeys/specs/journey-b2c-7-switching-region-or-language/spec.md",
+      "capability": "base.journey-b2c-7-switching-region-or-language",
+      "priority": "P2",
+      "epic": "journeys",
+      "sha256": "528674f992ef33e6d693ea0a62a14d531570bbea30fda48997341e88b69fcad3"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-journeys/specs/journey-b2c-8-subscriptions-recurring-orders/spec.md",
+      "capability": "base.journey-b2c-8-subscriptions-recurring-orders",
+      "priority": "P3",
+      "epic": "journeys",
+      "sha256": "a3e5a981c6791b2ebce70db379820984bd94331e41d1c9ad56a548540e04ffb6"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-core-shopping/proposal.md",
+      "capability": null,
+      "priority": "P1",
+      "epic": "core-shopping",
+      "sha256": "698a89ec1c0ed58fa2c51e2e28b39f87af8293a0c43ad2b5c204ec21b87676f9"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-core-shopping/tasks.md",
+      "capability": null,
+      "priority": "P1",
+      "epic": "core-shopping",
+      "sha256": "9fe8021147a28fc8af8a65b7f9eb4b50acce9b3cdfbc3a65348c15fda20aec1c"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-core-shopping/specs/cart-page/spec.md",
+      "capability": "base.cart-page",
+      "priority": "P1",
+      "epic": "core-shopping",
+      "sha256": "ba9f0afa049ab5b392a1a873f2a15e800bbd1ebfd9c52070aae76b56775592f4"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-core-shopping/specs/checkout-page/spec.md",
+      "capability": "base.checkout-page",
+      "priority": "P1",
+      "epic": "core-shopping",
+      "sha256": "630ac563ba2a7ad2353375483e1c7ddaa827c194f555d4ef86ec630c90ed8ff0"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-core-shopping/specs/home-landing-page/spec.md",
+      "capability": "base.home-landing-page",
+      "priority": "P1",
+      "epic": "core-shopping",
+      "sha256": "27450a00ede6cebb45831ac9e6a75a78bfc983aa990f74a90fc7a5cacce2c06d"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-core-shopping/specs/order-confirmation-page/spec.md",
+      "capability": "base.order-confirmation-page",
+      "priority": "P1",
+      "epic": "core-shopping",
+      "sha256": "ac7daa3d0e9ffb9c3cf7a5e78b04cffbd0c7ea6fce0957b3aeba299255e97cf6"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-core-shopping/specs/product-detail-page/spec.md",
+      "capability": "base.product-detail-page",
+      "priority": "P1",
+      "epic": "core-shopping",
+      "sha256": "888101f57e6de6f231ebabca9e2a400eb373087b53bb3461ec2d25b1a188f638"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-core-shopping/specs/product-listing-page/spec.md",
+      "capability": "base.product-listing-page",
+      "priority": "P1",
+      "epic": "core-shopping",
+      "sha256": "e6b2ee716546b12bbeee6f5f5c4980a4f4262df6dcb0edbc82efad5ede65846d"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-core-shopping/specs/search-results-page/spec.md",
+      "capability": "base.search-results-page",
+      "priority": "P2",
+      "epic": "core-shopping",
+      "sha256": "7d965a1a19e10ba5ac33a66816644e09e96a020bd1ab72d69ec59b3df29e1bfc"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-account-self-service/proposal.md",
+      "capability": null,
+      "priority": "P1",
+      "epic": "account-self-service",
+      "sha256": "a51ae85940b87ed7177b05ace5f05d46410b93005196af134a58890e9080ec7f"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-account-self-service/tasks.md",
+      "capability": null,
+      "priority": "P1",
+      "epic": "account-self-service",
+      "sha256": "181c5fa94c330fbbf77e5625b20910292153ca9ead4f414ebc3c3fc9141a482a"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-account-self-service/specs/account-registration-request/spec.md",
+      "capability": "base.account-registration-request",
+      "priority": "P1",
+      "epic": "account-self-service",
+      "sha256": "12460f4981dcc67b1018a817d4a3b2d7c3b1a1d0b3bd35d32adac9a0338baf79"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-account-self-service/specs/account-sign-in/spec.md",
+      "capability": "base.account-sign-in",
+      "priority": "P1",
+      "epic": "account-self-service",
+      "sha256": "32df1bc4e9bc095710af3c24b5af6951ae5544749540d9058b920ea5b753cb3e"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-account-self-service/specs/address-book/spec.md",
+      "capability": "base.address-book",
+      "priority": "P1",
+      "epic": "account-self-service",
+      "sha256": "bc200db5ce78a227ce060c1d8b71f253957c4e484c181f8bd562f278bb94ddb1"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-account-self-service/specs/order-history/spec.md",
+      "capability": "base.order-history",
+      "priority": "P1",
+      "epic": "account-self-service",
+      "sha256": "2701a9675f361887279e1862c3790bb62d7a96a551730968b7be7b2035f65531"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-account-self-service/specs/account-dashboard/spec.md",
+      "capability": "base.account-dashboard",
+      "priority": "P2",
+      "epic": "account-self-service",
+      "sha256": "f69f37d7c9d9f942407d591764b2d1781a230834d042ecba56390da603b331c9"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-account-self-service/specs/payment-methods/spec.md",
+      "capability": "base.payment-methods",
+      "priority": "P2",
+      "epic": "account-self-service",
+      "sha256": "8d9827aae38ac9f00194420edd47e738748db93dd97667bcc8f590f70a174369"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-account-self-service/specs/saved-lists/spec.md",
+      "capability": "base.saved-lists",
+      "priority": "P2",
+      "epic": "account-self-service",
+      "sha256": "9aa46eac1bd145c90948cc3af598bd0dfa9448f32a9a3815caaba5af4f431a37"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-content-support/proposal.md",
+      "capability": null,
+      "priority": "P1",
+      "epic": "content-support",
+      "sha256": "4b9fe3f92b2bf66dbea82a2b99309d88d8a3b9e418d387ab8c0157210499d41e"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-content-support/tasks.md",
+      "capability": null,
+      "priority": "P1",
+      "epic": "content-support",
+      "sha256": "491040add15c9c2c7cb3c215b6a7a47756bf274e61994751c46d8922e649199c"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-content-support/specs/contact-us/spec.md",
+      "capability": "base.contact-us",
+      "priority": "P1",
+      "epic": "content-support",
+      "sha256": "9f667ce34a67bb31605e15bee752700aca35b6a18c56e3fd509d52788aefed52"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-content-support/specs/policy-pages/spec.md",
+      "capability": "base.policy-pages",
+      "priority": "P1",
+      "epic": "content-support",
+      "sha256": "7fcda79e56431b0a584095328bd621b9ec22e5ee5447892940ccdfccf4cc87e3"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-content-support/specs/about-us/spec.md",
+      "capability": "base.about-us",
+      "priority": "P2",
+      "epic": "content-support",
+      "sha256": "e84cfd590eeab18c1d74debf7edb8a39af98dad3cc07dcbab4eb55edfd59cdb6"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-content-support/specs/faq/spec.md",
+      "capability": "base.faq",
+      "priority": "P2",
+      "epic": "content-support",
+      "sha256": "7752020d8ebafa072ea26a7c23c5640f018b0319ae30f2fa4453fea87a101280"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-content-support/specs/blog-resources/spec.md",
+      "capability": "base.blog-resources",
+      "priority": "P3",
+      "epic": "content-support",
+      "sha256": "06e89964a335cf77602b1b7b135ece86f12603d82ba3295f75e044679e0a40df"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-utility-system/proposal.md",
+      "capability": null,
+      "priority": "P1",
+      "epic": "utility-system",
+      "sha256": "1849b3181b7785c27ff1544cf6cb18327391e938f5cb249e7a6d1c1103b05d81"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-utility-system/tasks.md",
+      "capability": null,
+      "priority": "P1",
+      "epic": "utility-system",
+      "sha256": "82763eda0a55726adae300a0d745e03a3d27c6096ff11fa32ea189bdc57fcbc0"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-utility-system/specs/error-pages/spec.md",
+      "capability": "base.error-pages",
+      "priority": "P1",
+      "epic": "utility-system",
+      "sha256": "e5444cdc50c42d77781b6298fa7817c321de778fff8c248addc25759c8c2cdb4"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-utility-system/specs/password-reset/spec.md",
+      "capability": "base.password-reset",
+      "priority": "P1",
+      "epic": "utility-system",
+      "sha256": "115bf501169b2c2ae479da288d134775263a62a99156d0c052cff92a94c67861"
+    },
+    {
+      "path": "openspec/changes/add-_base-b2c-utility-system/specs/email-verification/spec.md",
+      "capability": "base.email-verification",
+      "priority": "P2",
+      "epic": "utility-system",
+      "sha256": "1e97c25de7ca7a6e866152af8b7260a90c2149a2d80c964afea8b0c671ec51d9"
+    }
+  ]
+}

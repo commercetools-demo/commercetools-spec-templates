@@ -1,0 +1,241 @@
+{
+  "manifest_version": 1,
+  "industry": "grocery",
+  "model": "B2C",
+  "framework": "openspec",
+  "placement": "specs",
+  "content_version": "0.1.0",
+  "files": [
+    {
+      "path": "openspec/specs/journey-b2c-1-discovery-browse/spec.md",
+      "capability": "base.journey-b2c-1-discovery-browse",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "d347ed7348eb3e6c0a25844ca7b3a7718b4377df21638d1e9dccc7a63701e753"
+    },
+    {
+      "path": "openspec/specs/journey-b2c-2-cart-management/spec.md",
+      "capability": "base.journey-b2c-2-cart-management",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "561085da447f5e5b627f4b0675344b6bf531bb9512ff1e88507e46b30c0357fa"
+    },
+    {
+      "path": "openspec/specs/journey-b2c-3-authentication-identity/spec.md",
+      "capability": "base.journey-b2c-3-authentication-identity",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "c45c12989db9eb7b3faeedfe9238b7ad05c808baaf0654e8e63996fc692bfad3"
+    },
+    {
+      "path": "openspec/specs/journey-b2c-4-checkout/spec.md",
+      "capability": "base.journey-b2c-4-checkout",
+      "priority": "P1",
+      "epic": "journeys",
+      "sha256": "348fdf917faf3de7a091e603c605b7cd9a325541e040eabd45f70f2cde018618"
+    },
+    {
+      "path": "openspec/specs/journey-b2c-5-order-management/spec.md",
+      "capability": "base.journey-b2c-5-order-management",
+      "priority": "P2",
+      "epic": "journeys",
+      "sha256": "25958713d1988f5a138b7d7cd4304623f8d5b82e472ca2dc604ac707a306ff7b"
+    },
+    {
+      "path": "openspec/specs/journey-b2c-6-account-self-service/spec.md",
+      "capability": "base.journey-b2c-6-account-self-service",
+      "priority": "P2",
+      "epic": "journeys",
+      "sha256": "3f664eeb58887910b51f0450a5b6bf354addcb2ce233c56177d3dbd45a2e3be7"
+    },
+    {
+      "path": "openspec/specs/journey-b2c-7-switching-region-or-language/spec.md",
+      "capability": "base.journey-b2c-7-switching-region-or-language",
+      "priority": "P2",
+      "epic": "journeys",
+      "sha256": "f79451944ac7aa26a7ffbea505fd5f1b7265c53d3740d762dca9b15281f81533"
+    },
+    {
+      "path": "openspec/specs/journey-b2c-8-subscriptions-recurring-orders/spec.md",
+      "capability": "base.journey-b2c-8-subscriptions-recurring-orders",
+      "priority": "P3",
+      "epic": "journeys",
+      "sha256": "1998d090c91b7aefd75811715999a1e1d337d78f65fd91e26c0091d36a432f0c"
+    },
+    {
+      "path": "openspec/specs/cart-page/spec.md",
+      "capability": "base.cart-page",
+      "priority": "P1",
+      "epic": "core-shopping",
+      "sha256": "5b30ae4d0e2c4e48d9d1c72cbedc1168bf220d421af44918f0e9fbac14ad0e96"
+    },
+    {
+      "path": "openspec/specs/checkout-page/spec.md",
+      "capability": "base.checkout-page",
+      "priority": "P1",
+      "epic": "core-shopping",
+      "sha256": "4fcb87298dff4840706553f303f7aac95a2356ba53a82ae97d3a9f5f66100923"
+    },
+    {
+      "path": "openspec/specs/home-landing-page/spec.md",
+      "capability": "base.home-landing-page",
+      "priority": "P1",
+      "epic": "core-shopping",
+      "sha256": "c8f9a195c0cc8a9e3e165e85203d548102ae91968e6648ff854a2b2d104cbed4"
+    },
+    {
+      "path": "openspec/specs/order-confirmation-page/spec.md",
+      "capability": "base.order-confirmation-page",
+      "priority": "P1",
+      "epic": "core-shopping",
+      "sha256": "e34970ed020895938c25d9a8640a0157bc54fa75b20f0321be2ff4584a978e82"
+    },
+    {
+      "path": "openspec/specs/product-detail-page/spec.md",
+      "capability": "base.product-detail-page",
+      "priority": "P1",
+      "epic": "core-shopping",
+      "sha256": "e2f72a9be1f929a7455b021210630bc7e36ef64571c7c92339bacca462af019d"
+    },
+    {
+      "path": "openspec/specs/product-listing-page/spec.md",
+      "capability": "base.product-listing-page",
+      "priority": "P1",
+      "epic": "core-shopping",
+      "sha256": "9e665b9c0a40fe7e88f3bf96aad4fce7a4bd1edf776b903f74bd6c867c1f260b"
+    },
+    {
+      "path": "openspec/specs/search-results-page/spec.md",
+      "capability": "base.search-results-page",
+      "priority": "P2",
+      "epic": "core-shopping",
+      "sha256": "58a7b1df1eb4f46e3ca06600ddf41f52d0ad8449329edac86062a5266390d7fd"
+    },
+    {
+      "path": "openspec/specs/account-registration-request/spec.md",
+      "capability": "base.account-registration-request",
+      "priority": "P1",
+      "epic": "account-self-service",
+      "sha256": "8f7aa9ce63c19340c358c044ab4d5c7d9b065e86cf646b06026fed3d994e3c66"
+    },
+    {
+      "path": "openspec/specs/account-sign-in/spec.md",
+      "capability": "base.account-sign-in",
+      "priority": "P1",
+      "epic": "account-self-service",
+      "sha256": "3c1026cd9dbde1e4953bbba829242a69dadf553d1dfc9622b3c6021486aca78b"
+    },
+    {
+      "path": "openspec/specs/address-book/spec.md",
+      "capability": "base.address-book",
+      "priority": "P1",
+      "epic": "account-self-service",
+      "sha256": "d83eeb62e118f92f138e70ab21dee0063d6d1c6f0057686b321670e28979386c"
+    },
+    {
+      "path": "openspec/specs/order-history/spec.md",
+      "capability": "base.order-history",
+      "priority": "P1",
+      "epic": "account-self-service",
+      "sha256": "b296783796378a1c913692b05ebf96b68832e3b4c319060c390f22eaf3d388de"
+    },
+    {
+      "path": "openspec/specs/account-dashboard/spec.md",
+      "capability": "base.account-dashboard",
+      "priority": "P2",
+      "epic": "account-self-service",
+      "sha256": "dd65115b5ca17ea05ef87f260c4a69995c718f43d41d94ee3f820663d89f21f3"
+    },
+    {
+      "path": "openspec/specs/payment-methods/spec.md",
+      "capability": "base.payment-methods",
+      "priority": "P2",
+      "epic": "account-self-service",
+      "sha256": "0a707ce955740be7c580d4d83783a0c6ce45f7f3bb90801fea29d33b9a3b66c7"
+    },
+    {
+      "path": "openspec/specs/saved-lists/spec.md",
+      "capability": "base.saved-lists",
+      "priority": "P2",
+      "epic": "account-self-service",
+      "sha256": "aa700d8f6208b0b4fd32a470ee0f4baae8ae00d4789e911f0da1e15e53594eaf"
+    },
+    {
+      "path": "openspec/specs/contact-us/spec.md",
+      "capability": "base.contact-us",
+      "priority": "P1",
+      "epic": "content-support",
+      "sha256": "ca2fd3ab979e8a0f39ae8335efbe1ffee4d037ed61ba7edfc9b59c61dac3c807"
+    },
+    {
+      "path": "openspec/specs/policy-pages/spec.md",
+      "capability": "base.policy-pages",
+      "priority": "P1",
+      "epic": "content-support",
+      "sha256": "e43bbf3e0dc28cb697f0bf7b157cc23e97bf0997174bd04311cc2cbc57be9fbb"
+    },
+    {
+      "path": "openspec/specs/about-us/spec.md",
+      "capability": "base.about-us",
+      "priority": "P2",
+      "epic": "content-support",
+      "sha256": "5262506404dc55b1113db68b54bdca7b918d361c717c5b328917229a55c74263"
+    },
+    {
+      "path": "openspec/specs/faq/spec.md",
+      "capability": "base.faq",
+      "priority": "P2",
+      "epic": "content-support",
+      "sha256": "d52ba2ba7dbf540439e86e15e6bb1ab9f4ffeaf365bc02e5816c345b49a35213"
+    },
+    {
+      "path": "openspec/specs/blog-resources/spec.md",
+      "capability": "base.blog-resources",
+      "priority": "P3",
+      "epic": "content-support",
+      "sha256": "d6015dee39eec0fb7e16b891a2d8ae26b3409918278544b90787924241f6fe94"
+    },
+    {
+      "path": "openspec/specs/error-pages/spec.md",
+      "capability": "base.error-pages",
+      "priority": "P1",
+      "epic": "utility-system",
+      "sha256": "82b26477c6c383be9d89f7ad15862535552fcaf8036bda6b65673eaed6eb5a82"
+    },
+    {
+      "path": "openspec/specs/password-reset/spec.md",
+      "capability": "base.password-reset",
+      "priority": "P1",
+      "epic": "utility-system",
+      "sha256": "764ba74e5458704961286f7d9ffc820877ea0bb3a57ba18266949d332fa0eb4b"
+    },
+    {
+      "path": "openspec/specs/email-verification/spec.md",
+      "capability": "base.email-verification",
+      "priority": "P2",
+      "epic": "utility-system",
+      "sha256": "7b6f9e083c1ae39cb3077778361463085618d9be2a2de96f1f6f2b0fb723843b"
+    },
+    {
+      "path": "openspec/specs/out-of-stock-substitutions/spec.md",
+      "capability": "grocery.out-of-stock-substitutions",
+      "priority": "P1",
+      "epic": "catalog-and-availability",
+      "sha256": "e45bc4e5224e7fe3c4490eecf9d8e81ebcf58f94f38a1e24f9e2622a058ec2a1"
+    },
+    {
+      "path": "openspec/specs/weight-based-pricing/spec.md",
+      "capability": "grocery.weight-based-pricing",
+      "priority": "P1",
+      "epic": "basket-and-pricing",
+      "sha256": "411189b00fe8f89a4e4ae1247982c104c2600d8b7561119d95067efc449a8c65"
+    },
+    {
+      "path": "openspec/specs/delivery-slot-booking/spec.md",
+      "capability": "grocery.delivery-slot-booking",
+      "priority": "P1",
+      "epic": "slots-and-fulfillment",
+      "sha256": "ec05357f550751756c350fa05523dfdd69c63e857ae36a81e707381210d5368c"
+    }
+  ]
+}
