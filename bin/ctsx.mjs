@@ -7,6 +7,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import vm from "node:vm";
 import YAML from "yaml";
 import { execFileSync } from "node:child_process";
 import { mapResponse } from "../lib/response.mjs";
@@ -295,6 +296,19 @@ function lint({ strict }) {
     }
     if (strict) for (const e of checkRights(c, src)) errors.push(`${at}: ${e}`);
   }
+
+    // J: the generated Apps Script must actually parse. Emitting a broken script is a failure
+    // the admin only discovers after pasting it into a browser, and `node --check` cannot be
+    // used to catch it — Node refuses the .gs extension entirely.
+    for (const f of fs.existsSync(path.join(ROOT, "collector/forms"))
+        ? fs.readdirSync(path.join(ROOT, "collector/forms")).filter((x) => x.endsWith(".gs")) : []) {
+      const src = fs.readFileSync(path.join(ROOT, "collector/forms", f), "utf8");
+      try {
+        new vm.Script(src, { filename: f });
+      } catch (e) {
+        errors.push(`collector/forms/${f}: generated script does not parse — ${e.message}`);
+      }
+    }
 
   // I: golden drift — rendered/ and registry.json must match what the sources produce now.
   let drift = 0;
