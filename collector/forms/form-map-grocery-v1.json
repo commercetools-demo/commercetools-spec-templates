@@ -1,0 +1,91 @@
+{
+  "map_version": 3,
+  "source": "grocery.gs",
+  "industry": "grocery",
+  "questionnaire": "expert-intake",
+  "questionnaire_version": 1,
+  "fields": [
+    {
+      "label": "How deep is your Grocery & q-commerce experience?",
+      "id": "exposure",
+      "type": "single",
+      "multiple": false,
+      "required": true,
+      "options": [
+        "Built it",
+        "Sold it",
+        "Advised on it",
+        "Read about it"
+      ],
+      "max_length": null
+    },
+    {
+      "label": "Which business models have you seen Grocery & q-commerce run as?",
+      "id": "business_models",
+      "type": "multi",
+      "multiple": true,
+      "required": true,
+      "options": [
+        "B2C",
+        "B2B",
+        "B2B2C",
+        "B2B2B"
+      ],
+      "max_length": null
+    },
+    {
+      "label": "Feature 1: what would you add to a bare storefront to make it work for Grocery & q-commerce?",
+      "id": "feature_1",
+      "type": "long_text",
+      "multiple": false,
+      "required": true,
+      "options": null,
+      "max_length": 1500
+    },
+    {
+      "label": "Feature 2: what would you add to a bare storefront to make it work for Grocery & q-commerce?",
+      "id": "feature_2",
+      "type": "long_text",
+      "multiple": false,
+      "required": false,
+      "options": null,
+      "max_length": 1500
+    },
+    {
+      "label": "Feature 3: what would you add to a bare storefront to make it work for Grocery & q-commerce?",
+      "id": "feature_3",
+      "type": "long_text",
+      "multiple": false,
+      "required": false,
+      "options": null,
+      "max_length": 1500
+    },
+    {
+      "label": "Which areas do your features touch?",
+      "id": "capability_areas",
+      "type": "multi",
+      "multiple": true,
+      "required": false,
+      "options": [
+        "Catalog & product data",
+        "Search & discovery",
+        "Cart & basket",
+        "Pricing & promotions",
+        "Checkout & payment",
+        "Shipping & fulfillment",
+        "Order management",
+        "Customers & accounts"
+      ],
+      "max_length": null
+    },
+    {
+      "label": "A retailer or competitor doing this well (optional)",
+      "id": "reference",
+      "type": "short_text",
+      "multiple": false,
+      "required": false,
+      "options": null,
+      "max_length": null
+    }
+  ]
+}

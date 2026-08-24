@@ -1,0 +1,151 @@
+# Tool 1's interactive flow, as data. Add, remove, reword, reorder or re-condition any
+# question here and run `npm run build`. No code changes. Ever.
+#
+# Written for a developer at a terminal who has not read this repo. Rules for anything
+# user-facing here:
+#   * No internal vocabulary. "P1", "derived match", "_base", "capability", "delta" are ours.
+#   * Never interpolate an id where a label belongs — use `.label`, and `humanize()` for id lists.
+#   * Say what a choice will DO, not what it is called.
+#   * Every option carries a description if the label alone leaves a real question open.
+#
+#   ask_when       conditional questions. Closed grammar: and|or|not|eq|ne|in|gt|lt over the
+#                  scopes answers.* detect.* registry.* resolved.* — no eval, no arithmetic.
+#   {{...}}        interpolation of an earlier answer, or of detection/resolution state.
+#                  Helpers: len() count() join() humanize().
+#   options_from   option list comes from registry.json, i.e. from the CONTENT. Publishing a
+#                  new vertical adds an option here with no edit to this file.
+#   options_append fixed choices alongside a derived list.
+schema: commercetools.spec-templates.questionnaire/v1
+schema_version: 1
+id: developer-intake
+version: 2
+surfaces: [agent, cli]
+limits:
+  agent: { max_options: 4, header_max_chars: 12 }
+
+questions:
+  - id: framework_state
+    type: single
+    required: true
+    header: Framework
+    prompt: "Do you already have a spec framework in this project, or should I set one up?"
+    prompt_when:
+      - when: { eq: [detect.framework_count, 1] }
+        prompt: "This project already uses {{detect.framework_label}}. Add the specs to it, or set up a different framework?"
+    options:
+      - value: have
+        label: "Use what's here"
+        label_when:
+          - when: { eq: [detect.framework_count, 1] }
+            label: "Add to {{detect.framework_label}}"
+        description: "Write the specs into the framework already set up in this project."
+      - value: instantiate
+        label: "Set one up for me"
+        description: "Run the framework's own setup command first, then write the specs."
+    prefill: { from: detect.framework_state, confirm: when-ambiguous }
+
+  - id: framework
+    type: single
+    required: true
+    header: Flavor
+    prompt: "Which spec framework?"
+    prompt_when:
+      - when: { eq: [answers.framework_state, instantiate] }
+        prompt: "Which spec framework should I set up?"
+    options_from: registry.compat
+    options_filter: { requires: [implemented] }
+    prefill: { from: detect.framework, confirm: never }
+
+  - id: business_model
+    type: single
+    required: true
+    header: Sells to
+    prompt: "Who does this storefront sell to?"
+    options_from: registry.business_models
+
+  - id: industry
+    type: single
+    required: true
+    header: Industry
+    prompt: "Which industry is this {{answers.business_model.label}} storefront for?"
+    hint: >
+      Only industries with specs written for {{answers.business_model.label}} are listed.
+    options_from: registry.industries
+    options_filter: { supports_model: answers.business_model.value }
+    option_badge: maturity
+    option_note: "{{option.capability_count}} specs"
+    options_append:
+      - value: _base
+        label: "Generic"
+        description: >
+          Not industry-specific. You get the full {{answers.business_model.label}} storefront specs
+          and nothing invented on top.
+    overflow:
+      group_by: group
+      group_source: registry.industry_groups
+      group_question:
+        id: industry_group
+        header: Segment
+        prompt: "Which part of the market is this {{answers.business_model.label}} storefront for?"
+
+  - id: scope
+    type: single
+    required: false
+    header: How much
+    prompt: "Take all of it, or start with the must-haves?"
+    ask_when: { gt: [resolved.capability_count, 6] }
+    options:
+      - value: all
+        label: "All {{resolved.capability_count}} specs"
+        default: true
+        description: "Everything, including the parts you may not build for months."
+      - value: mvp
+        label: "Just the must-haves ({{resolved.p1_count}} specs)"
+        description: >
+          Only what a storefront cannot launch without. Run this again later and choose all of it
+          to add the rest — nothing you have edited gets overwritten.
+
+  - id: gap_ack
+    type: single
+    required: true
+    header: Coverage
+    prompt: >
+      There are no specs written specifically for {{answers.industry.label}} +
+      {{answers.business_model.label}}, so I will use the closest set that applies.
+      {{len(resolved.gaps)}} things a {{answers.business_model.label}} build usually needs are not
+      covered: {{humanize(resolved.gaps)}}. I will write those up as open questions rather than
+      guess at them. Go ahead?
+    ask_when: { ne: [resolved.match, exact] }
+    options:
+      - value: continue
+        label: "Go ahead"
+        default: true
+        description: "Write the specs, and list what is missing as open questions to answer yourself."
+      - value: abort
+        label: "Stop, I'll pick something else"
+        description: "Nothing is written."
+
+  - id: openspec_target
+    type: single
+    required: false
+    header: Write as
+    prompt: "Write these as specs of how the storefront should behave, or as work still to be done?"
+    ask_when: { and: [{ eq: [resolved.framework, openspec] }, { eq: [flags.advanced, true] }] }
+    options:
+      - value: specs
+        label: "As specs"
+        default: true
+        description: "openspec/specs/ — browsable, and the shape you already use."
+      - value: change
+        label: "As work to do"
+        description: >
+          openspec/changes/ — each one gets a proposal and a task list, which is where the
+          commercetools skill annotations land.
+
+# The ONLY coupling between this file and code.
+outputs:
+  framework:      resolved.framework
+  business_model: answers.business_model.value
+  industry:       answers.industry.value
+  scope:          answers.scope.value
+  as_change:      "answers.openspec_target == 'change'"

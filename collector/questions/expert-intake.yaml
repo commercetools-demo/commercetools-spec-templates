@@ -1,0 +1,58 @@
+# commercetools-spec-collector — the questionnaire, as data.
+#
+# `ctsx collect:render` fans this out at BUILD TIME into one form per industry, which is why
+# Q2's text is fully interpolated in committed bytes rather than needing a branching engine.
+# Neither GitHub Issue Forms nor Google Forms nor Slack Workflow Builder can pipe an earlier
+# answer into a later question's label; build-time fan-out sidesteps all three.
+schema: commercetools.spec-templates.questionnaire/v1
+schema_version: 1
+id: expert-intake
+version: 1
+# Rung 0 of the fallback ladder. Rung 2 (a Bolt app + Block Kit modal) consumes this same file.
+targets: [github-issue-form, google-form, slack-modal]
+fan_out: industry            # one rendered form per value of taxonomy/industries.yaml
+
+# Optional "where do I ask a question?" link on the rendered form. Left unset on purpose: this
+# repo is public, and the answer for a commercetools colleague is an internal channel that means
+# nothing to anyone else. Set it in the private repo that actually receives the answers.
+# contact:
+#   name: Ask about the collector
+#   url: https://example.invalid/channel
+#   about: Not sure which industry to pick, or whether your answer is useful? Ask first.
+
+questions:
+  - id: exposure
+    type: single
+    required: true
+    label: "How deep is your {{industry.label}} experience?"
+    options: ["Built it", "Sold it", "Advised on it", "Read about it"]
+
+  - id: business_models
+    type: multi
+    required: true
+    label: "Which business models have you seen {{industry.label}} run as?"
+    options_from: registry.business_models
+
+  - id: feature
+    type: long_text
+    # Three numbered boxes instead of one textarea. This turns triage from an NLP problem into a
+    # data problem: three pre-atomized candidates per respondent, not one paragraph to split.
+    repeat: 3
+    repeat_required: 1
+    label: "Feature {n}: what would you add to a bare storefront to make it work for {{industry.label}}?"
+    hint: "One capability per box. Name it, then say why {{industry.label}} specifically needs it."
+    placeholder: "e.g. catch-weight pricing with tolerance bands, because fresh lines are picked to an approximate weight"
+    max_length: 1500
+
+  - id: capability_areas
+    type: multi
+    required: false
+    label: "Which areas do your features touch?"
+    # Pre-buckets the free text, which is most of the clustering work done at collection time.
+    options_from: registry.domains
+
+  - id: reference
+    type: short_text
+    required: false
+    label: "A retailer or competitor doing this well (optional)"
+    hint: "No customer names under NDA — describe the pattern instead."
