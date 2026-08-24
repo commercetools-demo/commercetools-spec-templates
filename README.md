@@ -18,6 +18,10 @@ That writes the grocery B2C spec set into `openspec/specs/`, runs the
 so every commercetools-touching task carries its `[SKILL: …]` annotation, and leaves a receipt at
 `.commercetools/spec-templates.lock.json` so `status`, `update` and `remove` all work.
 
+Step-by-step procedures for every task — bringing specs into a project, opening a collection
+round, adding an industry, authoring a vertical — are in **[`docs/runbook.md`](docs/runbook.md)**.
+This README explains why things are shaped the way they are.
+
 ## Three ways to answer the questions
 
 The questions live in `questions/developer-intake.yaml` and are asked by whichever surface you use.

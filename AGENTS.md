@@ -1,5 +1,7 @@
 # Working in this repo
 
+- Procedures live in [`docs/runbook.md`](docs/runbook.md). Follow them rather than improvising.
+
 - To **author or extend a vertical**, read `plugin/skills/commercetools-vertical-authoring/SKILL.md`
   and follow it. It is the procedure, not a summary of one.
 - `registry.json`, `dist/`, `rendered/` and `collector/forms/` are **generated**. Never hand-edit
