@@ -6,20 +6,6 @@
   "questionnaire_version": 1,
   "fields": [
     {
-      "label": "How deep is your Grocery & q-commerce experience?",
-      "id": "exposure",
-      "type": "single",
-      "multiple": false,
-      "required": true,
-      "options": [
-        "Built it",
-        "Sold it",
-        "Advised on it",
-        "Read about it"
-      ],
-      "max_length": null
-    },
-    {
       "label": "Which business models have you seen Grocery & q-commerce run as?",
       "id": "business_models",
       "type": "multi",
@@ -74,7 +60,8 @@
         "Checkout & payment",
         "Shipping & fulfillment",
         "Order management",
-        "Customers & accounts"
+        "Customers & accounts",
+        "Other"
       ],
       "max_length": null
     },

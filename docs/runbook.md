@@ -39,21 +39,27 @@ edit. The commercetools overlay is separate:
 
 ## B. Open a collection round
 
-Once per industry, steps 1–3 are one-time.
+Steps 1–5 are one-time per industry.
 
 1. Confirm the industry exists in `taxonomy/industries.yaml`. If not, do procedure **C** first.
 2. `node bin/ctsx.mjs collect:render`
-3. Open [script.google.com](https://script.google.com), paste
-   `collector/forms/<industry>.gs`, then **Run > setup**. Copy the published URL from the execution
-   log. Re-running `setup` reuses the same form; it never creates a second one.
-4. `node bin/ctsx.mjs collect:invite --industry <industry> --url <published URL>`
-5. Paste the printed message into Slack, and DM the named experts. Set the reminder it prints.
-6. When responses have landed: in Sheets, **File > Download > Comma-separated values**.
-7. ```bash
+3. Open [script.google.com](https://script.google.com) > **New project**, and paste
+   `collector/forms/<industry>.gs` over the placeholder.
+4. Pick **`setup`** in the function dropdown beside **Run**, click **Run**, and allow the
+   authorization prompt (Forms, Drive, Sheets).
+   **Do not use Deploy.** This is not a web app; deploying it gives
+   `Script function not found: doGet`. The script builds a Google Form and is finished once it has
+   run — the form is what has a URL.
+5. Copy the URL under `=== PASTE THIS INTO SLACK ===` in the **Execution log** at the bottom.
+   Re-running `setup` reuses the same form; it never creates a second one.
+6. `node bin/ctsx.mjs collect:invite --industry <industry> --url <published URL>`
+7. Paste the printed message into Slack, and DM the named experts. Set the reminder it prints.
+8. When responses have landed: in Sheets, **File > Download > Comma-separated values**.
+9. ```bash
    export COLLECTOR_PSEUDONYM_KEY='<from the team vault>'
    node bin/ctsx.mjs collect:ingest --csv ~/Downloads/responses.csv --industry <industry>
    ```
-8. Exit 1 means some responses are in `inbox/raw/<round>/_needs-a-human/`. Nothing was dropped —
+10. Exit 1 means some responses are in `inbox/raw/<round>/_needs-a-human/`. Nothing was dropped —
    read each file's `mapping` block and fix by hand.
 
 `inbox/` is gitignored. Never commit a raw response; commit the reviewed capability instead.

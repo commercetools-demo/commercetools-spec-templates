@@ -21,12 +21,6 @@ fan_out: industry            # one rendered form per value of taxonomy/industrie
 #   about: Not sure which industry to pick, or whether your answer is useful? Ask first.
 
 questions:
-  - id: exposure
-    type: single
-    required: true
-    label: "How deep is your {{industry.label}} experience?"
-    options: ["Built it", "Sold it", "Advised on it", "Read about it"]
-
   - id: business_models
     type: multi
     required: true

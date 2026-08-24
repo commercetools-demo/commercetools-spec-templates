@@ -259,7 +259,7 @@
     "grocery": {
       "label": "Grocery & q-commerce",
       "group": "retail",
-      "maturity": "beta",
+      "maturity": "draft",
       "supported_models": [
         "B2C",
         "B2B",

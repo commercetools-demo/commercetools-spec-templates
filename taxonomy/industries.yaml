@@ -10,7 +10,7 @@ industries:
   grocery:
     label: Grocery & q-commerce
     group: retail
-    maturity: beta          # draft | beta | stable | deprecated
+    maturity: draft          # draft | beta | stable | deprecated
   telecom:
     label: Telecommunications
     group: telco

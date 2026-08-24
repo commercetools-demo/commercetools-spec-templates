@@ -168,7 +168,10 @@ test("the question flow is data-driven end to end, and interpolates earlier answ
   const values = industry.question.options.map((o) => o.value);
   assert.ok(values.includes("grocery"));
   assert.ok(!values.includes("telecom"), "an industry with no B2C content must not be offered");
-  assert.match(industry.question.options.find((o) => o.value === "grocery").label, /\(beta\)/);
+  const maturity = JSON.parse(fs.readFileSync(path.join(ROOT, "registry.json"), "utf8"))
+    .industries.grocery.maturity;
+  assert.match(industry.question.options.find((o) => o.value === "grocery").label,
+    new RegExp(`\\(${maturity}\\)`), "the badge must show whatever maturity the taxonomy says");
 
   // The note must quote the count for the MODEL CHOSEN, not a single per-industry number.
   const countFor = (model) => {

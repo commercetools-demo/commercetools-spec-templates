@@ -8,3 +8,4 @@ domains:
   fulfillment:      { label: Shipping & fulfillment }
   order-management: { label: Order management }
   customers:        { label: Customers & accounts }
+  other:            { label: Other }
