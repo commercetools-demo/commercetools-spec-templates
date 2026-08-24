@@ -22,11 +22,22 @@
 
 const TITLE = "commercetools spec collector — Grocery & q-commerce";
 
+// Find the form we made last time, if any. getFilesByName also returns TRASHED files and
+// files of any type, so a deleted form would otherwise come back from the bin, and a
+// same-named document would crash openById.
+function findExistingForm() {
+  const files = DriveApp.getFilesByName(TITLE);
+  while (files.hasNext()) {
+    const file = files.next();
+    if (file.isTrashed()) continue;
+    if (file.getMimeType() !== MimeType.GOOGLE_FORMS) continue;
+    return FormApp.openById(file.getId());
+  }
+  return null;
+}
+
 function setup() {
-  const existing = DriveApp.getFilesByName(TITLE);
-  const form = existing.hasNext()
-    ? FormApp.openById(existing.next().getId())
-    : FormApp.create(TITLE);
+  const form = findExistingForm() || FormApp.create(TITLE);
   form.setDescription("What would you add to a bare storefront to make it work for Grocery & q-commerce? Three boxes, about three minutes. Your answers become reviewed spec drafts. Please do not name a customer you are under NDA with — describe the pattern instead.");
   // Email collection is what lets you chase non-responders; ingest derives a
   // handle from the address and discards it. Not every account type allows it,
@@ -48,10 +59,19 @@ function setup() {
   form.addTextItem().setTitle("A retailer or competitor doing this well (optional)").setHelpText("No customer names under NDA — describe the pattern instead.").setRequired(false);
 
   // Responses go to their own spreadsheet; ingest reads a CSV export of it.
-  if (!form.getDestinationId()) {
+  //
+  // getDestinationId() THROWS when nothing is linked yet — it does not return null — so it
+  // cannot be used as a condition. Probing it any other way is the same bug in a new shape.
+  let destination = null;
+  try { destination = form.getDestinationId(); } catch (e) { destination = null; }
+  if (!destination) {
     const sheet = SpreadsheetApp.create(TITLE + " — responses");
     form.setDestination(FormApp.DestinationType.SPREADSHEET, sheet.getId());
-    Logger.log("Responses sheet: " + sheet.getUrl());
+    destination = sheet.getId();
+    Logger.log("Responses sheet created: " + sheet.getUrl());
+  } else {
+    Logger.log("Responses sheet: " +
+      SpreadsheetApp.openById(destination).getUrl());
   }
   Logger.log("");
   Logger.log("=== PASTE THIS INTO SLACK ===");
