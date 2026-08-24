@@ -1,0 +1,38 @@
+# User journeys, referenced by each page capability's `journeys:` field. A journey is a path
+# across pages; the page capabilities are the nodes.
+schema_version: 1
+journeys:
+  B2C-1: { title: "Discovery & browse", business_models: [B2C, B2B],
+           description: "A buyer explores the catalog through the homepage, categories or search without a specific product in mind." }
+  B2C-2: { title: "Cart management", business_models: [B2C, B2B],
+           description: "A buyer adds, removes or adjusts items before committing, including discount codes and reviewing pricing." }
+  B2C-3: { title: "Authentication & identity", business_models: [B2C, B2B],
+           description: "A buyer registers, logs in, resets their password or verifies their email." }
+  B2C-4: { title: "Checkout", business_models: [B2C, B2B],
+           description: "A buyer completes a purchase: shipping details, delivery method, payment information, confirmation." }
+  B2C-5: { title: "Order management (post-purchase)", business_models: [B2C, B2B],
+           description: "A buyer tracks, reviews or acts on a placed order — shipment status, invoices, returns, support." }
+  B2C-6: { title: "Account & self-service", business_models: [B2C, B2B],
+           description: "A buyer manages their own account settings without involving the seller's support team." }
+  B2C-7: { title: "Switching region or language", business_models: [B2C, B2B],
+           description: "A buyer changes locale, currency or shipping region, updating language, pricing and available products." }
+  B2C-8: { title: "Subscriptions & recurring orders", business_models: [B2C, B2B],
+           description: "A buyer sets up, manages or cancels a recurring order — frequency, quantities, payment details." }
+  B2B-1: { title: "Company account setup", business_models: [B2B],
+           description: "A new company registers, submits business information, and waits for activation; an admin configures addresses and payment methods." }
+  B2B-2: { title: "Managing team members & access", business_models: [B2B],
+           description: "A company admin invites users, assigns roles, sets spending limits, and organises users into cost centers." }
+  B2B-3: { title: "Viewing contract & account pricing", business_models: [B2B],
+           description: "A buyer sees pricing specific to their company's contract or customer group, including volume tiers and negotiated rates." }
+  B2B-4: { title: "Requisition & shopping lists", business_models: [B2B],
+           description: "A buyer builds named product lists for recurring or project purchasing, shareable with teammates and convertible to cart in bulk." }
+  B2B-5: { title: "Quote request & negotiation", business_models: [B2B],
+           description: "A buyer requests a formal quote, a sales rep responds, the buyer negotiates or accepts, and the quote converts to an order." }
+  B2B-6: { title: "Approval workflows", business_models: [B2B],
+           description: "An order exceeding a threshold is routed to an approver before submission — both the requester and approver experiences." }
+  B2B-7: { title: "Purchase order & payment terms", business_models: [B2B],
+           description: "A buyer orders using a PO number and net-terms payment; covers PO entry, invoice generation, and payment against balances." }
+  B2B-8: { title: "Bulk & repeat ordering", business_models: [B2B],
+           description: "An experienced buyer places large or recurring orders via quick entry, CSV upload or reorder, without browsing the catalog." }
+  B2B-9: { title: "Account-level order history", business_models: [B2B],
+           description: "A buyer or admin reviews the whole company account's order history, including other members' orders, with filtering." }

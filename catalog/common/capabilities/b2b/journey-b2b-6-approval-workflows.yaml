@@ -1,0 +1,90 @@
+schema_version: 1
+id: base.journey-b2b-6-approval-workflows
+version: 1.0.0
+title: B2B-6 — Approval workflows
+kind: journey
+status: published
+visibility: public
+industry: ["*"]
+business_models: [B2B, B2B2B]
+priority: P1
+epic: journeys
+domains: [order-management, customers, checkout]
+journeys: [B2B-6]
+skill: commercetools-commerce-patterns
+supporting_skills: [commercetools-storefront]
+requirement: >
+  The storefront SHALL route an order that meets its company's approval conditions to an approver
+  before it is placed, and show both the requester and the approver where that order stands.
+rationale: >
+  Spend controls are the reason many companies can buy online at all. An approval that is invisible
+  to the requester looks like a broken checkout, and one that is invisible to the approver stalls;
+  both failures are experienced as the storefront losing the order.
+scenarios:
+  - id: threshold-triggers-approval
+    given: a company with an approval rule and a buyer whose basket meets it
+    when: the buyer submits the order
+    then: the order is held for approval, the buyer is told so at submission, and no fulfillment begins
+  - id: approver-sees-the-queue
+    given: an approver with pending requests
+    when: the approver opens their queue
+    then: each request shows what is being bought, by whom, and what rule caught it
+  - id: rejected
+    given: a held order
+    when: the approver rejects it
+    then: the requester is told, with the reason, and the order does not proceed
+  - id: below-threshold-passes-straight-through
+    given: a basket that matches no approval rule
+    when: the buyer submits it
+    then: the order is placed directly, with no approval step and no approval messaging
+  - id: rule-changes-mid-flight
+    given: an order already awaiting approval
+    when: the company's approval rules change
+    then: the in-flight approval resolves against the rules that applied when it was raised, not the new ones
+success_criteria:
+  - { id: never-silent, metric: no order is ever held for approval without the requester being told at submission }
+commercetools:
+  entities: [ApprovalRule, ApprovalFlow, Order, BusinessUnit, Associate, AssociateRole]
+  api_surface:
+    - kind: concept
+      ref: "An ApprovalRule states the conditions, as a predicate over the Order, under which an order matching it needs approval before a requester in a Business Unit can place it"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/approval-rules
+      verified_at: 2026-08-21
+    - kind: concept
+      ref: "An ApprovalFlow matches Approval Rules to Orders and manages the approval state, including whether the order is approved and the status of each approver"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/associates-overview
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Approval is a platform-enforced gate on order placement within a Business Unit, not a storefront convention — so the storefront must read the resulting flow state rather than deciding approval itself"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/approval-rules
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Who may approve is an Associate permission on the Business Unit, so approver assignment and role design are the same decision"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/associate-roles
+      verified_at: 2026-08-21
+  modeling_notes: >
+    Write approval rules as predicates over the order and keep them few and legible — a rule set
+    nobody can reason about produces orders stuck in approval, which is worse than no approval. Model
+    the requester's and approver's views from the ApprovalFlow rather than inferring status from order
+    state. Punch-out procurement, where an external system initiates the purchase, combines Product
+    Selections, as-associate carts and Approval Flows through middleware; there is no built-in
+    connector for it.
+tasks_hint:
+  - "Define the company's ApprovalRule predicates and the roles that may approve"
+  - "Show the requester the approval outcome at submission, not after silence"
+  - "Build the approver queue and approve/reject actions from ApprovalFlow state"
+open_questions:
+  - "Who defines approval rules — the company's admin in the storefront, or the seller?"
+  - "Is multi-step or multi-approver escalation required?"
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "User Journey Reference › B2B Journeys › B2B-6"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

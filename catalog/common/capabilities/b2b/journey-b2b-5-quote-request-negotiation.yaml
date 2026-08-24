@@ -1,0 +1,96 @@
+schema_version: 1
+id: base.journey-b2b-5-quote-request-negotiation
+version: 1.0.0
+title: B2B-5 — Quote request & negotiation
+kind: journey
+status: published
+visibility: public
+industry: ["*"]
+business_models: [B2B, B2B2B]
+priority: P1
+epic: journeys
+domains: [pricing, checkout, order-management]
+journeys: [B2B-5]
+skill: commercetools-commerce-patterns
+supporting_skills: [commercetools-storefront]
+requirement: >
+  The storefront SHALL let a buyer request a formal quote for a basket, negotiate it with a seller,
+  and convert an accepted quote into an order at the agreed prices even if the catalog has moved
+  since.
+rationale: >
+  A negotiation is worthless if the agreed price does not survive to the order. Large or non-standard
+  B2B purchases are priced by a person, not a rule, and the buyer's whole reason for asking is that
+  the number they were given is the number they will pay.
+scenarios:
+  - id: quote-requested-from-a-basket
+    given: a buyer with a basket that needs pricing
+    when: the buyer requests a quote
+    then: a quote request exists carrying the basket, the company context and the buyer's purchase order reference
+  - id: agreed-price-survives-a-catalog-rise
+    given: a pending quote at a negotiated price, and a catalog price that has since risen
+    when: the buyer creates the order from that quote
+    then: the order is placed at the quote's price, not the new catalog price
+  - id: renegotiation
+    given: a pending quote the buyer will not accept as offered
+    when: the buyer requests renegotiation
+    then: the seller can issue a fresh quote and the original is recorded as superseded rather than lost
+  - id: quote-no-longer-valid
+    given: a quote past its validity
+    when: the buyer attempts to accept it
+    then: acceptance is refused with the reason, and the buyer is offered a new request
+success_criteria:
+  - { id: price-holds, metric: an order created from an accepted quote is always at the quoted price }
+  - { id: auditable, metric: every round of a negotiation is recoverable after the fact }
+commercetools:
+  entities: [QuoteRequest, StagedQuote, Quote, Cart, Order, BusinessUnit, Channel]
+  api_surface:
+    - kind: concept
+      ref: "The lifecycle is Cart to Quote Request to Staged Quote to Quote to Order; the Quote is the binding offer"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/implement-b2b-purchase-flows/the-quote-lifecycle
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Quote states are Pending, Accepted, Declined, DeclinedForRenegotiation, RenegotiationAddressed and Withdrawn; only a Pending quote can be renegotiated"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/quotes
+      verified_at: 2026-08-21
+    - kind: rest
+      ref: "Creating an Order from a valid Pending Quote uses the Quote's captured amounts rather than re-resolving live prices; setting quoteStateToAccepted true records acceptance during order creation. It requires a permission such as CreateMyOrdersFromMyQuotes"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/implement-b2b-purchase-flows/quotes-price-locking-and-renegotiation
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Renegotiation moves a Quote to DeclinedForRenegotiation, the seller issues a new Quote, and the original becomes RenegotiationAddressed — so each round keeps its own sellerComment and buyerComment as a durable history"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/implement-b2b-purchase-flows/quotes-price-locking-and-renegotiation
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Quote Requests are supported from a cart with shippingMode Single, a shippingAddress and no Discount Codes — a multi-shipping or discount-coded cart is not a valid quote-request shape"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/implement-b2b-purchase-flows/the-b2b-cart
+      verified_at: 2026-08-21
+    - kind: concept
+      ref: "purchaseOrderNumber exists on Cart, Quote Request, Staged Quote, Quote and Order, and propagates forward, so the buyer's procurement reference set once at the start survives the whole negotiation"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/implement-b2b-purchase-flows/the-b2b-cart
+      verified_at: 2026-08-21
+  modeling_notes: >
+    Keep the quote cart and the direct-order cart separate: the quote path requires a single-shipping,
+    discount-code-free cart, so trying to quote a multi-site basket fails late. The price lock is the
+    whole product here — never re-resolve prices when converting an accepted quote.
+tasks_hint:
+  - "Build a quote-request-shaped cart: shippingMode Single, a shipping address, no discount codes"
+  - "Implement the request, staged-quote and acceptance transitions with their permissions"
+  - "Create the order from the Pending quote with quoteStateToAccepted, preserving quoted prices"
+  - "Preserve every negotiation round's comments as an auditable history"
+open_questions:
+  - "Who prices a quote — a sales rep in Merchant Center, or a CPQ system?"
+  - "What is a quote's validity period, and who sets it?"
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "User Journey Reference › B2B Journeys › B2B-5"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

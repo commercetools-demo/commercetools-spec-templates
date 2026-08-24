@@ -1,0 +1,120 @@
+schema_version: 1
+id: base.search-results-page
+version: 1.0.0
+title: Search results with exact part-number resolution
+kind: page
+status: published
+visibility: public
+industry: ["*"]
+business_models: ["*"]
+priority: P2
+epic: core-shopping
+page_group: "1. Core Shopping Pages"
+journeys: [B2C-1, B2B-3, B2B-8]
+domains: [search, catalog, pricing]
+skill: commercetools-platform
+supporting_skills: [commercetools-storefront, commercetools-commerce-patterns]
+
+requirement: >
+  The system SHALL resolve a query that exactly matches a variant SKU or part number to that variant
+  as the first result, rather than ranking it only as free text among other matches.
+
+rationale: >
+  Procurement-style buyers arrive with an identifier, not a description: they paste a part number from
+  a datasheet or a previous invoice and expect one answer. Relevance ranking over product names does
+  not reliably put an exact identifier match first, and a buyer who has to scan a ranked list for the
+  code they already typed will use the phone instead. The same search box still has to serve
+  descriptive queries, so identifier matching is an additional path, not a replacement.
+
+components:
+  - { name: "Search bar with active query", data_source: STATIC,
+      notes: "UI shell" }
+  - { name: "Results count and query label", data_source: CACHED,
+      notes: "Total hits from search index" }
+  - { name: "Faceted filters", data_source: CACHED,
+      notes: "Same as the product listing page" }
+  - { name: "Product cards — catalog data", data_source: CACHED,
+      notes: "From search index" }
+  - { name: "Product cards — price", data_source: MIDDLEWARE,
+      notes: "Contract pricing overlay on search results" }
+  - { name: "Product cards — availability", data_source: MIDDLEWARE,
+      notes: "Real-time inventory" }
+  - { name: "Sort controls", data_source: STATIC,
+      notes: "UI config" }
+  - { name: "Spelling suggestion prompt", data_source: CACHED,
+      notes: "Search engine suggestion" }
+  - { name: "No-results state with suggestions", data_source: CACHED,
+      notes: "Merchandising fallback rules" }
+
+scenarios:
+  - id: part-number-pasted
+    given: a buyer pastes a string that exactly matches one variant's SKU
+    when: the search runs
+    then: that variant's product is the first result and the variant that matched is identified on the card
+  - id: query-matches-nothing
+    given: a query that matches no product
+    when: the results page renders
+    then: the absence of matches is stated, the query stays editable, and the configured fallback content is offered instead of an empty grid
+  - id: misspelt-query
+    given: a query of more than five characters containing a typo
+    when: the search runs
+    then: typo-tolerant matching returns the intended products, and no correction is claimed that the search cannot actually make
+  - id: unsupported-language
+    given: a query issued in a language the project is not configured for
+    when: the search runs
+    then: the page reports that the language is not supported rather than presenting a legitimate empty result
+
+success_criteria:
+  - { id: identifier-first, metric: every exact SKU match appears as the first result for that query }
+  - { id: no-dead-end, metric: no search response renders as a blank page with no next action }
+
+commercetools:
+  entities: [Product, ProductProjection, ProductType, Store, StandalonePrice, InventoryEntry]
+  api_surface:
+    - kind: rest
+      ref: "variants.sku is a keyword field in Product Search, usable in exact, prefix, wildcard and exists expressions, so a part-number lookup is an exact expression rather than a full-text query"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/product-search
+      verified_at: 2026-08-21
+    - kind: rest
+      ref: "Setting markMatchingVariants to true makes the response carry matchingVariants with the id and sku of the variants that matched, which is how a card can show the buyer which variant answered their query"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/product-search
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Search Term Suggestions is prefix autocomplete over a Product's SearchKeywords - it is not spell correction, it returns nothing for numeric values or special characters such as inch marks, and it fails with SearchDeactivated unless Product Projection Search is activated for the Project"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/search-term-suggestions
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Typo tolerance comes from a fuzzy expression on Product Search, whose fuzziness adjusts automatically to term length; Product Projection Search has fuzzy parameters but no automatic level and no per-field control"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/storefront-search-overview
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Product Search only supports Locales configured on the Project - a query for an unconfigured Locale returns no results at all, which is indistinguishable from a genuine zero-match unless the storefront checks the Project's Locales"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/product-search
+      verified_at: 2026-08-21
+  modeling_notes: >
+    Run the identifier path and the free-text path as one compound query rather than two round trips,
+    and let the exact expression on variants.sku carry its own boost. The no-results state and the
+    spelling prompt are different problems: the fallback content is a merchandising decision the
+    storefront owns, while genuine "did you mean" correction is not something the platform provides.
+
+tasks_hint:
+  - "Combine an exact variants.sku expression with the full-text expression in one Product Search query"
+  - "Implement the no-results fallback as configured content rather than a hardcoded message"
+
+open_questions:
+  - "Is a real 'did you mean' correction in scope? It needs an external search engine; commercetools offers fuzzy matching and keyword autocomplete, not correction."
+  - "Who curates the no-results fallback content, and is it per category or global?"
+
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "1. Core Shopping Pages › Search Results Page"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

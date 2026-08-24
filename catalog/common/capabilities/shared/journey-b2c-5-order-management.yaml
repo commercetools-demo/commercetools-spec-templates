@@ -1,0 +1,84 @@
+schema_version: 1
+id: base.journey-b2c-5-order-management
+version: 1.0.0
+title: B2C-5 — Order management (post-purchase)
+kind: journey
+status: published
+visibility: public
+industry: ["*"]
+business_models: ["*"]
+priority: P2
+epic: journeys
+domains: [order-management, fulfillment]
+journeys: [B2C-5]
+skill: commercetools-storefront
+supporting_skills: [commercetools-connect]
+requirement: >
+  The storefront SHALL let a buyer see the current fulfillment state of a placed order and start a
+  return on it without contacting support.
+rationale: >
+  "Where is my order" is the highest-volume support contact in commerce, and every one of those
+  contacts is a self-service gap. Returns are the same problem with money attached: a buyer who
+  cannot start one calls, and a return whose refund state is invisible generates a second call.
+scenarios:
+  - id: shipment-state-visible
+    given: a placed order that has been dispatched
+    when: the buyer opens the order
+    then: the shipment and its tracking reference are shown against the items in that shipment
+  - id: partial-shipment
+    given: an order dispatched in more than one parcel
+    when: the buyer opens the order
+    then: each parcel and the items in it are distinguishable, rather than one aggregate status for the whole order
+  - id: return-started
+    given: a delivered order within its returns window
+    when: the buyer starts a return for specific items
+    then: the return is recorded against those items with its own shipment and refund state
+  - id: refund-state-visible
+    given: a return that has been received
+    when: the buyer checks it
+    then: whether the refund has been made is shown, distinctly from whether the goods were received
+success_criteria:
+  - { id: self-service, metric: a buyer can answer "where is my order" and "where is my refund" without contacting support }
+commercetools:
+  entities: [Order, Delivery, Parcel, ReturnInfo, ReturnItem, Payment]
+  api_surface:
+    - kind: concept
+      ref: "Fulfillment is modelled on the Order as Delivery, Parcel and TrackingData; parcels carry their own items, so partial shipments are representable"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/orders
+      verified_at: 2026-08-21
+    - kind: update-action
+      ref: "Order addReturnInfo records a return; setReturnShipmentState and setReturnPaymentState track it. These actions exist on Order and Order Edit, not on Cart"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/orders
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "ReturnShipmentState transitions are Advised or Returned as entry states, then Returned to BackInStock or Unusable. ReturnPaymentState is NonRefundable or Initial as entry, then Initial to Refunded or NotRefunded — goods received and money refunded are deliberately separate states"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/orders
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "A post-purchase change that affects the order total is an Order Edit, not a direct order update; a return that triggers a refund therefore touches both the return state and the settlement"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/carts-orders-overview
+      verified_at: 2026-08-21
+  modeling_notes: >
+    Do not collapse the two return state machines into one status field in the UI: "we have your
+    goods" and "we have refunded you" are different facts to a buyer, and the API models them
+    separately for that reason. Tracking data is usually owned by a carrier integration, so treat
+    the storefront as a reader of it.
+tasks_hint:
+  - "Render deliveries and parcels per item rather than one order-level status"
+  - "Implement return initiation via addReturnInfo with per-item selection"
+  - "Surface return shipment state and return payment state as separate facts"
+open_questions:
+  - "Who owns the returns process of record — commercetools, an OMS, or a third-party returns service?"
+  - "What is the returns window, and is it per category?"
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "User Journey Reference › B2C Journeys › B2C-5"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

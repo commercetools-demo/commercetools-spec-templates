@@ -1,0 +1,61 @@
+schema_version: 1
+id: base.faq
+version: 1.0.0
+title: FAQ answers readable and indexable without being expanded
+status: published
+visibility: public
+kind: page
+industry: ["*"]
+business_models: ["*"]
+priority: P2
+epic: content-support
+page_group: "4. Content & Support Pages"
+journeys: [B2C-5, B2C-6]
+domains: [customers, order-management]
+
+requirement: >
+  The system SHALL group published questions under topic headings and deliver each answer's full
+  text in the page's initial response, so an answer is readable and indexable without the reader
+  expanding it.
+
+rationale: >
+  The page earns its keep by deflecting support contacts, and that only happens when a search — on
+  the site or on a search engine — lands the buyer directly on the answer. An accordion that fetches
+  its body on expansion is invisible to a crawler and awkward for assistive technology, so the page
+  can be editorially complete and still fail its purpose. The helpfulness signal is analytics about
+  the answers, not part of them.
+
+components:
+  - { name: All Q&A content,                   data_source: STATIC,     notes: CMS-managed }
+  - { name: '"Was this helpful?" feedback',    data_source: MIDDLEWARE, notes: Feedback submission to analytics / support }
+
+scenarios:
+  - id: deep-link-to-one-question
+    given: an inbound link that addresses a single question
+    when: it is opened
+    then: that question's answer is in view and already open, and the other topics remain reachable on the same page
+  - id: feedback-collector-unreachable
+    given: the feedback endpoint is unreachable
+    when: the reader marks an answer unhelpful
+    then: the vote is discarded without interrupting the reader, and no acknowledgement implying it was recorded is shown
+  - id: answer-not-translated
+    given: a question whose answer has no translation for the reader's locale
+    when: the topic renders
+    then: the fallback language version is served and identified as such, rather than a question with an empty body
+
+success_criteria:
+  - { id: answer-lands-directly, metric: an answer is complete and readable from a single inbound link with no interaction }
+  - { id: deflection-measurable, metric: "helpfulness votes are attributable to a specific answer, not only to the page" }
+
+open_questions:
+  - "Is an unhelpful vote routed to an owner of record for that answer, or only to a dashboard nobody is accountable for?"
+  - "Do any answers restate a policy, a price or a lead time, and what stops them from drifting from the policy pages and the catalog?"
+
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "4. Content & Support Pages › FAQ Page"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

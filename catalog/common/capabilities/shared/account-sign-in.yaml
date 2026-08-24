@@ -1,0 +1,118 @@
+schema_version: 1
+id: base.account-sign-in
+version: 1.0.0
+title: Buyer sign-in with password or federated identity
+status: published
+visibility: public
+kind: page
+industry: ["*"]
+business_models: ["*"]
+priority: P1
+epic: account-self-service
+page_group: "2. Account & Self-Service Pages"
+journeys: [B2C-3, B2B-1]
+domains: [customers]
+skill: commercetools-platform
+supporting_skills: [commercetools-storefront]
+
+requirement: >
+  The system SHALL establish an authenticated buyer session only after the presented credentials or
+  federated assertion are validated, and refuse every other attempt with a message that does not
+  reveal whether the identifier exists.
+
+rationale: >
+  Sign-in is the only page on the account group that an unauthenticated stranger can reach, so it is
+  where account enumeration, credential stuffing and session fixation are attempted. Enterprise
+  buyers additionally arrive through their own identity provider rather than a password, which is a
+  different trust path with different cart and session consequences, not a styling variant of the
+  same form.
+
+components:
+  - { name: "Email and password fields",        data_source: STATIC,
+      notes: "UI shell" }
+  - { name: "SSO or federated login button",    data_source: STATIC,
+      notes: "Config-driven; the auth flow itself is middleware" }
+  - { name: "Authentication call",              data_source: MIDDLEWARE,
+      notes: "Credential validation, session token issuance" }
+  - { name: "Error messaging",                  data_source: MIDDLEWARE,
+      notes: "Response from the auth service" }
+  - { name: "Forgot password link",             data_source: STATIC,
+      notes: "Navigation" }
+
+scenarios:
+  - id: credentials-accepted
+    given: a registered buyer with a usable password
+    when: the correct credentials are submitted
+    then: a session scoped to that buyer is issued and their most recently modified active cart comes back with it
+  - id: unknown-and-wrong-are-indistinguishable
+    given: one unregistered email address and one registered address with the wrong password
+    when: either is submitted
+    then: both produce the same refusal text, and nothing in the response indicates which address exists
+  - id: buyer-bound-to-another-entry-point
+    given: a buyer whose account is bound to a single storefront or store
+    when: they submit correct credentials at a different entry point
+    then: the attempt is refused with the same generic text and the buyer is directed to the entry point that owns their account
+  - id: federated-buyer-has-no-local-password
+    given: a buyer whose organisation authenticates through its own identity provider
+    when: the provider returns a valid assertion for that buyer
+    then: the session is established against the linked buyer record without any password being submitted to the storefront
+
+success_criteria:
+  - { id: no-enumeration, metric: no sign-in failure response distinguishes an unknown identifier from a wrong password }
+  - { id: no-token-in-browser, metric: the customer access token is never exposed to client-side code }
+
+commercetools:
+  entities: [Customer, CustomerToken, Cart, Store, BusinessUnit]
+  api_surface:
+    - kind: rest
+      ref: "POST /{projectKey}/login returns a CustomerSignInResult with the Customer and, where one exists, the active Cart; passing anonymousCart assigns one guest cart and anonymousId assigns all Carts, Orders, ShoppingLists and Payments held under that id"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/customers-overview
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "The InvalidCredentials error is deliberately ambiguous - it never says whether the email, the password or the Store association was wrong - so the storefront cannot render a specific reason and must not try to derive one by probing"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-implement-carts-and-shopping-lists/manage-signups-and-signins/customer-signin
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "A Store-specific Customer cannot authenticate through the global /login endpoint at all; it must use /in-store/key={storeKey}/login, and a password-flow token requested in-store is valid only for that Store"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/customers-overview
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Automatic cart merge on sign-in applies only to Customers authenticated through the internal OAuth service; an externally authenticated buyer needs the explicit Merge Cart endpoint instead"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/customers-overview
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "commercetools does not introspect a third-party identity provider's token; the storefront's server tier validates the assertion, resolves the Customer by externalId (creating it on first sign-in) and then calls the API with its own client credentials"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-implement-carts-and-shopping-lists/manage-signups-and-signins/third-party-identity-providers
+      verified_at: 2026-08-21
+    - kind: rest
+      ref: "The password flow POST /oauth/{projectKey}/customers/token issues a customer access token (48 hours by default) with a refresh token; refreshing yields a fresh access token but does not extend the refresh token's own validity"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/authorization
+      verified_at: 2026-08-21
+  modeling_notes: >
+    Decide where identity lives before building the page: commercetools-native passwords and an
+    external identity provider diverge on cart merge, on email verification and on where lockout and
+    multi-factor policy are enforced. Either way the customer token belongs in the server tier and
+    the browser holds only an opaque session cookie, because the token carries the buyer's scopes.
+
+tasks_hint:
+  - "Implement password sign-in with anonymous cart assignment and a generic failure path"
+  - "Implement federated sign-in that links the provider identity to a buyer record server-side"
+
+open_questions:
+  - "Which identity provider owns enterprise buyers, and does it also own multi-factor and lockout policy, or must the storefront tier rate-limit sign-in itself?"
+  - "Are buyer accounts store-scoped? If so the sign-in surface has to know the store before it can authenticate anyone."
+
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "2. Account & Self-Service Pages › Login / Sign In Page"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

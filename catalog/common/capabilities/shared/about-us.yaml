@@ -1,0 +1,59 @@
+schema_version: 1
+id: base.about-us
+version: 1.0.0
+title: About page assembled entirely from published CMS content
+status: published
+visibility: public
+kind: page
+industry: ["*"]
+business_models: ["*"]
+priority: P2
+epic: content-support
+page_group: "4. Content & Support Pages"
+journeys: [B2C-1]
+
+requirement: >
+  The system SHALL present the seller's company story, credentials and route to sales on a single
+  page assembled entirely from published content, so the page can be served without any call to a
+  commerce API.
+
+rationale: >
+  This is the page a prospect lands on from a campaign or a supplier vetting exercise, and its
+  content changes on a marketing and legal cadence rather than a release cadence. Binding it to
+  nothing but the content system keeps two properties that the transactional pages cannot have: an
+  editor can correct a credential the same day, and the page still answers when the catalog,
+  pricing or session tier is degraded.
+
+components:
+  - { name: "All content (hero, story, team, CTAs)", data_source: STATIC, notes: Fully CMS-managed }
+
+scenarios:
+  - id: editor-publishes-a-correction
+    given: an editor revises the company story and a certification claim in the content system
+    when: the page is next requested
+    then: the revised text is served without a storefront deployment, and the previous version is no longer reachable at the same address
+  - id: commerce-tier-degraded
+    given: the commerce API is unreachable
+    when: a visitor opens the page
+    then: the page's own content is served in full, and the shared shell's session-dependent elements fall back to their signed-out state instead of blocking the render
+  - id: locale-without-translation
+    given: a visitor whose locale has no translated version of the content
+    when: they open the page
+    then: the storefront's fallback language is served and identified as such, rather than an empty page or an error
+
+success_criteria:
+  - { id: editorial-independence, metric: a content change to this page reaches production with no storefront release }
+  - { id: survives-commerce-outage, metric: the page returns its full content while the commerce API is unavailable }
+
+open_questions:
+  - "Which certification and compliance claims on this page are legally controlled, and who signs off before an editor publishes a change to them?"
+  - "Should the sales call-to-action carry the referring page into the enquiry for attribution, and is that permitted under the storefront's consent policy?"
+
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "4. Content & Support Pages › About Us"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

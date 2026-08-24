@@ -1,0 +1,85 @@
+schema_version: 1
+id: base.journey-b2b-1-company-account-setup
+version: 1.0.0
+title: B2B-1 — Company account setup
+kind: journey
+status: published
+visibility: public
+industry: ["*"]
+business_models: [B2B, B2B2B]
+priority: P1
+epic: journeys
+domains: [customers]
+journeys: [B2B-1]
+skill: commercetools-platform
+supporting_skills: [commercetools-storefront]
+requirement: >
+  The storefront SHALL let a company register, be activated by the seller, and have its first
+  administrator configure the addresses and payment methods the company will buy against.
+rationale: >
+  A B2B account is a company, not a person, and it cannot transact until the seller has accepted it
+  and someone inside it has authority to configure it. Treating registration as instant self-service
+  sign-up produces accounts with no credit terms, no delivery locations and nobody entitled to fix
+  either.
+scenarios:
+  - id: registration-pending-activation
+    given: a company submitting its business details
+    when: the registration is submitted
+    then: a pending company record exists, the submitter is told activation is required, and no ordering is possible yet
+  - id: activated-with-an-administrator
+    given: a pending company the seller has accepted
+    when: activation completes
+    then: the company can transact and at least one associate holds the permissions needed to configure it
+  - id: sub-company-under-a-parent
+    given: an activated company with divisions that buy separately
+    when: a division is added
+    then: the division is modelled beneath the parent and inherits what the parent grants it
+  - id: activation-declined
+    given: a pending company the seller will not accept
+    when: the decision is recorded
+    then: the submitter is told, and no partially usable account is left behind
+success_criteria:
+  - { id: no-orphan-accounts, metric: no activated company exists without at least one associate able to administer it }
+commercetools:
+  entities: [BusinessUnit, Company, Division, Customer, Associate, AssociateRole, Store, Channel]
+  api_surface:
+    - kind: concept
+      ref: "A company is a BusinessUnit; Business Units model companies in hierarchical structures and define which Associates may represent them"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/associates-overview
+      verified_at: 2026-08-21
+    - kind: concept
+      ref: "An Associate is a Customer acting on behalf of a company; the person and the company are separate resources joined by an AssociateRoleAssignment on the Business Unit"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/associates-overview
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Associates and their roles are inherited within the Business Unit hierarchy, so a division's access is a function of the parent's grants and not only its own"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/associates-overview
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "B2B resources — Carts, Orders, Recurring Orders, Quotes, Quote Requests and Shopping Lists — are the ones whose businessUnit field is set; a resource created outside that context is not company-scoped and will not appear in company views"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/associates-overview
+      verified_at: 2026-08-21
+  modeling_notes: >
+    Decide the Business Unit shape (single company, or company with divisions) before the first
+    account is created — restructuring a hierarchy after orders exist is painful because inheritance
+    changes who can see what. The seller-side activation step is a workflow the storefront reflects,
+    not one it owns; model where that decision is actually made.
+tasks_hint:
+  - "Model the company as a BusinessUnit, with divisions where buying is decentralised"
+  - "Implement the registration-to-activation handoff, including the declined outcome"
+  - "Ensure every activated company has at least one administering associate"
+open_questions:
+  - "Where does seller-side activation happen — Merchant Center, a CRM, or a custom back office?"
+  - "Do divisions buy independently, and if so do they inherit the parent's pricing and entitlements?"
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "User Journey Reference › B2B Journeys › B2B-1"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

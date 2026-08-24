@@ -1,0 +1,10 @@
+schema_version: 1
+domains:
+  catalog:          { label: Catalog & product data }
+  search:           { label: Search & discovery }
+  cart:             { label: Cart & basket }
+  pricing:          { label: Pricing & promotions }
+  checkout:         { label: Checkout & payment }
+  fulfillment:      { label: Shipping & fulfillment }
+  order-management: { label: Order management }
+  customers:        { label: Customers & accounts }

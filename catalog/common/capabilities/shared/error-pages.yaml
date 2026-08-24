@@ -1,0 +1,106 @@
+schema_version: 1
+id: base.error-pages
+version: 1.0.0
+title: Error pages that name the failure and route the buyer back
+status: published
+visibility: public
+kind: page
+industry: ["*"]
+business_models: ["*"]
+priority: P1
+epic: utility-system
+page_group: "5. Utility & System Pages"
+journeys: [B2C-1, B2C-3, B2C-6, B2B-2]
+domains: [customers, search]
+skill: commercetools-storefront
+supporting_skills: [commercetools-platform]
+
+requirement: >
+  The system SHALL answer a request it cannot fulfil with a page that states which condition
+  occurred — an address that resolves to nothing, an action the buyer is not permitted to take, or a
+  fault on the seller's side — and that offers at least one route back into the storefront.
+
+rationale: >
+  The three failures share a shell but not a recovery: a dead URL is recovered by searching, a
+  refused action is recovered by asking whoever administers the buyer's permissions, and a server
+  fault is recovered by retrying. Collapsing them into one generic apology converts a permission
+  problem into a support ticket, because the buyer cannot tell that the storefront worked correctly
+  and their access did not.
+
+components:
+  - { name: Error message and copy,   data_source: STATIC, notes: CMS-managed or hardcoded }
+  - { name: Search bar (404),         data_source: STATIC, notes: UI shell; the query itself is MIDDLEWARE }
+  - { name: Navigation links,         data_source: STATIC, notes: Config-driven }
+
+scenarios:
+  - id: address-resolves-to-nothing
+    given: a URL that matches no page, category or product, including one whose product was unpublished
+    when: the storefront handles the request
+    then: a not-found response is returned carrying the search entry point and the top-level navigation, and no partially rendered page shell is served
+  - id: action-outside-permissions
+    given: a buyer whose roles in their company do not carry the permission the attempted action requires
+    when: the middleware calls the platform on their behalf and the call is refused
+    then: the unauthorized page states that the action was refused for their account rather than that it failed, and none of the requested resource's data is rendered
+    business_models: [B2B]
+  - id: upstream-fault
+    given: an upstream call fails or exceeds its timeout while assembling a page
+    when: the page cannot be completed
+    then: a server-error page is returned with a retry route, and the buyer's session and cart are left intact
+  - id: expired-session-is-not-a-refusal
+    given: a visitor whose session has expired
+    when: they open a URL that requires authentication
+    then: they are routed to sign-in with the original destination preserved, not to the unauthorized page
+
+success_criteria:
+  - { id: no-generic-catch-all, metric: every error response resolves to one of the three named conditions, with none falling through to an unclassified page }
+  - { id: refusal-is-actionable, metric: a refused action tells the buyer who can grant the missing access }
+
+commercetools:
+  entities: [Customer, BusinessUnit, AssociateRole]
+  api_surface:
+    - kind: constraint
+      ref: "A failed permission check on an as-associate endpoint returns 403 with an AssociateMissingPermission error naming the associate, the business unit and the permission(s) required - the unauthorized page can therefore state what was missing instead of a bare denial"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/configure-associate-access/api-endpoint-patterns-for-b2b
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "as-associate endpoints check permissions against the URL parameters but do not validate those parameters against the token's scopes, so they may only be called from trusted middleware - authorization refusals therefore surface in the middleware tier, which is what renders the unauthorized page"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/configure-associate-access/api-endpoint-patterns-for-b2b
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "The me endpoints do not evaluate View permissions: an associate can read every resource reachable there regardless of their roles. A storefront that relies on a platform refusal to hide another buyer's data must read through the as-associate endpoints instead"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/associates-overview
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Removing an associate from a Business Unit does not revoke their access to the Carts, Orders, Quotes and Quote Requests already associated with it - they must also be removed from each entity, so revocation alone will not produce a refusal"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/associates-overview
+      verified_at: 2026-08-21
+  modeling_notes: >
+    Treat the three pages as one component with a discriminator, not three templates. The
+    discriminator is set in the middleware tier, because that is where a platform refusal is
+    observed; the page itself stays STATIC and must render with no session and no catalog call, so
+    it survives the outage that produced it. Keep the platform's error message out of the buyer-
+    facing copy - it carries associate and business unit identifiers - and map the permission names
+    it returns onto the storefront's own vocabulary.
+
+tasks_hint:
+  - "Map platform error responses onto the three error conditions in the middleware tier"
+  - "Render the error shell without a session, catalog or pricing call so it survives an upstream outage"
+  - "Distinguish an expired session from a refused action so the buyer is routed to sign-in rather than a dead end"
+
+open_questions:
+  - "Does the unauthorized page show the buyer the name of the missing permission, or only a reference their company administrator can quote to support?"
+  - "Is the server-error page allowed to be served from the CDN when the middleware tier is itself the component that failed?"
+  - "Which conditions must be a soft 404 with recovery content versus a hard redirect - for example a product retired from the assortment but still linked from an email campaign?"
+
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "5. Utility & System Pages › 404, 403, 500 Error Pages"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

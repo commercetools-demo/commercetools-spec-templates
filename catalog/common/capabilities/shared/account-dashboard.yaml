@@ -1,0 +1,115 @@
+schema_version: 1
+id: base.account-dashboard
+version: 1.0.0
+title: Session-scoped account dashboard with explicit empty states
+status: published
+visibility: public
+kind: page
+industry: ["*"]
+business_models: ["*"]
+priority: P2
+epic: account-self-service
+page_group: "2. Account & Self-Service Pages"
+journeys: [B2C-6, B2B-6, B2B-9]
+domains: [customers, order-management]
+skill: commercetools-storefront
+supporting_skills: [commercetools-commerce-patterns, commercetools-connect]
+
+requirement: >
+  The system SHALL resolve every dashboard summary from the signed-in buyer's own identity and
+  organisation scope at request time, and state when a summary is empty rather than omitting it.
+
+rationale: >
+  The dashboard owns no data of its own: it is a fan-out over order, approval, list and finance
+  queries that are all session-specific, so a cached or wrongly scoped panel shows one buyer another
+  buyer's business. An omitted panel is equally damaging in the other direction, because a buyer
+  cannot tell "nothing is waiting for you" from "this failed to load" and stops trusting the page.
+
+components:
+  - { name: "Welcome message with user or company name", data_source: MIDDLEWARE,
+      notes: "Session identity" }
+  - { name: "Open orders count",                data_source: MIDDLEWARE,
+      notes: "Real-time order query" }
+  - { name: "Pending approvals count",          data_source: MIDDLEWARE, business_models: [B2B],
+      notes: "Approval queue query" }
+  - { name: "Outstanding invoices summary",     data_source: MIDDLEWARE, business_models: [B2B],
+      notes: "Finance or ERP integration" }
+  - { name: "Recent orders widget",             data_source: MIDDLEWARE,
+      notes: "Last N orders from the account" }
+  - { name: "Pending approvals widget",         data_source: MIDDLEWARE, business_models: [B2B],
+      notes: "Approval queue items" }
+  - { name: "Quick order shortcut",             data_source: STATIC, business_models: [B2B],
+      notes: "Navigation link" }
+  - { name: "Saved lists preview",              data_source: MIDDLEWARE,
+      notes: "The account's requisition lists" }
+  - { name: "Notifications and alerts banner",  data_source: MIDDLEWARE,
+      notes: "Account-specific alerts" }
+
+scenarios:
+  - id: nothing-yet-on-the-account
+    given: a newly activated buyer with no orders, lists or approvals
+    when: the dashboard loads
+    then: every summary renders with an explicit nothing-here state and none is hidden
+  - id: approvals-waiting-on-this-buyer
+    given: orders awaiting approval in the buyer's organisation and a buyer holding an approver role
+    when: the dashboard loads
+    business_models: [B2B]
+    then: only the approvals whose currently open tier includes one of that buyer's roles are counted as waiting on them
+  - id: one-backing-service-down
+    given: one of the systems behind a panel is unreachable
+    when: the dashboard loads
+    then: that panel reports itself unavailable and every other panel still renders its own data
+  - id: session-no-longer-valid
+    given: a buyer whose session has expired
+    when: the dashboard is requested
+    then: no account data is rendered and the buyer is sent to sign-in with the dashboard preserved as the destination
+
+success_criteria:
+  - { id: no-cross-account-leak, metric: no summary is ever rendered from another buyer's or another organisation's data }
+  - { id: zero-is-not-failure, metric: an empty summary is always visually distinguishable from a failed one }
+
+commercetools:
+  entities: [Customer, Order, ApprovalFlow, ShoppingList, BusinessUnit, AssociateRole]
+  api_surface:
+    - kind: constraint
+      ref: "The me endpoints resolve everything from the token's customer and do not evaluate View Permissions at all, so a buyer sees their own carts, orders and lists regardless of role; any company-wide figure has to come from the as-associate endpoints instead"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/associates-overview
+      verified_at: 2026-08-21
+    - kind: rest
+      ref: "GET /{projectKey}/as-associate/{associateId}/in-business-unit/key={businessUnitKey}/approval-flows returns the unit's Approval Flows; gate an awaiting-me count on currentTierPendingApprovers (roles needed in the open tier) and action eligibility on eligibleApprovers"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/approval-flows
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "The platform sends no approval notifications of any kind, so an alerts banner has to be driven from Approval Flow Messages through a Subscription rather than expected from the API"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/configure-approval-workflows/approval-flows-in-action
+      verified_at: 2026-08-21
+    - kind: rest
+      ref: "GET /{projectKey}/me/shopping-lists is scoped to the authenticated Customer and exposes only a subset of ShoppingList fields, so a preview widget can read it directly while curation of shared lists cannot"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/me-shoppingLists
+      verified_at: 2026-08-21
+  modeling_notes: >
+    Treat each panel as an independent query with its own timeout and its own failure state, because
+    the slowest integration otherwise sets the page's latency. commercetools carries an Order's
+    paymentState, but the invoice document and the outstanding balance come from the finance system,
+    so that panel is on a different reliability budget from the rest of the page.
+
+tasks_hint:
+  - "Implement the dashboard as independent per-panel queries with per-panel empty and error states"
+  - "Implement the awaiting-approval count from the buyer's roles against the flows' current tier"
+
+open_questions:
+  - "Who owns the outstanding balance figure, and can it be read inside the dashboard's latency budget or must it be cached with a staleness marker?"
+  - "Is the approvals count scoped to the buyer's own organisation only, or to every organisation they are a member of?"
+
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "2. Account & Self-Service Pages › Account Dashboard"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

@@ -1,0 +1,68 @@
+schema_version: 1
+id: base.journey-b2c-6-account-self-service
+version: 1.0.0
+title: B2C-6 — Account & self-service
+kind: journey
+status: published
+visibility: public
+industry: ["*"]
+business_models: ["*"]
+priority: P2
+epic: journeys
+domains: [customers]
+journeys: [B2C-6]
+skill: commercetools-storefront
+requirement: >
+  The storefront SHALL let a buyer change their own stored addresses, payment methods and preferences
+  without involving the seller's support team.
+rationale: >
+  Every stored detail a buyer cannot change themselves becomes a support ticket, and a stale default
+  address becomes a misdelivered order. In B2B the same surface additionally decides who inside a
+  company may change shared account data, so self-service and permission are the same problem.
+scenarios:
+  - id: address-added-and-defaulted
+    given: an authenticated buyer
+    when: the buyer adds an address and marks it default
+    then: the address is stored on the account and the default is used to preselect delivery on the next order
+  - id: last-address-removed
+    given: an account with exactly one stored address
+    when: the buyer removes it
+    then: the removal is handled explicitly rather than leaving a checkout that cannot preselect an address
+  - id: change-scoped-to-permission
+    business_models: [B2B, B2B2B]
+    given: a buyer who is not an administrator of their company
+    when: the buyer attempts to change shared company data such as the billing address
+    then: the attempt is refused and the buyer is told who can make that change
+success_criteria:
+  - { id: no-ticket-for-self-service, metric: no buyer needs support to change an address, payment method or preference they own }
+commercetools:
+  entities: [Customer, Address, Payment, BusinessUnit, AssociateRole]
+  api_surface:
+    - kind: concept
+      ref: "Addresses live on the Customer with addAddress / changeAddress / removeAddress and separate default shipping and default billing pointers, so 'stored' and 'default' are distinct decisions"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/customers
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "In B2B the equivalent surface is scoped by Associate Permissions on a Business Unit, and permissions come in My and Others pairs — Others never implies My, so a role needs both halves deliberately"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/associate-roles
+      verified_at: 2026-08-21
+  modeling_notes: >
+    Card details are never stored in commercetools; the Payment resource records the settlement and
+    the PSP holds the instrument. In B2B, do not build a second permission model in the storefront —
+    read the Associate's permissions and let the platform refuse what it should refuse.
+tasks_hint:
+  - "Implement address add / edit / remove with explicit default handling"
+  - "Render payment instruments from the PSP vault, never from commercetools"
+  - "Gate shared company data edits on the associate's permissions"
+open_questions:
+  - "Which account data is personal to a buyer and which is shared company data that only an admin may change?"
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "User Journey Reference › B2C Journeys › B2C-6"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

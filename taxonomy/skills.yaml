@@ -1,0 +1,15 @@
+# The only legal values for a capability's `skill:` / `supporting_skills:`. Kept in step with
+# the commercetools plugin's shipped skills; `ctsx lint` fails if this list and the installed
+# plugin disagree.
+schema_version: 1
+skills:
+  commercetools-platform:
+    covers: SDK & auth, project data model, GraphQL vs REST, search, platform limits
+  commercetools-storefront:
+    covers: Shopper- or buyer-facing surfaces (PDP, PLP, cart, account, B2B portal)
+  commercetools-commerce-patterns:
+    covers: Pricing, discounts, tax, shipping rules, catalog modeling, B2B order flows
+  commercetools-checkout:
+    covers: The Checkout product, payment sessions, PSP connectors
+  commercetools-connect:
+    covers: Connectors, subscriptions, jobs, API extensions, external-system sync

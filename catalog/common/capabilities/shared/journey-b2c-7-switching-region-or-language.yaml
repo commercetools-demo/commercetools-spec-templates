@@ -1,0 +1,72 @@
+schema_version: 1
+id: base.journey-b2c-7-switching-region-or-language
+version: 1.0.0
+title: B2C-7 — Switching region or language
+kind: journey
+status: published
+visibility: public
+industry: ["*"]
+business_models: ["*"]
+priority: P2
+epic: journeys
+domains: [catalog, pricing, cart]
+journeys: [B2C-7]
+skill: commercetools-commerce-patterns
+supporting_skills: [commercetools-storefront]
+requirement: >
+  The storefront SHALL keep language, currency, price and product availability consistent with the
+  buyer's selected region, so that no page mixes one region's prices with another's catalog.
+rationale: >
+  Locale is not a display setting. Currency and country are inputs to price selection and to which
+  products are sellable at all, so a half-applied region switch produces a cart priced in one
+  currency against a catalog from another — which fails at checkout, not at the switch.
+scenarios:
+  - id: region-switched-before-a-cart-exists
+    given: a buyer with no cart
+    when: the buyer changes region
+    then: language, currency, prices and the sellable catalog all reflect the new region
+  - id: region-switched-with-a-cart
+    given: a cart already priced in the previous region's currency
+    when: the buyer changes region
+    then: the currency mismatch is resolved explicitly rather than leaving a cart that cannot be checked out
+  - id: product-not-sellable-in-the-new-region
+    given: a cart line whose product has no price in the new region
+    when: the region changes
+    then: the buyer is told which lines cannot be carried over, rather than seeing them silently vanish or block checkout
+success_criteria:
+  - { id: no-mixed-region-state, metric: no page or cart ever mixes prices from one region with a catalog from another }
+commercetools:
+  entities: [Cart, Price, StandalonePrice, Store, Channel, Product]
+  api_surface:
+    - kind: constraint
+      ref: "Price selection resolves on currency first, then validity dates, customer group, distribution channel and country, in that precedence order — so currency and country are selection inputs, not presentation"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-price-and-discount-your-products/price-calculation/price-selection
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "A Cart's currency is fixed at creation. Changing region therefore means creating a new cart, not re-pricing the existing one"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/carts
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Price selection can resolve to no price at all (the lowest branch of the cascade), which is how a product becomes unsellable in a region rather than merely unpriced"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/pricing-and-discounts-overview
+      verified_at: 2026-08-21
+  modeling_notes: >
+    Because a cart's currency is immutable, "switch region" is really "create a new cart and decide
+    what carries over". Decide that policy explicitly: silently dropping lines is the behaviour
+    buyers complain about, and blocking the switch is the behaviour they abandon over.
+tasks_hint:
+  - "Resolve country and currency once per request and pass them into every price-bearing call"
+  - "Implement the region-switch cart policy explicitly, reporting lines that cannot carry over"
+open_questions:
+  - "On a region switch with a populated cart: carry lines over where a price exists, or start empty?"
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "User Journey Reference › B2C Journeys › B2C-7"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

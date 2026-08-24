@@ -1,0 +1,142 @@
+schema_version: 1
+id: base.cost-center-management
+version: 1.0.0
+title: Cost center codes assignable to a purchase
+status: published
+visibility: public
+kind: page
+industry: ["*"]
+business_models: [B2B, B2B2B]
+priority: P3
+epic: b2b-specific
+page_group: "3. B2B-Specific Pages"
+journeys: [B2B-2, B2B-7]
+domains: [customers, order-management]
+skill: commercetools-platform
+supporting_skills: [commercetools-storefront, commercetools-commerce-patterns]
+
+requirement: >
+  The system SHALL limit the cost centers a buyer can charge a purchase to those their company has
+  defined and assigned to that buyer, so an order never carries an internal billing code the company
+  does not recognise.
+
+rationale: >
+  A cost center exists so the buyer's finance team can attribute spend without re-keying it, which
+  only works if every code on an order is a code that still exists in their chart of accounts. Free
+  text or a global code list produces orders that reconcile against nothing, and the platform has no
+  cost-center resource of its own to constrain the value for you.
+
+components:
+  - name: Cost center list
+    data_source: MIDDLEWARE
+    notes: Account configuration
+  - name: "Create / edit cost center form"
+    data_source: MIDDLEWARE
+    notes: Write to account service
+  - name: Assign users to cost center
+    data_source: MIDDLEWARE
+    notes: Cross-reference with identity service
+  - name: "Usage / order history per cost center"
+    data_source: MIDDLEWARE
+    notes: Order aggregation query
+
+scenarios:
+  - id: only-assigned-codes-offered
+    given: a buyer assigned to two of their company's cost centers
+    when: they choose a cost center for a purchase
+    then: only those two codes are offered, each shown with the label the company gave it
+  - id: unassigned-code-refused
+    given: a code that exists for the company but is not assigned to this buyer
+    when: that code is submitted for their purchase
+    then: the purchase is refused with the reason, and no order is created carrying the code
+  - id: withdrawn-code-keeps-its-history
+    given: a cost center withdrawn from the list after orders were placed against it
+    when: an administrator opens that cost center's usage history
+    then: the earlier orders are still attributed to it, while the code is no longer offered for new purchases
+  - id: company-uses-no-cost-centers
+    given: a company that has defined no cost centers
+    when: a buyer completes a purchase
+    then: no cost-center selection is required and the order is placed without one
+
+success_criteria:
+  - id: attribution
+    metric: every order carrying a cost center resolves to a code defined by that order's company
+  - id: history-stability
+    metric: withdrawing a code changes no attribution on orders already placed
+
+commercetools:
+  entities: [CustomObject, Type, Cart, Order, LineItem, BusinessUnit, Customer]
+  api_surface:
+    - kind: constraint
+      ref: >
+        commercetools has no cost-center resource. Model the code list as Custom Objects in a
+        namespaced container - containers behave as namespaces and can be queried as a set - and the
+        selected code as a Custom Field on the cart, order or line item
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/custom-objects
+      verified_at: 2026-08-21
+    - kind: concept
+      ref: >
+        The extensibility rule for B2B context: data that describes this cart, order or line item is
+        a Custom Field, and a standalone record referenced from elsewhere - a code list, a credit
+        limit, organisation-wide configuration - is a Custom Object
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/implement-b2b-purchase-flows/the-b2b-cart
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: >
+        A customizable resource can carry only one Type at a time, so the cost-center field has to be
+        added to the Type already assigned to that resource rather than defined in a Type of its own
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/api-extensibility-overview
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: >
+        Custom Fields are queryable and sortable, so per-cost-center order history is an Order query
+        predicate on custom.<fieldName> rather than a client-side filter over fetched orders
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/custom-fields
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: >
+        A ReferenceType Custom Field is identified by id only and does not support a KeyReference, so
+        storing the code as a reference to its Custom Object means resolving that id at write time -
+        a string or enum field avoids the extra lookup
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/custom-fields
+      verified_at: 2026-08-21
+    - kind: concept
+      ref: >
+        An Approval Rule can gate on the cost center by predicating on custom.<fieldName> of the
+        Order, which is the mechanism for departmental sign-off rules; a predicate referencing a
+        field the order does not carry never matches
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/configure-approval-workflows/approval-rules-predicates-and-requesters
+      verified_at: 2026-08-21
+  modeling_notes: >
+    Decide up front whether a cost center applies to the whole order or per line, because the two
+    choices land on different resources and only the per-line choice supports a requisition split
+    across departments. Model the code as an enum or string Custom Field validated by the middleware
+    against the Custom Object list, not as a reference, so a withdrawn code stays legible on old
+    orders. Keep the code list per top-level company; a project-wide container makes one buyer's
+    chart of accounts visible to another.
+
+tasks_hint:
+  - "Define the cost-center Custom Object container and the code and assignment records it holds"
+  - "Add the cost-center field to the Type on the cart, order or line item and validate submissions against the list"
+  - "Implement per-cost-center order history as an order query predicate on the custom field"
+  - "Implement assignment of associates to cost centers and enforce it at purchase time"
+
+open_questions:
+  - "Does a cost center apply to the whole order or per line item, and does a single requisition need to split across several?"
+  - "Is the code list mastered in the buyer's ERP and synchronised in, or maintained by the buyer's administrator in the storefront?"
+  - "What happens to a buyer's in-flight cart when their cost-center assignment is revoked?"
+
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "3. B2B-Specific Pages › Cost Center Management"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

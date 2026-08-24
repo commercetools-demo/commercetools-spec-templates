@@ -1,0 +1,68 @@
+schema_version: 1
+id: base.journey-b2c-1-discovery-browse
+version: 1.0.0
+title: B2C-1 — Discovery & browse
+kind: journey
+status: published
+visibility: public
+industry: ["*"]
+business_models: ["*"]
+priority: P1
+epic: journeys
+domains: [catalog, search]
+journeys: [B2C-1]
+skill: commercetools-storefront
+requirement: >
+  The storefront SHALL let a buyer reach a relevant product from the homepage, a category or search
+  without knowing a product identifier in advance.
+rationale: >
+  A buyer who arrives without a specific product in mind is the largest share of storefront traffic.
+  If the only path to a product is knowing its SKU, every discovery-led visit is lost, and in B2B the
+  catalog a buyer may see is narrower than the full catalog, so discovery has to be scoped as well
+  as fast.
+scenarios:
+  - id: browse-a-category
+    given: a buyer on the homepage with no product in mind
+    when: the buyer follows a featured category
+    then: a paginated, filterable list of products in that category is shown with prices resolved for that buyer
+  - id: scoped-to-what-the-buyer-may-buy
+    business_models: [B2B, B2B2B]
+    given: a buyer whose company is entitled to a subset of the catalog
+    when: the buyer browses or searches
+    then: only products within that entitlement appear, at that company's negotiated prices
+  - id: nothing-matches
+    given: a search or filter combination with no matching products
+    when: the results render
+    then: the empty state is explicit and offers a way back into the catalog rather than a blank list
+success_criteria:
+  - { id: no-dead-ends, metric: no discovery path ever renders a blank page with no way forward }
+commercetools:
+  entities: [Product, ProductSelection, Store, Channel, Category]
+  api_surface:
+    - kind: concept
+      ref: "Product Search (the GraphQL productsSearch query) is the discovery surface; it can scope results to a buyer's commercial context, which is what makes an entitlement-narrowed catalog possible"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/discover-and-order-products-in-b2b/product-search-for-b2b-catalogs
+      verified_at: 2026-08-21
+    - kind: concept
+      ref: "A Store plus Product Selection defines which products a given buyer may see; price scope is resolved separately through the distribution Channel"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/design-b2b-catalogs/overview
+      verified_at: 2026-08-21
+  modeling_notes: >
+    Catalog data is shareable and cacheable; the price and availability overlay is not. Design the
+    discovery surfaces so the cacheable half renders first and the per-buyer half arrives as an
+    overlay, or every listing page becomes a per-request middleware call.
+tasks_hint:
+  - "Implement category and search listing against Product Search with the buyer's store scope"
+  - "Overlay per-buyer price and availability onto cached catalog results"
+open_questions:
+  - "Is the catalog identical for every buyer, or entitlement-scoped per company?"
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "User Journey Reference › B2C Journeys › B2C-1"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

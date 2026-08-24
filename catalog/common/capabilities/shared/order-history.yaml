@@ -1,0 +1,117 @@
+schema_version: 1
+id: base.order-history
+version: 1.0.0
+title: Order history scoped to what the buyer may see
+status: published
+visibility: public
+kind: page
+industry: ["*"]
+business_models: ["*"]
+priority: P1
+epic: account-self-service
+page_group: "2. Account & Self-Service Pages"
+journeys: [B2C-5, B2C-6, B2B-8, B2B-9]
+domains: [order-management, customers, cart]
+skill: commercetools-storefront
+supporting_skills: [commercetools-commerce-patterns, commercetools-connect]
+
+requirement: >
+  The system SHALL list only the orders the signed-in buyer is entitled to see: their own orders
+  always, and other members' orders of the same organisation only where their assigned role grants
+  that visibility.
+
+rationale: >
+  Order history is the highest-risk read in the account area, because the difference between "my
+  orders" and "my company's orders" is an authorization decision and not a filter on a list. A buyer
+  scoped to their own identity can never be shown a colleague's purchase, while an administrator who
+  cannot see the team's orders has no way to reconcile spend, so both scopes have to be explicit.
+
+components:
+  - { name: "Order list with filters",          data_source: MIDDLEWARE,
+      notes: "Paginated query against order history" }
+  - { name: "Order summary rows",               data_source: MIDDLEWARE,
+      notes: "Order metadata" }
+  - { name: "Order detail line items",          data_source: MIDDLEWARE,
+      notes: "Full order document" }
+  - { name: "Shipment tracking links",          data_source: MIDDLEWARE,
+      notes: "Fulfillment service integration" }
+  - { name: "Invoice download",                 data_source: MIDDLEWARE,
+      notes: "Finance or document service" }
+  - { name: "Reorder call to action",           data_source: MIDDLEWARE,
+      notes: "Adds past items to the current cart" }
+  - { name: "Returns or RMA initiation",        data_source: MIDDLEWARE,
+      notes: "Write to the returns service" }
+
+scenarios:
+  - id: own-orders-only
+    given: a buyer whose role grants visibility of their own orders only
+    when: they open order history
+    then: only the orders they placed are listed, filterable and paginated across the whole history rather than a fixed recent window
+  - id: company-wide-with-permission
+    given: an administrator whose role grants visibility of other members' orders
+    when: they filter the list by another member or by cost centre
+    business_models: [B2B]
+    then: that member's orders are listed with the same detail as their own
+  - id: detail-of-an-order-not-theirs
+    given: a buyer following a link to an order they are not entitled to see
+    when: the detail page is requested
+    then: no order data is returned and the refusal is stated, rather than an empty order rendering
+  - id: reorder-with-an-unavailable-item
+    given: a past order containing an item that can no longer be purchased
+    when: the buyer reorders it
+    then: a new cart is created from that order and the unavailable item is reported to the buyer instead of being dropped silently
+
+success_criteria:
+  - { id: no-unentitled-order, metric: no order is ever listed or detailed to a buyer whose role does not grant visibility of it }
+  - { id: reorder-is-honest, metric: every difference between the past order and the reordered cart is stated before checkout }
+
+commercetools:
+  entities: [Order, Cart, Customer, BusinessUnit, AssociateRole, Store]
+  api_surface:
+    - kind: rest
+      ref: "GET /{projectKey}/me/orders returns only the authenticated Customer's Orders; company-level history uses GET /{projectKey}/as-associate/{associateId}/in-business-unit/key={businessUnitKey}/orders, which requires the ViewMyOrders or ViewOthersOrders Permission and answers 403 AssociateMissingPermission without it"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/associate-orders
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "The as-associate endpoints check membership and permission but do not validate the associateId and business unit in the URL against the token's scopes, so anyone who can call them can name any associate - they must only be reachable from trusted middleware that established the buyer's identity itself"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/configure-associate-access/api-endpoint-patterns-for-b2b
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "The My Orders API has no write access at all and an Order cannot be changed through it once created, so a return raised from the storefront has to be written by a trusted service using the Order's Add ReturnInfo action"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/me-orders
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Return state is a fixed machine the storefront reflects rather than invents: ReturnShipmentState starts Advised or Returned and moves to BackInStock or Unusable, and ReturnPaymentState starts NonRefundable or Initial and moves to Refunded or NotRefunded"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/orders
+      verified_at: 2026-08-21
+    - kind: rest
+      ref: "Reorder is cart replication, not a dedicated action: replicating an existing Cart or Order produces a fresh active Cart the buyer then adjusts before checkout"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/implement-b2b-purchase-flows/the-b2b-cart
+      verified_at: 2026-08-21
+  modeling_notes: >
+    Settle the entitlement model before the UI: own-orders reads go through the me endpoints, company
+    scope goes through as-associate with the role permission as the switch, and the page must not
+    hold both behind one shared query. Cost centre has no native field on an Order, so carry it as a
+    custom field set at order creation and filter on it with a query predicate.
+
+tasks_hint:
+  - "Implement own-orders and company-wide order queries behind one entitlement decision in the server tier"
+  - "Implement reorder as a cart replication that reports items it could not carry over"
+
+open_questions:
+  - "Where do invoice documents live, and is the download proxied by the storefront tier or served as a signed link from the document service?"
+  - "Is cost centre modelled as a division of the buyer organisation or as an order custom field? The filter and the permission story differ between the two."
+
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "2. Account & Self-Service Pages › Order History & Order Detail Page"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

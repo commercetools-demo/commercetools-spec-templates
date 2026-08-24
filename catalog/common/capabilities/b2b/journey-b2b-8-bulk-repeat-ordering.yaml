@@ -1,0 +1,90 @@
+schema_version: 1
+id: base.journey-b2b-8-bulk-repeat-ordering
+version: 1.0.0
+title: B2B-8 — Bulk & repeat ordering
+kind: journey
+status: published
+visibility: public
+industry: ["*"]
+business_models: [B2B, B2B2B]
+priority: P1
+epic: journeys
+domains: [cart, catalog, order-management]
+journeys: [B2B-8]
+skill: commercetools-commerce-patterns
+supporting_skills: [commercetools-storefront]
+requirement: >
+  The storefront SHALL let an experienced buyer assemble a large or repeat order from part numbers or
+  a past order, without navigating the catalog product by product.
+rationale: >
+  A procurement buyer who already knows what they need experiences catalog browsing as an obstacle.
+  These buyers place the largest orders, and a hundred-line requisition entered one product page at a
+  time is the reason they stay on the phone or in a punch-out system instead.
+scenarios:
+  - id: part-numbers-entered-directly
+    given: a buyer with a list of part numbers
+    when: the buyer enters or uploads them
+    then: each is resolved to a product at the company's price, and the whole set is added in one operation
+  - id: unresolvable-lines-reported
+    given: an upload containing unknown part numbers and out-of-stock items
+    when: validation runs
+    then: each problem line is named with its reason, and the valid lines are still addable
+  - id: past-order-repeated
+    given: a previously placed order
+    when: the buyer chooses to reorder it
+    then: a new basket is created from it at today's entitlements and prices, and any line that can no longer be bought is reported
+  - id: basket-frozen-for-review
+    given: a large basket awaiting internal sign-off
+    when: the buyer freezes it
+    then: the agreed total cannot move under the reviewers while they consider it
+success_criteria:
+  - { id: bulk-in-one-step, metric: a hundred-line requisition can be entered without opening a product page }
+commercetools:
+  entities: [Cart, Order, ShoppingList, RecurringOrder, Product, InventoryEntry, Channel]
+  api_surface:
+    - kind: concept
+      ref: "Reorder a past purchase by replicating a Cart or an Order; use a Recurring Order instead only when the cadence is fixed and scheduled"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/implement-b2b-purchase-flows/the-b2b-cart
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Cart freeze has two strengths: SoftFreeze locks prices, HardFreeze also locks discounts and shipping. A freeze allows price-neutral edits while a lock blocks all edits — which is what makes buying-committee review possible without the total moving"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/implement-b2b-purchase-flows/the-b2b-cart
+      verified_at: 2026-08-21
+    - kind: update-action
+      ref: "Cart addShoppingList adds an entire saved list in one call, with distributionChannel to resolve negotiated prices — the bulk-entry path and the saved-list path converge here"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/discover-and-order-products-in-b2b/shopping-lists-for-b2b-purchasing
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "With shippingMode Multiple, quantities must be fully allocated across itemShippingAddresses; an unallocated quantity suppresses taxedPrice, so a multi-site bulk order with a partial allocation silently loses its tax total"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/implement-b2b-purchase-flows/the-b2b-cart
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Punch-out procurement is supported by combining Product Selections, as-associate carts and Approval Flows through middleware; there is no built-in punch-out connector"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/implement-b2b-purchase-flows/the-b2b-cart
+      verified_at: 2026-08-21
+  modeling_notes: >
+    Resolve part numbers server-side in batch rather than one lookup per line, and validate the whole
+    upload before mutating the cart — a half-added upload is worse than a rejected one. If the basket
+    ships to several sites, allocate every quantity or the tax total silently disappears. Reorder is
+    replication, not a recurring order; conflating them produces schedules nobody asked for.
+tasks_hint:
+  - "Implement batch SKU/part-number resolution with per-line validation feedback"
+  - "Implement CSV upload with column mapping, validating fully before touching the cart"
+  - "Implement reorder by replicating a past cart or order, reporting lines that lapsed"
+  - "Offer SoftFreeze or HardFreeze for baskets under internal review"
+open_questions:
+  - "Is punch-out from a customer procurement system in scope? It is middleware work, not configuration."
+  - "What is the largest realistic requisition size, and does it exceed the shopping-list line limits?"
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "User Journey Reference › B2B Journeys › B2B-8"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

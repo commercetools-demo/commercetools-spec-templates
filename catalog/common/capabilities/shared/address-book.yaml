@@ -1,0 +1,120 @@
+schema_version: 1
+id: base.address-book
+version: 1.0.0
+title: Address book with a default delivery location
+status: published
+visibility: public
+kind: page
+industry: ["*"]
+business_models: ["*"]
+priority: P1
+epic: account-self-service
+page_group: "2. Account & Self-Service Pages"
+journeys: [B2C-6, B2B-1]
+domains: [customers, fulfillment, checkout]
+skill: commercetools-storefront
+supporting_skills: [commercetools-platform, commercetools-connect]
+
+requirement: >
+  The system SHALL make every delivery location saved against the account selectable at checkout
+  without re-entry, with exactly one of them marked as the default for new orders.
+
+rationale: >
+  Deliveries repeat to the same handful of places - a head office, two warehouses, a site that runs
+  for six months - so re-typing an address per order is both the slowest part of ordering and the
+  largest single source of failed deliveries. The default is the part that carries the value: a book
+  the buyer has to search through every time is only a slower form of re-entry.
+
+components:
+  - { name: Address cards,               data_source: MIDDLEWARE,
+      notes: Account's saved addresses }
+  - { name: Add and edit address form,   data_source: MIDDLEWARE,
+      notes: Write to account }
+  - { name: Address validation,          data_source: MIDDLEWARE,
+      notes: Third-party validation service via middleware }
+  - { name: Set as default,              data_source: MIDDLEWARE,
+      notes: Write to account preferences }
+
+scenarios:
+  - id: default-preselected-for-a-new-order
+    given: an account with three saved addresses, one of them marked default
+    when: the buyer begins a new order
+    then: the default is already selected and the other two are offered without the buyer re-entering either
+  - id: validation-cannot-resolve-the-address
+    given: an address the validation service cannot resolve
+    when: the buyer saves it
+    then: the fields that could not be resolved are named alongside the service's nearest match, and the buyer decides before anything is stored
+  - id: default-address-removed
+    given: the address currently marked default
+    when: the buyer removes it
+    then: no address is marked default and the next order asks the buyer to choose, rather than another address being promoted silently
+  - id: company-site-added-centrally
+    business_models: [B2B]
+    given: an administrator adds a new site to the company account
+    when: another buyer in that company begins an order
+    then: the new site is offered to them without their having saved it themselves
+
+success_criteria:
+  - { id: no-re-entry, metric: an address saved once is never re-typed by that buyer on a later order }
+  - { id: default-is-real, metric: "the address marked default is the one applied to a new order, with no second confirmation step" }
+
+commercetools:
+  entities: [Customer, BusinessUnit, Cart, Store, Type]
+  api_surface:
+    - kind: constraint
+      ref: "commercetools stores addresses but does not verify them; there is no address-verification resource. A third-party service such as Loqate, Google Places or UPS Address Validation is integrated in the frontend or the BFF, before the address is written, to avoid extra calls to commercetools"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-implement-checkout/custom-checkout/shipping
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Business Unit addresses never inherit down the hierarchy. A Division that inherits its Associates and its Stores from the parent Company still needs its own shipping and billing addresses, and a Division with inherited people but no addresses is a common and easily missed cause of B2B checkout failure"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/configure-associate-access/inheritance-modes
+      verified_at: 2026-08-21
+    - kind: rest
+      ref: "My Customer Profile exposes the full address set of update actions - addAddress, changeAddress, removeAddress, setDefaultShippingAddress, addShippingAddressId, removeShippingAddressId and the billing equivalents - so a storefront can maintain a personal address book without reaching for the general Customers endpoint"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/me-profile
+      verified_at: 2026-08-21
+    - kind: update-action
+      ref: "A Business Unit carries its own addresses through addAddress, changeAddress, setDefaultShippingAddress, setDefaultBillingAddress and the addShippingAddressId and addBillingAddressId identifier actions, which is where a company's sites belong rather than on one employee's Customer record"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/business-units
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Setting a Cart's shipping address triggers automatic recalculation of shipping cost, taxes and the available delivery options, so the cart has to be re-read after a saved address is applied or the storefront shows totals that no longer match"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-implement-checkout/custom-checkout/shipping
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Address update actions on the My Business Units API require the UpdateBusinessUnitDetails Permission and return AssociateMissingPermission without it; that API also cannot change a Business Unit's status or manage its Stores"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/me-business-units
+      verified_at: 2026-08-21
+  modeling_notes: >
+    Decide per project whose book this is. A consumer's book is customer.addresses; a company's
+    delivery locations belong on the Business Unit so they outlive the employee who added them. In
+    both cases the default is a pointer into an existing address set, so the address is saved first
+    and named as default second - batch the two actions in one update if a partially saved state
+    would be visible. Keep the shipping and billing identifier lists distinct from the defaults: an
+    address can be present in the book, absent from shippingAddressIds, and still not be a legal
+    delivery target.
+
+tasks_hint:
+  - "Implement address create, edit, remove and set-default against the customer or business unit address set"
+  - "Integrate the address validation provider in the BFF and gate the write on the buyer's decision"
+  - "Re-read the cart after applying a saved address so shipping and tax totals stay consistent"
+
+open_questions:
+  - "Which validation provider, and is it authoritative? A hard block on an unresolvable address will reject legitimate rural and industrial addresses; a warning-only mode returns the delivery failures the integration was bought to prevent."
+  - "Do company sites need per-associate visibility, or may every buyer in a Business Unit ship to every site the company has saved? Associate permissions are per role and per unit, with no per-address granularity."
+  - "Where does a job site that exists for one project live - a Business Unit address that has to be cleaned up later, or a cart-level address that is never reusable?"
+
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "2. Account & Self-Service Pages › Address Book Management"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

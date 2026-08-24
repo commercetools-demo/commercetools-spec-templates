@@ -1,0 +1,113 @@
+schema_version: 1
+id: base.quote-negotiation
+version: 1.0.0
+title: Quote acceptance at the negotiated price
+status: published
+visibility: public
+kind: page
+industry: ["*"]
+business_models: [B2B, B2B2B]
+priority: P2
+epic: account-self-service
+page_group: "2. Account & Self-Service Pages"
+journeys: [B2B-5]
+domains: [pricing, order-management, cart]
+skill: commercetools-commerce-patterns
+supporting_skills: [commercetools-storefront]
+
+requirement: >
+  The system SHALL place an order created from a quote at the prices negotiated on that quote,
+  irrespective of the catalog prices in force at the moment the order is placed.
+
+rationale: >
+  A negotiation is only worth having if the agreed amount survives the next price change, so the
+  agreed amounts are snapshotted on the offer and the order is created from the offer rather than
+  from a re-priced cart. That also makes the offer's state the gate on what the buyer may do: an
+  offer that has been superseded, withdrawn or sent back for renegotiation is not something the
+  buyer can still accept.
+
+components:
+  - { name: "Quote list",                       data_source: MIDDLEWARE,
+      notes: "The account's quote records" }
+  - { name: "Quote detail with line items and pricing", data_source: MIDDLEWARE,
+      notes: "Quote document carrying the negotiated prices" }
+  - { name: "Message thread with the sales rep", data_source: MIDDLEWARE,
+      notes: "Messaging or CRM integration" }
+  - { name: "Accept quote and continue to checkout", data_source: MIDDLEWARE,
+      notes: "Converts the quote to a cart" }
+  - { name: "Download quote PDF",               data_source: MIDDLEWARE,
+      notes: "Document generation service" }
+
+scenarios:
+  - id: accept-the-current-offer
+    given: a quote that is the seller's current pending offer
+    when: the buyer accepts it
+    then: an order is created carrying the quote's negotiated line item prices and the quote is recorded as accepted
+  - id: send-it-back-for-another-round
+    given: a pending quote the buyer wants improved rather than refused
+    when: they submit a renegotiation request with a comment
+    then: the offer leaves the actionable state, the comment is retained against that round, and the buyer is told a new offer is expected from the seller
+  - id: act-on-a-superseded-offer
+    given: a quote that has been declined, withdrawn or replaced by a later offer
+    when: the buyer tries to accept or renegotiate it
+    then: the action is refused and the current offer, or the absence of one, is shown instead
+  - id: buyer-without-acceptance-rights
+    given: a buyer whose role does not permit accepting quotes
+    when: they open a pending quote
+    then: the acceptance action is not offered and a direct attempt is refused rather than partially applied
+
+success_criteria:
+  - { id: price-holds, metric: an order created from a quote never differs in price from the quote the buyer accepted }
+  - { id: one-live-offer, metric: at most one offer per negotiation is actionable by the buyer at any time }
+
+commercetools:
+  entities: [Quote, QuoteRequest, StagedQuote, Cart, Order, BusinessUnit, AssociateRole]
+  api_surface:
+    - kind: concept
+      ref: "A Quote is a binding offer with states Pending, Accepted, Declined, DeclinedForRenegotiation, RenegotiationAddressed and Withdrawn; only Pending is actionable, and creating an Order from a valid Pending Quote uses the Quote's negotiated prices, with quoteStateToAccepted true recording acceptance during order creation"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/quotes
+      verified_at: 2026-08-21
+    - kind: update-action
+      ref: "requestQuoteRenegotiation with a buyerComment moves a Pending Quote to DeclinedForRenegotiation; the seller reopens the Staged Quote and issues a new Quote, which moves the original to RenegotiationAddressed. Only a Pending Quote can be renegotiated"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/implement-b2b-purchase-flows/quotes-price-locking-and-renegotiation
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "The negotiation record is the series of Quotes, not a message store: each Quote carries the sellerComment that accompanied that offer and the buyerComment that prompted it, whereas the Staged Quote's own sellerComment is mutable and always shows only the seller's latest edit"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/implement-b2b-purchase-flows/quotes-price-locking-and-renegotiation
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "A Quote Request cannot be raised from a Cart with shippingMode Multiple, from an anonymous Cart, or from a Cart carrying Discount Codes, and the source Cart must have a shippingAddress - so multi-site negotiated delivery needs one request per destination"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/implement-b2b-purchase-flows/quote-requests-and-staged-quotes
+      verified_at: 2026-08-21
+    - kind: rest
+      ref: "GET /{projectKey}/me/quotes lists the buyer's Quotes, and changeMyQuoteState plus requestQuoteRenegotiation are the only buyer-side actions on one; they require the AcceptMyQuotes, DeclineMyQuotes or RenegotiateMyQuotes Permission, and POST /me/orders/quotes requires CreateMyOrdersFromMyQuotes"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/me-quotes
+      verified_at: 2026-08-21
+  modeling_notes: >
+    Render the conversation as a projection over the quote series plus whatever the CRM holds; do not
+    model it as free-form messages hanging off the current offer, because each round's comments belong
+    to the offer they produced. Acceptance is not a cart operation either: the order is created from
+    the quote, so the storefront must not rebuild a cart from the quote's line items and price it
+    again.
+
+tasks_hint:
+  - "Implement quote list and detail with actions driven by the offer's state and the buyer's permissions"
+  - "Implement order creation from a pending quote that records acceptance in the same call"
+
+open_questions:
+  - "Does the conversation with the sales rep live in the CRM, or is the round-by-round comment history on the quote series sufficient to render the thread?"
+  - "Who generates the quote PDF, and must it be re-issued per round so the document always matches the offer the buyer accepted?"
+
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "2. Account & Self-Service Pages › Quotes & Quote Detail Page"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

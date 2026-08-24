@@ -1,0 +1,90 @@
+schema_version: 1
+id: base.journey-b2b-2-team-members-access
+version: 1.0.0
+title: B2B-2 — Managing team members & access
+kind: journey
+status: published
+visibility: public
+industry: ["*"]
+business_models: [B2B, B2B2B]
+priority: P1
+epic: journeys
+domains: [customers]
+journeys: [B2B-2]
+skill: commercetools-platform
+supporting_skills: [commercetools-storefront]
+requirement: >
+  The storefront SHALL let a company administrator grant each team member exactly the purchasing
+  authority that member should have, and revoke it, without the seller's involvement.
+rationale: >
+  Purchasing authority is the control B2B customers care most about, and it is the one a seller
+  cannot administer on their behalf at scale. A permission model that is approximated in the
+  storefront rather than enforced by the platform will eventually let someone buy something they
+  were not entitled to buy.
+scenarios:
+  - id: member-invited-with-a-role
+    given: a company administrator
+    when: a new member is invited and assigned a role
+    then: the member can do exactly what that role permits and nothing else
+  - id: permission-refused-server-side
+    given: a member whose role lacks a permission
+    when: the member attempts the corresponding action
+    then: the platform refuses it, and the storefront reports the refusal rather than having prevented it only in the UI
+  - id: member-deactivated
+    given: a member who has left the company
+    when: the administrator deactivates them
+    then: the member can no longer act for the company, and their existing orders remain attributed to them
+  - id: shared-resource-visibility
+    given: two members of the same company
+    when: one creates a shopping list or cart
+    then: whether the other can see it follows the role's own-versus-others permissions, not resource ownership alone
+success_criteria:
+  - { id: platform-enforced, metric: every authority decision is enforced by the platform, not only hidden in the UI }
+commercetools:
+  entities: [BusinessUnit, Associate, AssociateRole, AssociateRoleAssignment, Customer]
+  api_surface:
+    - kind: concept
+      ref: "An AssociateRole is created and managed by the seller and defines granular Permissions; it is assigned to an Associate in a Business Unit through an AssociateRoleAssignment"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/associate-roles
+      verified_at: 2026-08-21
+    - kind: concept
+      ref: "Permission names encode the action and the resource, for example CreateMyCarts, and provide controlled access to B2B resources"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/associate-roles
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Permissions come in My and Others pairs and Others never implies My. Granting ViewOthersShoppingLists without ViewMyShoppingLists produces an associate who can see everyone's lists but not their own — a documented, common support case"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/discover-and-order-products-in-b2b/shopping-lists-for-b2b-purchasing
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "The as-associate endpoints enforce permissions server-side and return 403 Forbidden when the associate's role lacks the matching permission, in addition to the API client needing the corresponding OAuth scope"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/associates-overview
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Associates and their roles are inherited down the Business Unit hierarchy, so a role granted at a parent reaches its divisions"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/associates-overview
+      verified_at: 2026-08-21
+  modeling_notes: >
+    Roles are seller-managed, so the set of roles is a product decision, not per-customer
+    configuration — design the role catalogue before onboarding the first company. Always design
+    both halves of each My/Others permission pair. Never reimplement the permission model in the
+    storefront: call as-associate and render the platform's refusal.
+tasks_hint:
+  - "Define the seller's AssociateRole catalogue, with both halves of each My/Others pair"
+  - "Implement invite, role change and deactivate through the as-associate endpoints"
+  - "Render 403 refusals from the platform rather than gating only in the UI"
+open_questions:
+  - "Which roles does the business actually need beyond buyer, approver and administrator?"
+  - "Are spending limits a role concern, an approval-rule concern, or both?"
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "User Journey Reference › B2B Journeys › B2B-2"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

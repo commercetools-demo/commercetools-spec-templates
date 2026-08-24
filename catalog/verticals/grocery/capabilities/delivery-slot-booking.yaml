@@ -1,0 +1,110 @@
+schema_version: 1
+id: grocery.delivery-slot-booking
+version: 1.0.0
+title: Delivery slot selection with finite capacity
+status: published
+visibility: public
+industry: [grocery]
+business_models: [B2C, B2B, B2B2C]
+priority: P1
+epic: slots-and-fulfillment
+domains: [fulfillment, checkout, cart]
+skill: commercetools-commerce-patterns
+supporting_skills: [commercetools-storefront, commercetools-connect]
+
+requirement: >
+  The system SHALL offer only delivery slots with remaining capacity for the shopper's address, and
+  reject an order placed against a slot whose capacity is exhausted at the moment of placement.
+
+rationale: >
+  Grocery fulfillment capacity is finite per slot per location, and a slot sold twice becomes a
+  failed delivery rather than a late one. Capacity therefore has to be checked at selection and
+  again at order placement, because slots fill while a shopper is still in checkout.
+
+components:
+  - { name: Slot picker with remaining availability,      data_source: MIDDLEWARE, business_models: [B2C, B2B, B2B2C],
+      notes: Capacity is external state, queried per cart address }
+  - { name: Slot price or premium-slot surcharge,         data_source: MIDDLEWARE, business_models: [B2C, B2B, B2B2C],
+      notes: ShippingMethod zoneRates; recalculated on every change }
+  - { name: Slot held on the cart until placement,        data_source: MIDDLEWARE, business_models: [B2C, B2B, B2B2C],
+      notes: Cart custom field; revalidated at placement }
+  - { name: Recurring slot for a standing order,          data_source: MIDDLEWARE, business_models: [B2B],
+      notes: Pairs with a RecurrencePolicy on the recurring order }
+  - { name: Slot capacity scoped to the fulfilling seller, data_source: MIDDLEWARE, business_models: [B2B2C],
+      notes: One capacity ledger per seller Channel }
+
+scenarios:
+  - id: slot-selected-and-priced
+    given: a cart with a deliverable address
+    when: the shopper opens the slot picker
+    then: only slots with remaining capacity for that address are offered, each with its delivery charge
+  - id: slot-exhausted-before-placement
+    given: the shopper selected a slot that has since filled
+    when: the shopper submits the order
+    then: placement is refused with the reason, the slot selection is cleared, and current slots are offered again
+  - id: address-change-revalidates
+    given: a cart with a selected slot
+    when: the shopper changes the delivery address
+    then: the slot selection is revalidated against the new address and cleared if it no longer applies
+  - id: no-capacity-at-all
+    given: no slot has remaining capacity for the shopper's address
+    when: the shopper opens the slot picker
+    then: the absence of availability is stated explicitly, with the next date that has capacity
+
+success_criteria:
+  - { id: no-oversell, metric: no order is ever placed against a slot with no remaining capacity }
+  - { id: honesty, metric: a shopper is never shown a slot they cannot book }
+
+commercetools:
+  entities: [ShippingMethod, Zone, Cart, Order, Type, Channel, Store]
+  api_surface:
+    - kind: constraint
+      ref: "commercetools has no delivery-slot resource. Slot capacity is external state; commercetools carries the shopper's selection and the charge, not the capacity ledger"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/shipping-delivery-overview
+      verified_at: 2026-08-21
+    - kind: rest
+      ref: "GET shipping-methods matching-cart returns only the methods valid for the current cart, given its address, contents and the project's Zones - use it rather than filtering the full list client-side"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/shippingMethods
+      verified_at: 2026-08-21
+    - kind: update-action
+      ref: "Cart setShippingMethod sets the chosen method; the API rejects a method that does not match the cart's conditions, and the cart returns recalculated shippingInfo.price and taxedPrice"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-implement-checkout/custom-checkout/shipping
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Setting the shipping address or method triggers automatic recalculation of shipping cost, taxes and available options - the storefront must re-read the cart after each, or it will show mismatched totals"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-implement-checkout/custom-checkout/shipping
+      verified_at: 2026-08-21
+    - kind: concept
+      ref: "ShippingMethod predicates on cart fields (for example store.key, or a cart custom field set by the BFF or an API Extension) are how slot eligibility narrower than a Zone's country/state pair is expressed"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-your-business-structure/stores-and-channels/apply-stores-and-channels
+      verified_at: 2026-08-21
+
+  modeling_notes: >
+    Model the slot as a ShippingMethod only where the set of slots is small and stable; otherwise
+    keep slots in the capacity service and carry the booked slot as a cart custom field, using a
+    single ShippingMethod for the delivery type. Zones only express country and state pairs, so any
+    finer geography (postcode, metro area) needs a predicate over a cart custom field that the BFF or
+    an API Extension maintains. Capacity must be re-checked at placement, not only at selection.
+
+tasks_hint:
+  - "Decide whether slots are ShippingMethods or external capacity plus a cart custom field, and record it"
+  - "Implement slot availability lookup for a cart address using matching-cart shipping methods"
+  - "Carry the booked slot on the cart and revalidate it on any address change"
+  - "Re-check slot capacity at order placement and fail closed with a re-selection path"
+  - "Surface the recalculated shipping charge and totals after every slot or address change"
+
+open_questions:
+  - "Who owns slot capacity, and can it be queried synchronously within checkout latency budget?"
+  - "Is a slot held on selection, or only checked - and if held, for how long?"
+
+provenance:
+  # Authored from the commercetools documentation, grounded via the commercetools-knowledge MCP.
+  source: authored
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

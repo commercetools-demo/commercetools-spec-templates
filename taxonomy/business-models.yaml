@@ -1,0 +1,22 @@
+schema_version: 1
+business_models:
+  B2C:
+    label: B2C
+    description: Direct to consumer
+    inherits: []
+  B2B:
+    label: B2B
+    description: Business buyers
+    inherits: []
+  B2B2C:
+    label: B2B2C
+    description: Marketplace or franchise selling through to consumers
+    inherits: [B2C]
+    # Capabilities every B2B2C build needs that no industry vertical supplies. When a
+    # combination resolves as `derived`, these become open questions, never invented content.
+    gap_capabilities: [seller-onboarding, seller-scoped-assortment, commission-and-payout, split-fulfillment]
+  B2B2B:
+    label: B2B2B
+    description: Distributor selling through to business buyers
+    inherits: [B2B]
+    gap_capabilities: [seller-onboarding, reseller-tiered-pricing, commission-and-payout]

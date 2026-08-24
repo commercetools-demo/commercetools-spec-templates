@@ -1,0 +1,121 @@
+schema_version: 1
+id: grocery.out-of-stock-substitutions
+version: 1.0.0
+title: Out-of-stock substitutions at picking time
+status: published
+visibility: public
+industry: [grocery]
+business_models: [B2C, B2B2C]
+priority: P1
+epic: catalog-and-availability
+domains: [catalog, cart, order-management, fulfillment]
+skill: commercetools-commerce-patterns
+supporting_skills: [commercetools-storefront]
+
+requirement: >
+  The system SHALL apply a substitution to a placed order only where the shopper's stored per-line
+  preference or an explicit acceptance permits it, recording both products and the resulting price
+  change on the order.
+
+rationale: >
+  Grocery baskets are picked hours after checkout from volatile fresh stock, so a material share of
+  lines is unavailable at pick time. Without a per-line preference and an auditable post-placement
+  record, the retailer either cancels profitable lines or substitutes without consent.
+
+components:
+  - { name: Per-line substitution preference control, data_source: MIDDLEWARE, business_models: [B2C, B2B2C],
+      notes: LineItem custom field; written per line on the session cart }
+  - { name: Substitute suggestions on the line,       data_source: CACHED,     business_models: [B2C, B2B2C],
+      notes: From the ProductType substitute-set attribute; shared across shoppers }
+  - { name: Substitution notice before delivery,      data_source: MIDDLEWARE, business_models: [B2C, B2B2C],
+      notes: Triggered by the OrderEditApplied message }
+  - { name: Seller-scoped substitute assortment,      data_source: MIDDLEWARE, business_models: [B2B2C],
+      notes: Narrow the substitute set to the fulfilling seller's Channel }
+
+scenarios:
+  - id: preference-captured-at-line-level
+    given: a cart containing a fresh-produce line item
+    when: the shopper sets that line's preference to "allow similar"
+    then: the preference is persisted on the line item and survives onto the placed order
+  - id: substitute-applied-within-tolerance
+    given: a placed order has a line flagged "allow similar" that is unavailable at picking
+    when: the picker selects a substitute within the configured price tolerance
+    then: the order reflects the substitute, both SKUs are recorded on the line, and the shopper is notified before delivery
+  - id: no-substitute-allowed
+    given: a placed order has a line flagged "no substitution"
+    when: the item is unavailable at picking
+    then: the line is refunded or removed and no alternative product is added
+  - id: outside-tolerance-needs-consent
+    given: the only available substitute exceeds the configured price tolerance
+    when: the picker proposes that substitute
+    then: the order is not modified until the shopper accepts, and removal is offered as the alternative
+  - id: seller-scoped-substitutes
+    business_models: [B2B2C]
+    given: the unavailable item is fulfilled by a marketplace seller
+    when: the picker searches for a substitute
+    then: only products from that same seller's assortment are offered
+
+success_criteria:
+  - { id: consent, metric: every applied substitution traces to a stored preference or an explicit acceptance }
+  - { id: notice,  metric: the shopper is notified of an applied substitution before the delivery window opens }
+
+commercetools:
+  entities: [ProductType, Product, LineItem, Cart, Order, OrderEdit, InventoryEntry, Type, Channel]
+  api_surface:
+    - kind: concept
+      ref: "A ProductType attribute of type set-of-reference(product) holds the substitute set, so merchandisers own it in Merchant Center"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/productTypes
+      verified_at: 2026-08-21
+    - kind: update-action
+      ref: "Cart setLineItemCustomField stores the per-line substitution preference"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/carts
+      verified_at: 2026-08-21
+    - kind: rest
+      ref: "Order Edits are the only supported path for a post-placement change that affects the order total: create the OrderEdit, add stagedActions (a dry run runs immediately and returns the order as if applied), review the preview, then Apply"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/carts-orders-overview
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "An Order Edit can only be created when the InventoryMode of the Order and its LineItems is None - the Order Edits API does not track or reserve inventory"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/carts-orders-overview
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Applying an Order Edit recalculates the order: if Embedded or Standalone Prices changed since placement, the updated prices apply to ALL line items even if the edit did not touch them, and discounts that are no longer valid are removed"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/order-edits
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "The OrderEditApplied message carries the before and after net total, gross total and tax portion - use it as the audit record of the price effect"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/order-edits
+      verified_at: 2026-08-21
+
+  modeling_notes: >
+    Substitution preference is a LineItem custom field (enum), not a cart-level flag - grocery
+    shoppers decide per item. Post-placement substitution is a financial change, so it goes through
+    Order Edits, never a direct order update. That forces InventoryMode: None on grocery orders,
+    which directly conflicts with using ReserveOnCart to prevent overselling at checkout: a project
+    cannot have both on the same order. Decide which matters more for this business before planning,
+    and record the decision. The price-recalculation-on-apply behaviour means the substitution flow
+    must always show the preview totals rather than assume only the edited line changed.
+
+tasks_hint:
+  - "Define the substitute-set attribute on the grocery ProductType and backfill fresh categories"
+  - "Add the substitution-preference custom type to LineItem and expose it per line in the cart"
+  - "Implement the pick-time substitute lookup with price-tolerance evaluation"
+  - "Implement the Order Edit create / dry-run preview / apply flow for an applied substitution"
+  - "Notify the shopper of an applied substitution before the delivery window opens"
+
+open_questions:
+  - "Is the substitution price tolerance a fixed percentage per category, or a per-customer setting?"
+  - "Does this business need ReserveOnCart at checkout? If so, post-placement substitution cannot use Order Edits and needs a cancel-and-reorder flow instead."
+
+provenance:
+  # Authored from the commercetools documentation, grounded via the commercetools-knowledge MCP.
+  source: authored
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

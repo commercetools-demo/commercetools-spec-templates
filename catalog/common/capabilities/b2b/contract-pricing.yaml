@@ -1,0 +1,155 @@
+schema_version: 1
+id: base.contract-pricing
+version: 1.0.0
+title: Contract pricing shown as the cart will price it
+status: published
+visibility: public
+kind: page
+industry: ["*"]
+business_models: [B2B, B2B2B]
+priority: P2
+epic: b2b-specific
+page_group: "3. B2B-Specific Pages"
+journeys: [B2B-3]
+domains: [pricing, catalog]
+skill: commercetools-commerce-patterns
+supporting_skills: [commercetools-storefront]
+
+requirement: >
+  The system SHALL present each active agreement with the prices the buyer's own orders resolve, so
+  that the price shown for a covered SKU on the agreement and the price applied to a cart line for
+  that same SKU cannot disagree.
+
+rationale: >
+  A contract page is usually rendered from the contract record while the cart resolves its price
+  through price selection over the buyer's channel-scoped prices. When the two sources drift, the
+  buyer discovers it on the invoice and the seller argues about it, so the page has to read the same
+  prices the cart will use, including the quantity break that applies at the quantity being shown.
+
+components:
+  - name: Active contracts list
+    data_source: MIDDLEWARE
+    notes: Pricing / contract service
+  - name: "Contract detail — covered SKUs, discounts"
+    data_source: MIDDLEWARE
+    notes: Contract document
+  - name: Expiry alerts
+    data_source: MIDDLEWARE
+    notes: Evaluated against contract dates
+  - name: Download contract PDF
+    data_source: MIDDLEWARE
+    notes: Document service
+
+scenarios:
+  - id: contract-price-matches-cart-price
+    given: an active agreement covering a SKU with a quantity break
+    when: the buyer adds that SKU to a cart at a quantity above the break
+    then: the unit price on the cart line equals the tier price shown for that quantity on the agreement
+  - id: expiry-warned-before-it-bites
+    given: an agreement whose validity ends inside the configured warning window
+    when: the buyer opens the agreement list
+    then: the agreement is flagged with its exact end date while its prices continue to apply until that date
+  - id: expired-agreement-leaves-no-price
+    given: an agreement whose validity has ended and no successor agreement
+    when: the buyer views a SKU that agreement covered
+    then: the SKU is presented as price on request rather than at the lapsed contract price, and adding it to a cart is refused
+  - id: buyer-has-no-agreement
+    given: a company with no negotiated agreement in force
+    when: the buyer opens the page
+    then: the absence of an agreement is stated, with the route to request a quote rather than an empty table
+
+success_criteria:
+  - id: no-price-drift
+    metric: for every covered SKU and quantity, the price rendered on the agreement equals the price the cart resolves
+  - id: expiry-visibility
+    metric: no agreement lapses without having been flagged with its end date beforehand
+
+commercetools:
+  entities: [StandalonePrice, Channel, Store, BusinessUnit, Product, ProductVariant, Cart, CustomerGroup]
+  api_surface:
+    - kind: concept
+      ref: >
+        A negotiated B2B price is carried by a distribution Channel (role ProductDistribution)
+        attached to the buyer's Store and holding Channel-scoped Standalone Prices; the buyer never
+        picks the scope - it derives from Business Unit to Store to Channel, passed as priceChannel
+        for browsing and as the line item distributionChannel for carts
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/configure-b2b-pricing/company-specific-pricing
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: >
+        A quantity break is a PriceTier on the Price (minimumQuantity), not a discount, and applies
+        to the whole line quantity once reached - but a tiered price is ignored when the Price is
+        already discounted by a Product Discount
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/pricing-and-discounts-overview
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: >
+        Within each price-selection fallback step, time-bound prices take precedence over
+        non-time-bound ones, and a price is returned only while the request timestamp falls inside its
+        validFrom and validUntil window - so an agreement's expiry is silent: the price simply stops
+        being selected
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/pricing-and-discounts-overview
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: >
+        When nothing matches the buyer's price context the ProductVariant comes back with no price
+        field at all, and adding that SKU to a cart returns MatchingPriceNotFound; both are
+        configuration signals to render as price on request, not platform errors
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/configure-b2b-pricing/company-specific-pricing
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: >
+        A Customer-Group-scoped price outranks a Channel-scoped price in price selection, so using
+        Customer Groups for anything other than discounts can silently override the negotiated rate
+        for the same buyer
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/configure-b2b-pricing/price-versus-discount
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: >
+        For B2B customer-group prices to apply to a cart, both businessUnit.customerGroupAssignments
+        and cart.businessUnit have to be set; otherwise the platform selects the B2C price for that
+        cart
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/pricing-and-discounts-overview
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: >
+        A ProductVariant supports up to 50000 Standalone Prices, so one bespoke price set per company
+        does not scale - cluster buyers with comparable terms onto a shared pricing Channel and create
+        a new Channel only for a genuinely new tier
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/configure-b2b-pricing/company-specific-pricing
+      verified_at: 2026-08-21
+  modeling_notes: >
+    Treat the contract record as the commercial document and the Standalone Prices as its executable
+    form, with one direction of derivation only; a page that renders the document while carts price
+    from the platform is the drift this capability exists to prevent. Express validity as
+    validFrom/validUntil on the prices so expiry is enforced by price selection rather than by
+    storefront logic, and keep the expiry alert as a read over the same dates. Where an agreement is
+    a percentage off list rather than a rate card, that is a discount concern and belongs on a
+    Customer Group - do not model it as a second price on the same channel.
+
+tasks_hint:
+  - "Resolve the buyer's pricing channel from their business unit and store, and read the covered SKUs at that scope"
+  - "Render tier prices per quantity break from the same prices the cart uses"
+  - "Set validFrom and validUntil on contract prices and drive the expiry alert from those dates"
+  - "Handle the no-matching-price case as price on request in both listing and add-to-cart paths"
+
+open_questions:
+  - "Is the contract service or commercetools the master for negotiated prices? Only one can be authoritative, and the other has to be derived."
+  - "Are the discount levels on an agreement genuinely Cart or Product Discounts, or are they just how the negotiated rate is expressed against list price?"
+  - "Who is notified when an agreement lapses with no successor, and does the buyer keep browsing at list price or lose access to the assortment?"
+
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "3. B2B-Specific Pages › Contract / Agreement Pricing Page"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

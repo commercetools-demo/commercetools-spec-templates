@@ -1,0 +1,17 @@
+# GLOBAL epics — the page groups every storefront has, in build order. A vertical's own
+# `vertical.yaml.epics` are industry deltas and sort AFTER these: build the base storefront,
+# then layer the industry on top.
+schema_version: 1
+epics:
+  - { slug: journeys,             title: "User journeys",
+      description: "The paths a buyer takes across pages. Authored first: a journey is the why, a page is the what." }
+  - { slug: core-shopping,        title: "Core shopping pages",
+      description: "The transactional backbone: discovery through order confirmation. Heaviest mix of CACHED and MIDDLEWARE." }
+  - { slug: account-self-service, title: "Account & self-service pages",
+      description: "Buyer control over account, orders and purchasing tools without contacting the seller. Almost entirely session-specific." }
+  - { slug: b2b-specific,         title: "B2B-specific pages",
+      description: "Financial controls, contractual agreements and operational complexity with no B2C equivalent. Almost entirely MIDDLEWARE." }
+  - { slug: content-support,      title: "Content & support pages",
+      description: "CMS-managed informational pages with no commerce API dependency. Almost entirely STATIC." }
+  - { slug: utility-system,       title: "Utility & system pages",
+      description: "Errors, auth token flows and system state. Lightweight by design." }

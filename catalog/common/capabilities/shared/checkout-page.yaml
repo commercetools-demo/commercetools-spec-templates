@@ -1,0 +1,140 @@
+schema_version: 1
+id: base.checkout-page
+version: 1.0.0
+title: Checkout re-reading totals after each shipping change
+kind: page
+status: published
+visibility: public
+industry: ["*"]
+business_models: ["*"]
+priority: P1
+epic: core-shopping
+page_group: "1. Core Shopping Pages"
+journeys: [B2C-4, B2B-6, B2B-7]
+domains: [checkout, fulfillment, cart]
+skill: commercetools-storefront
+supporting_skills: [commercetools-checkout, commercetools-commerce-patterns]
+
+requirement: >
+  The system SHALL re-read the cart after every change to the shipping address or the delivery method
+  and present the shipping cost, tax and order total from that response instead of the values shown
+  before the change.
+
+rationale: >
+  Setting a shipping address or a shipping method makes the platform recalculate shipping cost, tax
+  and the set of available delivery options. A checkout that keeps its own copy of the summary after
+  such a change shows a total the order will not be created with, and the buyer discovers the
+  difference on the confirmation page or the invoice. Re-reading is cheap; reconciling a disputed
+  invoice is not.
+
+components:
+  - { name: "Progress stepper", data_source: STATIC,
+      notes: "UI shell" }
+  - { name: "Shipping address selector", data_source: MIDDLEWARE,
+      notes: "Buyer's saved addresses from account" }
+  - { name: "New address form", data_source: MIDDLEWARE,
+      notes: "Writes new address to account" }
+  - { name: "Delivery method options with costs and dates", data_source: MIDDLEWARE,
+      notes: "Calculated from cart contents plus address plus carrier rules" }
+  - { name: "Billing address selector", data_source: MIDDLEWARE,
+      notes: "Account addresses" }
+  - { name: "Payment method selector", data_source: MIDDLEWARE,
+      notes: "Account's available payment methods (net terms, cards, purchase order)" }
+  - { name: "Purchase order number field", data_source: STATIC,
+      business_models: [B2B],
+      notes: "UI input; value passed to order on submit" }
+  - { name: "Cost center or budget code field", data_source: MIDDLEWARE,
+      business_models: [B2B],
+      notes: "Validated against account's cost centers" }
+  - { name: "Order notes field", data_source: STATIC,
+      notes: "UI input" }
+  - { name: "Order summary sidebar", data_source: MIDDLEWARE,
+      notes: "Live cart summary including shipping and tax" }
+  - { name: "Terms acceptance checkbox", data_source: STATIC,
+      notes: "UI only" }
+  - { name: "Place order action", data_source: MIDDLEWARE,
+      notes: "Order submission to commerce backend" }
+  - { name: "Approval routing notice", data_source: MIDDLEWARE,
+      business_models: [B2B],
+      notes: "Evaluated against account's approval rules" }
+
+scenarios:
+  - id: address-change-moves-tax
+    given: a checkout with a summary already displayed
+    when: the buyer switches to a delivery address in a different tax jurisdiction
+    then: the summary shows the recalculated tax, shipping cost and total, and any delivery option no longer valid for that address is withdrawn
+  - id: no-delivery-method-for-address
+    given: an address that no configured delivery method can serve
+    when: the buyer reaches the delivery step
+    then: the absence of options is stated with what the buyer can change, and the step cannot be completed
+  - id: submitted-for-approval
+    given: a cart that will match an active approval rule for the buyer's account
+    when: the buyer submits the order
+    then: the buyer is told the order has been submitted for approval, not that it is confirmed
+    business_models: [B2B]
+  - id: missing-purchase-order-number
+    given: an account that requires a purchase order number
+    when: the buyer submits without one
+    then: submission is refused, the field is flagged, and the entered checkout data is preserved
+    business_models: [B2B]
+
+success_criteria:
+  - { id: summary-matches-order, metric: the total displayed at the moment of submission equals the total on the created order }
+  - { id: no-silent-option-loss, metric: no delivery option remains selectable after an address change that invalidates it }
+
+commercetools:
+  entities: [Cart, Order, ShippingMethod, Zone, TaxCategory, Payment, ApprovalRule, ApprovalFlow, BusinessUnit, Customer]
+  api_surface:
+    - kind: constraint
+      ref: "Setting a cart's shipping address or shipping method triggers automatic recalculation of shipping cost, taxes and available options - the storefront must re-read the cart after each or it shows mismatched totals. GET shipping-methods matching-cart returns only the methods valid for the current cart"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-implement-checkout/custom-checkout/shipping
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Approval governance evaluates Orders, not Carts: the predicate is an Order Predicate and the platform creates the Approval Flow only once the Order is placed and matches an active rule. Checkout can therefore warn that approval is likely, but cannot state the outcome before submission"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/configure-approval-workflows/why-procurement-governance-matters
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "purchaseOrderNumber is native on the Cart and is inherited by the Order created from it, so set it during checkout on the cart rather than patching the order afterwards"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/implement-b2b-purchase-flows/the-b2b-cart
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "With shippingMode Multiple, taxedPrice is not calculated until every Line Item quantity is allocated across the registered itemShippingAddresses - an unallocated quantity is the usual cause of a checkout that shows no tax"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/implement-b2b-purchase-flows/the-b2b-cart
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "There is no update action to set the Store on an existing Cart - it must be set at creation, via in-store cart creation or CartDraft.store, so a checkout cannot correct the commercial context late"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/carts
+      verified_at: 2026-08-21
+    - kind: rest
+      ref: "Before creating the order the cart must carry a shipping address, a shipping method, a billing address where required and linked payments; payment authorization must be complete for synchronous PSP flows, the latest cart version must be used, and your own business validations must have passed"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-implement-checkout/custom-checkout/order-creation
+      verified_at: 2026-08-21
+  modeling_notes: >
+    Make the summary sidebar a projection of the last cart response and never a locally maintained
+    object. Fetch delivery options for the current cart rather than filtering a full method list in
+    the client. Because approval is decided on the order, design the submit step to end in one of two
+    outcomes - placed or submitted for approval - and make both first-class rather than treating the
+    approval case as an error path.
+
+tasks_hint:
+  - "Re-read the cart and re-render the summary after each address or delivery-method write"
+  - "Fetch delivery options for the current cart and handle the empty-options case as a blocking state"
+
+open_questions:
+  - "Which system decides whether net terms or a credit line are available to this account at this total, and is that check synchronous within the checkout latency budget?"
+  - "Is delivery to multiple addresses in one order in scope, given that it changes when tax becomes calculable?"
+
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "1. Core Shopping Pages › Checkout Page"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

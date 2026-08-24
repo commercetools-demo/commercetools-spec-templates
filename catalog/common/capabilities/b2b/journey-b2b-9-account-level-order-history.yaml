@@ -1,0 +1,86 @@
+schema_version: 1
+id: base.journey-b2b-9-account-level-order-history
+version: 1.0.0
+title: B2B-9 — Account-level order history
+kind: journey
+status: published
+visibility: public
+industry: ["*"]
+business_models: [B2B, B2B2B]
+priority: P2
+epic: journeys
+domains: [order-management, customers]
+journeys: [B2B-9]
+skill: commercetools-platform
+supporting_skills: [commercetools-storefront]
+requirement: >
+  The storefront SHALL let an entitled buyer or administrator review the whole company's order
+  history, including orders placed by other team members, filtered by member, cost center, date or
+  status.
+rationale: >
+  In a company, the person who needs to see an order is often not the person who placed it. Finance
+  reconciles, managers review departmental spend, and administrators answer for the account — none of
+  which is possible if order history is scoped to the individual who happened to check out.
+scenarios:
+  - id: whole-company-visible-to-an-administrator
+    given: a company whose members have each placed orders
+    when: an administrator opens order history
+    then: every member's orders are listed, attributed to the member who placed them
+  - id: individual-sees-only-their-own
+    given: a member without company-wide visibility
+    when: that member opens order history
+    then: only their own orders are listed, and the platform, not the UI, is what excludes the rest
+  - id: filtered-by-cost-center
+    given: a company that allocates orders to cost centers
+    when: an administrator filters by one
+    then: only orders allocated to that cost center are listed, with their totals
+  - id: division-scoped-view
+    given: a company with divisions
+    when: a division administrator opens order history
+    then: the view covers that division and what it inherits, not unrelated sibling divisions
+success_criteria:
+  - { id: attribution, metric: every order in a company view names the member who placed it }
+commercetools:
+  entities: [Order, BusinessUnit, Associate, AssociateRole, CustomObject, Type]
+  api_surface:
+    - kind: constraint
+      ref: "Orders are company-scoped only when their businessUnit field is set, which happens when they are created through the as-associate and in-business-unit path; an order created outside that context will not appear in a company view"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/associates-overview
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Whether an associate sees their own or also others' orders is governed by paired My/Others Associate permissions, and Others never implies My — so a company-wide view still needs the My half to include the viewer's own orders"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/associate-roles
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Associates and roles are inherited down the Business Unit hierarchy, so a division administrator's visibility follows the hierarchy rather than a flat company list"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/associates-overview
+      verified_at: 2026-08-21
+    - kind: concept
+      ref: "A cost-center reference has no native field and belongs on the resource it describes as a Custom Field on the order or line item; filtering by it is therefore a query over that custom field"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/implement-b2b-purchase-flows/the-b2b-cart
+      verified_at: 2026-08-21
+  modeling_notes: >
+    Every order must be created in the as-associate / in-business-unit context or it is invisible to
+    the company forever — this is not repairable later without touching the order. Do not build the
+    visibility rule in the storefront; read the associate's permissions and let the platform scope the
+    query. If cost-center filtering matters, define the custom field before the first order is placed.
+tasks_hint:
+  - "Create every B2B order through the as-associate / in-business-unit path so businessUnit is set"
+  - "Scope order queries by the associate's My/Others permissions rather than in the UI"
+  - "Define the cost-center custom field up front and index the filter on it"
+  - "Attribute each order in a company view to the member who placed it"
+open_questions:
+  - "Which roles get company-wide order visibility, and is it scoped per division?"
+  - "Is cost-center reporting needed in the storefront, or does finance take an export?"
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "User Journey Reference › B2B Journeys › B2B-9"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

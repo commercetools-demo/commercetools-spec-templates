@@ -1,0 +1,138 @@
+schema_version: 1
+id: base.product-detail-page
+version: 1.0.0
+title: Product detail page showing the buyer's effective price
+kind: page
+status: published
+visibility: public
+industry: ["*"]
+business_models: ["*"]
+priority: P1
+epic: core-shopping
+page_group: "1. Core Shopping Pages"
+journeys: [B2C-1, B2B-3, B2B-5]
+domains: [catalog, pricing, fulfillment]
+skill: commercetools-storefront
+supporting_skills: [commercetools-commerce-patterns, commercetools-platform]
+
+requirement: >
+  The system SHALL present, for the selected variant, the single price the requesting buyer would pay
+  at the quantity they intend to order, including any volume tier that applies at that quantity.
+
+rationale: >
+  The detail page is where a buyer decides, so it is the page a wrong price costs the most on. A
+  variant can carry many prices at once - list, customer-group, channel-scoped, time-bound, tiered -
+  and only one of them is the buyer's. Showing the list price beside a contract price, or ignoring
+  the tier the buyer's quantity has already crossed, produces a total at checkout that does not match
+  the page the buyer agreed to.
+
+components:
+  - { name: "Product image gallery", data_source: CACHED,
+      notes: "Asset URLs from product data" }
+  - { name: "Product name, SKU and brand", data_source: CACHED,
+      notes: "Catalog master data" }
+  - { name: "Short and long description", data_source: CACHED,
+      notes: "Catalog or CMS copy" }
+  - { name: "Variant selector", data_source: CACHED,
+      notes: "Variant attributes from catalog" }
+  - { name: "Standard or list price", data_source: CACHED,
+      notes: "Base price, shared" }
+  - { name: "Contract or negotiated price", data_source: MIDDLEWARE,
+      business_models: [B2B],
+      notes: "Customer-group or contract-specific pricing" }
+  - { name: "Volume or tiered pricing table", data_source: MIDDLEWARE,
+      business_models: [B2B],
+      notes: "Per-customer tier rules" }
+  - { name: "Stock availability indicator", data_source: MIDDLEWARE,
+      notes: "Real-time inventory" }
+  - { name: "Delivery estimate", data_source: MIDDLEWARE,
+      notes: "Depends on buyer's shipping address plus inventory location" }
+  - { name: "Add to Cart and Add to List actions", data_source: MIDDLEWARE,
+      notes: "Write operations on session cart or account lists" }
+  - { name: "Request Quote action", data_source: MIDDLEWARE,
+      business_models: [B2B],
+      notes: "Write operations on session cart or account lists" }
+  - { name: "Product attributes and technical specifications", data_source: CACHED,
+      notes: "Catalog attributes" }
+  - { name: "Downloadable assets (datasheets, safety data sheets)", data_source: STATIC,
+      notes: "Static file links from PIM or DAM" }
+  - { name: "Related and cross-sell products", data_source: CACHED,
+      notes: "Merchandising rules, shared" }
+  - { name: "Recently viewed", data_source: MIDDLEWARE,
+      notes: "Session or user browsing history" }
+  - { name: "Breadcrumb", data_source: CACHED,
+      notes: "Category path from catalog" }
+
+scenarios:
+  - id: quantity-crosses-a-tier
+    given: a variant priced with volume tiers
+    when: the buyer raises the quantity past a tier boundary
+    then: the displayed unit price and line total change to the tier price before the item is added to the cart
+  - id: no-price-resolves
+    given: no price matches the buyer's currency, context and validity window
+    when: the detail page renders
+    then: the page states that the price is on request and the add-to-cart action is unavailable rather than defaulting to a list price
+  - id: variant-out-of-stock
+    given: the selected variant has no available quantity for the buyer's supply location
+    when: the detail page renders
+    then: the unavailability is stated, with the restock information the inventory record carries if any
+  - id: quote-instead-of-cart
+    given: a buyer whose role permits requesting a quote
+    when: the buyer chooses to request a quote for the variant and quantity
+    then: the variant and quantity are carried into a quote request and the active cart is left untouched
+    business_models: [B2B]
+
+success_criteria:
+  - { id: page-price-equals-cart-price, metric: the price shown on the detail page equals the line-item price the same buyer gets in the cart at the same quantity }
+
+commercetools:
+  entities: [Product, ProductProjection, ProductType, StandalonePrice, CustomerGroup, Channel, InventoryEntry, QuoteRequest, ShoppingList]
+  api_surface:
+    - kind: constraint
+      ref: "Price selection walks a fixed fallback order - Customer Group outranks Channel, which outranks country - and stops at the first level that matches. Currency and the validFrom/validUntil window are hard filters, so a price in another currency or outside its window is invisible rather than a fallback"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/pricing-and-discounts-overview
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "If the selected Price has PriceTiers, the tier valid for the Line Item quantity is used instead of the base Price - but the tiered price is ignored when the Price is already discounted by a Product Discount, so a promotion silently disables volume pricing"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/pricing-and-discounts-overview
+      verified_at: 2026-08-21
+    - kind: rest
+      ref: "The price-selection parameters priceCurrency, priceCountry, priceCustomerGroup and priceChannel on Product Projections add a single best-matching price field to each returned variant, which may be an Embedded or a Standalone Price; the prices array itself never contains Standalone Prices"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/product-catalog-overview
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "ProductVariant.availability is an eventually consistent aggregate of the SKU's InventoryEntries and is documented as suitable for display, not for decisions; a binding availability check must read the InventoryEntry, which is strongly consistent for direct updates"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/inventory-overview
+      verified_at: 2026-08-21
+    - kind: concept
+      ref: "InventoryEntry carries restockableInDays and expectedDelivery as informational fields, plus minCartQuantity and maxCartQuantity boundaries that limit how many units a buyer may add"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-your-product-catalog/inventory-modeling/inventory-management
+      verified_at: 2026-08-21
+  modeling_notes: >
+    Resolve the price with the buyer's full context on every detail-page request and treat the
+    catalog copy, gallery and attributes as the only cacheable part. If a buyer can see both a list
+    price and their own price, decide deliberately which is authoritative on the page, because the
+    cart will use the selected price and nothing else. Keep the tier table derived from the same
+    Price object rather than a separate source, or the two will drift.
+
+tasks_hint:
+  - "Resolve the selected variant's price with the buyer's currency, country, customer group and channel on every request"
+  - "Render the tier table from the selected Price's own tiers and re-resolve the effective unit price when quantity changes"
+
+open_questions:
+  - "What computes a delivery estimate for a buyer's address before a cart exists? commercetools carries restock information, not a per-address delivery date."
+  - "Are datasheets and safety data sheets served as product assets or from a separate document system with its own access rules?"
+
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "1. Core Shopping Pages › Product Detail Page (PDP)"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

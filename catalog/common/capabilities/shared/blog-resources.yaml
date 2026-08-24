@@ -1,0 +1,59 @@
+schema_version: 1
+id: base.blog-resources
+version: 1.0.0
+title: Articles addressable and indexable independently of the listing
+status: published
+visibility: public
+kind: page
+industry: ["*"]
+business_models: ["*"]
+priority: P3
+epic: content-support
+page_group: "4. Content & Support Pages"
+journeys: [B2C-1]
+
+requirement: >
+  The system SHALL serve every published article at its own stable address carrying that article's
+  title, description and canonical metadata, so the article is reachable and indexable without the
+  listing's filter state.
+
+rationale: >
+  This content exists to be found by a search engine and cited in a sales conversation, which makes
+  addressability the requirement and layout a detail. An article reachable only through a filtered
+  listing earns no ranking and cannot be linked from an email, so the filters and the related-content
+  block are conveniences over the CMS taxonomy rather than the route to the content.
+
+components:
+  - { name: Article listing and filters,       data_source: STATIC, notes: CMS-managed content }
+  - { name: Article detail content,            data_source: STATIC, notes: CMS-managed }
+  - { name: Related content suggestions,       data_source: STATIC, notes: CMS taxonomy / tagging }
+
+scenarios:
+  - id: filter-matches-nothing
+    given: a filter combination that matches no published article
+    when: the reader applies it
+    then: the listing states that nothing matched and keeps the applied filters visible so they can be relaxed one at a time
+  - id: article-withdrawn
+    given: an article that was published and has since been withdrawn
+    when: its address is requested
+    then: the withdrawn text is not served, and the response directs the reader to the topic the article belonged to
+  - id: article-without-tags
+    given: an article carrying no taxonomy tags
+    when: its detail page renders
+    then: the related-content block is omitted rather than filled with unrelated articles
+
+success_criteria:
+  - { id: article-addressable, metric: every published article resolves from its own address with no listing state required }
+
+open_questions:
+  - "Does the article address space share a prefix with category or product slugs, and which system arbitrates a collision?"
+  - "Are gated resources such as a case study behind a form in scope here, and does the gate live in the CMS or in the storefront's session tier?"
+
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "4. Content & Support Pages › Blog / Resources Page"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

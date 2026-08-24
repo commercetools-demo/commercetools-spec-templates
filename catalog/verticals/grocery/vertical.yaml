@@ -1,0 +1,14 @@
+schema_version: 1
+id: grocery
+label: Grocery & q-commerce
+group: retail
+description: Fresh-heavy, slot-based, weight-variable retail with pick-time volatility.
+maturity: beta
+# Anything not listed is a hard refusal (exit 5), never invented.
+supported_models: [B2C, B2B, B2B2C]
+owners: [grocery-guild@commercetools.com]
+# ORDERED. Drives Spec Kit numbering and, with --as-change, one OpenSpec change per epic.
+epics:
+  - { slug: catalog-and-availability, title: Catalog & availability }
+  - { slug: basket-and-pricing,       title: Basket & pricing }
+  - { slug: slots-and-fulfillment,    title: Slots & fulfillment }

@@ -1,0 +1,131 @@
+schema_version: 1
+id: base.cart-page
+version: 1.0.0
+title: Cart with engine-calculated totals after every change
+kind: page
+status: published
+visibility: public
+industry: ["*"]
+business_models: ["*"]
+priority: P1
+epic: core-shopping
+page_group: "1. Core Shopping Pages"
+journeys: [B2C-2, B2B-4, B2B-6, B2B-7]
+domains: [cart, pricing]
+skill: commercetools-storefront
+supporting_skills: [commercetools-commerce-patterns]
+
+requirement: >
+  The system SHALL display the cart's subtotal, discounts, tax and total as returned by the commerce
+  engine for the cart's current state after every line-item or discount change, never as a value
+  calculated in the storefront.
+
+rationale: >
+  Discounts are re-evaluated on every cart mutation, and a code that matched a moment ago can stop
+  matching when a line is removed. Any total the storefront computes itself will therefore disagree
+  with the total the order is created from, and the disagreement surfaces at the worst possible
+  moment. Reading the engine's own numbers back after each write is the only way the cart page and
+  the placed order can agree.
+
+components:
+  - { name: "Line items (image, name, SKU, quantity, unit price, line total)", data_source: MIDDLEWARE,
+      notes: "Session cart state plus resolved pricing" }
+  - { name: "Quantity editor and remove item", data_source: MIDDLEWARE,
+      notes: "Writes to cart via middleware" }
+  - { name: "Cost center or budget code selector per line", data_source: MIDDLEWARE,
+      business_models: [B2B],
+      notes: "Account-specific cost centers" }
+  - { name: "Applied promotions and discount codes", data_source: MIDDLEWARE,
+      notes: "Cart discounts evaluated server-side" }
+  - { name: "Order summary (subtotal, shipping estimate, taxes, total)", data_source: MIDDLEWARE,
+      notes: "Calculated by commerce engine" }
+  - { name: "Minimum order value warning", data_source: MIDDLEWARE,
+      notes: "Business rule evaluated against cart total" }
+  - { name: "Save cart action", data_source: MIDDLEWARE,
+      notes: "Write to account" }
+  - { name: "Convert cart to quote request", data_source: MIDDLEWARE,
+      business_models: [B2B],
+      notes: "Write to account" }
+  - { name: "Cross-sell suggestions", data_source: CACHED,
+      notes: "Merchandising rules, product data" }
+  - { name: "Empty cart state", data_source: STATIC,
+      notes: "Static UI with call to action" }
+
+scenarios:
+  - id: discount-stops-applying
+    given: a cart with a discount code applied and a line item the code depended on
+    when: the buyer removes that line item
+    then: the code is shown as no longer applicable with the reason, and the totals no longer include it
+  - id: empty-cart
+    given: a cart with no line items
+    when: the buyer opens the cart page
+    then: the empty state is shown with a route back to browsing, and no summary block with zero totals
+  - id: below-minimum-order-value
+    given: a cart whose total is under the configured minimum order value
+    when: the buyer views the cart
+    then: the shortfall is stated as an amount and the route to checkout is not offered
+  - id: cost-center-not-set
+    given: a policy that requires a cost center on every line and a line without one
+    when: the buyer tries to continue to checkout
+    then: the incomplete line is flagged and the route to checkout stays closed until it is set
+    business_models: [B2B]
+
+success_criteria:
+  - { id: totals-match-order, metric: the total shown on the cart page equals the total on the order created from that cart }
+  - { id: discount-state-checked, metric: the state of every applied discount code is re-read after every cart mutation }
+
+commercetools:
+  entities: [Cart, LineItem, CartDiscount, DiscountCode, ShoppingList, QuoteRequest, BusinessUnit, Type]
+  api_surface:
+    - kind: constraint
+      ref: "Cart Discounts are recalculated whenever a Discount Code, Line Item or Custom Line Item is added or removed, and again when the Order is created; an applied code can flip to the DoesNotMatchCart state, so the storefront must re-read discountCodes state after every mutation"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/pricing-and-discounts-overview
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "commercetools does not enforce a minimum order value. Business validations such as minimum order value and stock requirements are the implementation's responsibility, and a stale Cart needs an explicit recalculate action - with updateProductData set to true if variant prices must refresh too"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-implement-checkout/custom-checkout/cart-preparation-and-review
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "purchaseOrderNumber is a native field on Cart, Quote Request, Staged Quote, Quote and Order and is inherited by whatever is created from the Cart; a per-line cost centre has no native field and belongs on a Line Item Custom Field instead"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/implement-b2b-purchase-flows/the-b2b-cart
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "A Quote Request cannot be created from an anonymous Cart, a Cart carrying Discount Codes, or a Cart with shippingMode Multiple, and the Cart must have a shippingAddress - so the convert-to-quote action has to be gated on the cart's actual shape, not just on the buyer's role"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/quotes-overview
+      verified_at: 2026-08-21
+    - kind: update-action
+      ref: "addShoppingList copies every Line Item of a Shopping List onto a Cart in one call and applies the given distributionChannel to the added lines, which is the mechanism behind a saved list becoming a cart at the right price"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/discover-and-order-products-in-b2b/shopping-lists-for-b2b-purchasing
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Cart writes are read-then-write on the cart version: always read the latest Cart before an update and verify the anonymousId or customerId matches the acting user, or concurrent edits from two tabs conflict"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-implement-checkout/custom-checkout/cart-preparation-and-review
+      verified_at: 2026-08-21
+  modeling_notes: >
+    Treat every cart mutation as write-then-read and render from the response, not from local state.
+    Minimum order value, per-line cost centres and any spend rule are your validations to write and
+    to place consistently - if the cart page enforces them but checkout does not, buyers will find
+    the gap. Keep the saved-cart concept on Shopping Lists rather than duplicating cart storage.
+
+tasks_hint:
+  - "Render the cart summary from the cart response returned by each update action"
+  - "Re-check every applied discount code's state after each mutation and surface the reason when one stops matching"
+
+open_questions:
+  - "Where is the minimum order value configured, and is it per store, per account or per currency?"
+  - "Is the list of valid cost centers held on the Business Unit, in an external finance system, or both?"
+
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "1. Core Shopping Pages › Cart Page"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

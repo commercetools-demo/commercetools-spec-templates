@@ -1,0 +1,21 @@
+# Closed vocabulary. Tool 1's industry question and the collector's forms both derive from
+# this file, which is why their option lists cannot drift. Add a token here BEFORE any
+# capability, overlay, or form references it.
+schema_version: 1
+groups:
+  retail: { label: Retail & grocery }
+  telco:  { label: Telco & media }
+  industrial: { label: Industrial & distribution }
+industries:
+  grocery:
+    label: Grocery & q-commerce
+    group: retail
+    maturity: beta          # draft | beta | stable | deprecated
+  telecom:
+    label: Telecommunications
+    group: telco
+    maturity: draft
+  fashion:
+    label: Fashion & apparel
+    group: retail
+    maturity: draft

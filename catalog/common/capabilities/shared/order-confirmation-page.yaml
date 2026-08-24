@@ -1,0 +1,126 @@
+schema_version: 1
+id: base.order-confirmation-page
+version: 1.0.0
+title: Order confirmation stating reference and true order state
+kind: page
+status: published
+visibility: public
+industry: ["*"]
+business_models: ["*"]
+priority: P1
+epic: core-shopping
+page_group: "1. Core Shopping Pages"
+journeys: [B2C-4, B2C-5, B2B-6, B2B-7]
+domains: [order-management, checkout]
+skill: commercetools-storefront
+supporting_skills: [commercetools-connect]
+
+requirement: >
+  The system SHALL present the placed order's own reference together with the order's actual state, so
+  that an order still awaiting approval is described as awaiting approval and never as confirmed.
+
+rationale: >
+  This page is the buyer's receipt and the only artefact they will quote back when something goes
+  wrong, so the reference has to be the order's real identifier and the state has to be the order's
+  real state. An order that has been submitted into an approval flow is not yet a commitment to
+  deliver; telling the buyer it is confirmed produces a purchase their own organization has not
+  authorized and a delivery expectation nobody owns.
+
+components:
+  - { name: "Confirmation message with order number", data_source: MIDDLEWARE,
+      notes: "Returned from order submission response" }
+  - { name: "Estimated delivery date", data_source: MIDDLEWARE,
+      notes: "From order response" }
+  - { name: "Order summary (items, address, payment, totals)", data_source: MIDDLEWARE,
+      notes: "Snapshot from placed order" }
+  - { name: "Download or print receipt", data_source: MIDDLEWARE,
+      notes: "Generated PDF or order data" }
+  - { name: "Track order link", data_source: MIDDLEWARE,
+      notes: "Order plus fulfillment reference" }
+  - { name: "Continue shopping and go to order history actions", data_source: STATIC,
+      notes: "Navigation links" }
+  - { name: "Approval pending notice", data_source: MIDDLEWARE,
+      business_models: [B2B],
+      notes: "Conditional on order status" }
+  - { name: "Support contact information", data_source: STATIC,
+      notes: "CMS-managed" }
+
+scenarios:
+  - id: order-placed
+    given: an order created without any approval requirement
+    when: the confirmation page renders
+    then: the order reference, the captured totals and the next steps are shown from the order itself, not from the cart
+  - id: awaiting-approval
+    given: an order that matched an approval rule when it was placed
+    when: the confirmation page renders
+    then: the page states that the order is awaiting approval, who it is waiting on, and that no delivery is scheduled yet
+    business_models: [B2B]
+  - id: placement-outcome-unknown
+    given: order placement that failed with a server error after the request was sent
+    when: the buyer returns to the confirmation page
+    then: the order is looked up by the reference generated before submission and either the confirmation or a single retry path is shown, and no second order exists
+  - id: revisited-later
+    given: a buyer who reloads the confirmation page or returns to it from a bookmark
+    when: the page renders
+    then: it renders from the stored order and does not depend on the cart or the session that placed it
+
+success_criteria:
+  - { id: state-truthful, metric: no order awaiting approval is ever presented as confirmed }
+  - { id: no-duplicate-orders, metric: retrying a failed placement never produces a second order for the same reference }
+
+commercetools:
+  entities: [Order, Cart, ApprovalFlow, Payment, Message, Subscription]
+  api_surface:
+    - kind: constraint
+      ref: "Creating an Order sets the source Cart's cartState to Ordered and snapshots all prices, discounts, taxes, shipping and payment details onto the Order - the confirmation must render the Order, because the Cart can no longer be modified and no longer represents the transaction"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-implement-checkout/custom-checkout/order-creation
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "orderNumber is a user-defined identifier that must be unique within the Project and is immutable once set; generating it before placement makes retries idempotent, and a DuplicateField error on orderNumber means an Order with that number already exists"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/tutorials/standard-checkout-flow
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "A 5xx response from order creation does not mean the Order was not created - verify by querying the unique identifier supplied in the creation request, such as the orderNumber, before offering a retry"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-implement-checkout/custom-checkout/order-creation
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "An ApprovalFlow is created automatically when a placed Order matches an active rule and starts in Pending; the platform sends no approval notifications, so pending state must be read from the flow's status and currentTierPendingApprovers or from ApprovalFlow Messages via a Subscription"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/configure-approval-workflows/approval-flows-in-action
+      verified_at: 2026-08-21
+    - kind: concept
+      ref: "Order creation emits an OrderCreated Message that a Subscription can consume to send the confirmation email and synchronize an ERP or OMS, keeping those out of the request that renders the page"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-implement-checkout/custom-checkout/order-creation
+      verified_at: 2026-08-21
+    - kind: update-action
+      ref: "Shipment progress is recorded on the Order itself through the addDelivery and changeShipmentState update actions, so a track-order link can resolve from the Order before any external carrier data exists"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/orders
+      verified_at: 2026-08-21
+  modeling_notes: >
+    Render this page from a fresh read of the order by its reference so that a reload, a bookmark or a
+    forwarded link all work. Keep the confirmation email and any downstream synchronization on the
+    OrderCreated Message rather than in the placement request, so a slow mail service cannot fail a
+    successful order. Where approval applies, read the approval flow for that order rather than
+    inferring approval state from the order alone.
+
+tasks_hint:
+  - "Render the confirmation from a read of the order by its reference rather than from the placement response held in memory"
+  - "Resolve and display the approval flow's pending state for orders that matched a rule"
+
+open_questions:
+  - "What generates the printable receipt, and is it the same document as the eventual invoice?"
+  - "Where does carrier tracking come from once a delivery exists, and is the tracking reference held on the order or in the fulfillment system?"
+
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "1. Core Shopping Pages › Order Confirmation Page"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

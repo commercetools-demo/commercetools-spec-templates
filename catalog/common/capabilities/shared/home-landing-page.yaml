@@ -1,0 +1,127 @@
+schema_version: 1
+id: base.home-landing-page
+version: 1.0.0
+title: Landing page with session-resolved buyer context
+kind: page
+status: published
+visibility: public
+industry: ["*"]
+business_models: ["*"]
+priority: P1
+epic: core-shopping
+page_group: "1. Core Shopping Pages"
+journeys: [B2C-1, B2C-3, B2B-3, B2B-8]
+domains: [catalog, customers, pricing]
+skill: commercetools-storefront
+supporting_skills: [commercetools-platform, commercetools-commerce-patterns]
+
+requirement: >
+  The system SHALL resolve every buyer-specific element of the landing page — cart item count,
+  signed-in identity, contract promotions and account alerts — from the current session at request
+  time, and not from page content cached and shared between visitors.
+
+rationale: >
+  The landing page is the one page every visitor loads, so it is the page most worth caching and the
+  page where caching does the most damage. Its shared merchandising is identical for everyone, while
+  cart count, account identity, entitled promotions and account warnings differ per buyer and per
+  company. Mixing the two into one cacheable response is how one buyer's company name or negotiated
+  offer ends up on another buyer's screen.
+
+components:
+  - { name: "Header — logo and global navigation structure", data_source: STATIC,
+      notes: "Nav tree from CMS or config" }
+  - { name: "Header — search bar", data_source: STATIC,
+      notes: "UI shell; query execution is MIDDLEWARE" }
+  - { name: "Header — cart icon and item count", data_source: MIDDLEWARE,
+      notes: "Session-specific cart state" }
+  - { name: "Header — account menu (user name, company)", data_source: MIDDLEWARE,
+      notes: "Requires authenticated session" }
+  - { name: "Hero banner and promotional carousel", data_source: STATIC,
+      notes: "CMS-managed; same for all visitors" }
+  - { name: "Personalized promotions (contract-specific)", data_source: MIDDLEWARE,
+      business_models: [B2B],
+      notes: "Requires customer group / contract context" }
+  - { name: "Featured categories", data_source: CACHED,
+      notes: "Category tree from commerce backend, shared" }
+  - { name: "Recently ordered and recommended for you", data_source: MIDDLEWARE,
+      notes: "User order history plus personalization engine" }
+  - { name: "Quick order widget (SKU entry)", data_source: MIDDLEWARE,
+      notes: "Product lookup by SKU at runtime" }
+  - { name: "Announcements and system alerts", data_source: STATIC,
+      notes: "CMS-managed for general notices" }
+  - { name: "Contract expiry and account alerts", data_source: MIDDLEWARE,
+      business_models: [B2B],
+      notes: "Account-specific, requires session" }
+  - { name: "Footer", data_source: STATIC,
+      notes: "CMS-managed links and legal copy" }
+
+scenarios:
+  - id: anonymous-visitor
+    given: no authenticated session
+    when: a visitor opens the landing page
+    then: the shared merchandising renders in full and every account-dependent slot is omitted rather than rendered empty or with a default
+  - id: expired-session
+    given: a session whose token has expired
+    when: the landing page is requested
+    then: the page renders as for an anonymous visitor with a sign-in path, and no stale cart count or account name is shown
+  - id: contract-promotions
+    given: an authenticated buyer acting for a company that has negotiated offers
+    when: the landing page loads
+    then: only the offers that resolve for that company's commercial context are shown
+    business_models: [B2B]
+  - id: expiring-agreement
+    given: a company account whose agreement ends inside the alert window
+    when: the buyer opens the landing page
+    then: the end date is stated together with the route to renew it
+    business_models: [B2B]
+
+success_criteria:
+  - { id: no-context-leak, metric: no cached landing-page response ever contains another buyer's cart count, name or entitled offer }
+  - { id: shell-independent-of-session, metric: the shared shell renders with full content when the session service is unavailable }
+
+commercetools:
+  entities: [BusinessUnit, Customer, CustomerGroup, Store, Cart, Category, CartDiscount]
+  api_surface:
+    - kind: constraint
+      ref: "The signed-in company is a Business Unit, not a Customer field. Business Units nest up to five levels with the top level a Company, and Divisions can inherit Stores, Associates with their roles, and Approval Rules from a parent - so the account context shown in the header resolves through the hierarchy"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/business-units
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "For B2B-specific prices to apply, both businessUnit.customerGroupAssignments and cart.businessUnit must be non-null; if either is missing the platform selects B2C-specific prices instead, silently showing list pricing to a contract buyer"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/pricing-and-discounts-overview
+      verified_at: 2026-08-21
+    - kind: concept
+      ref: "Cart Discounts can be scoped to one or more Stores through the CartDiscount stores array; an empty or absent array applies the discount to every Cart in the Project - this is the mechanism behind account-specific promotional offers"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/pricing-and-discounts-overview
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "The header cart count can change at sign-in: anonymousCartSignInMode chooses between MergeWithExistingCustomerCart and UseAsNewActiveCustomerCart, and the merge can also recalculate tax depending on whether the carts carry a shipping address"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-implement-carts-and-shopping-lists/manage-signups-and-signins/cart-merge-strategies
+      verified_at: 2026-08-21
+  modeling_notes: >
+    Promotional content itself is not a commercetools resource. What commercetools supplies is the
+    context that selects it - the resolved Business Unit, Store and Customer Group - so the content
+    system should be keyed on those and never on a page-level cache key. Cache the shell and the
+    featured-category tree; fetch the account slots as separate per-session calls so a slow account
+    service degrades a widget rather than the page.
+
+tasks_hint:
+  - "Split the landing page into a cacheable shell and per-session account fragments"
+  - "Resolve the buyer's Business Unit, Store and Customer Group once per request and pass it to both pricing and content selection"
+
+open_questions:
+  - "Which system owns the hero, announcements and footer copy, and does its targeting key off the Business Unit key or the Customer Group?"
+  - "Is 'recently ordered' computed from the buyer's own orders or the whole company account's orders?"
+
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "1. Core Shopping Pages › Home / Landing Page"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

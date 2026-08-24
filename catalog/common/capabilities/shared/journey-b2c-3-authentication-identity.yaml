@@ -1,0 +1,96 @@
+schema_version: 1
+id: base.journey-b2c-3-authentication-identity
+version: 1.0.0
+title: B2C-3 — Authentication & identity
+kind: journey
+status: published
+visibility: public
+industry: ["*"]
+business_models: ["*"]
+priority: P1
+epic: journeys
+domains: [customers]
+journeys: [B2C-3]
+skill: commercetools-platform
+supporting_skills: [commercetools-storefront]
+requirement: >
+  The storefront SHALL establish an authenticated session for a returning buyer, and carry any work
+  the buyer did anonymously into that session, without revealing whether a given email is registered.
+rationale: >
+  Anything the buyer built before signing in is lost unless it is deliberately carried across, and
+  the sign-in surface is the most probed part of a storefront: error messages that distinguish
+  "unknown email" from "wrong password" hand an attacker a list of valid accounts.
+scenarios:
+  - id: sign-in-carries-the-anonymous-cart
+    given: an anonymous buyer with items in a cart
+    when: the buyer signs in to an existing account
+    then: the anonymous cart is merged into or becomes the customer's active cart, and no items are silently dropped
+  - id: failed-sign-in-is-ambiguous
+    given: a sign-in attempt with an email that is not registered, and one with a wrong password
+    when: either fails
+    then: the buyer sees the same generic message, and nothing distinguishes the two cases
+  - id: password-reset-does-not-confirm-the-email
+    given: a password reset requested for an address that may or may not be registered
+    when: the request is submitted
+    then: the response is identical either way, and any reset link is delivered only by email
+  - id: verification-before-recovery
+    given: an account whose email address has never been verified
+    when: the buyer attempts password recovery
+    then: the flow states what is required rather than failing opaquely
+success_criteria:
+  - { id: no-enumeration, metric: no response distinguishes a registered from an unregistered email address }
+  - { id: no-lost-carts, metric: no buyer loses cart contents by signing in }
+commercetools:
+  entities: [Customer, Cart, Store]
+  api_surface:
+    - kind: rest
+      ref: "Sign-in has two endpoints: global POST /{projectKey}/login and store-specific POST /{projectKey}/in-store/key={storeKey}/login. A store-specific Customer must use their store's endpoint; a global Customer can use either"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/customers-overview
+      verified_at: 2026-08-21
+    - kind: concept
+      ref: "CustomerSignin takes an optional anonymousId or anonymousCart plus anonymousCartSignInMode — MergeWithExistingCustomerCart (default) or UseAsNewActiveCustomerCart — which is how anonymous work is carried into the session"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/customers-overview
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "The InvalidCredentials 400 error is deliberately generic and does not say whether the email, the password or the store association was wrong; it exists to prevent account enumeration, so the UI must mirror that ambiguity"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-implement-carts-and-shopping-lists/manage-signups-and-signins/customer-signin
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "commercetools does not manage sessions. Creating, storing, validating, expiring and refreshing the session token is the application backend's responsibility"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-implement-carts-and-shopping-lists/manage-signups-and-signins/customer-signin
+      verified_at: 2026-08-21
+    - kind: rest
+      ref: "Password reset is two steps: POST /{projectKey}/customers/password-token to mint a short-TTL token, then POST /{projectKey}/customers/password/reset with that token and the new password"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/customers-overview
+      verified_at: 2026-08-21
+    - kind: rest
+      ref: "Email verification mints a token via POST /{projectKey}/customers/email-token with a ttlMinutes, then confirms it; verification activates the account and enables password recovery"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-implement-carts-and-shopping-lists/manage-signups-and-signins/customer-signup-and-email-verification
+      verified_at: 2026-08-21
+  modeling_notes: >
+    The session boundary lives in the BFF, not in commercetools: mint an HttpOnly, Secure cookie
+    after a successful sign-in and validate it on every subsequent request. Never log a reset or
+    verification token. Decide MergeWithExistingCustomerCart versus UseAsNewActiveCustomerCart
+    deliberately — the default merges, which is usually right but is a business decision.
+tasks_hint:
+  - "Implement global and store-scoped sign-in, choosing the anonymous-cart sign-in mode explicitly"
+  - "Issue and validate the session token in the BFF; commercetools does not do this"
+  - "Implement the two-step password reset and the email verification token flows"
+  - "Make every authentication failure message non-committal about account existence"
+open_questions:
+  - "Are buyers global or store-scoped Customers? That decides which sign-in endpoint is correct."
+  - "Is SSO or federated login required, and if so which identity provider fronts it?"
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "User Journey Reference › B2C Journeys › B2C-3"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

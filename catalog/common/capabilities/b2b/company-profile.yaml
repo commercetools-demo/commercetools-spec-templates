@@ -1,0 +1,156 @@
+schema_version: 1
+id: base.company-profile
+version: 1.0.0
+title: Company profile with permission-gated editing
+status: published
+visibility: public
+kind: page
+industry: ["*"]
+business_models: [B2B, B2B2B]
+priority: P2
+epic: b2b-specific
+page_group: "3. B2B-Specific Pages"
+journeys: [B2B-1]
+domains: [customers]
+skill: commercetools-storefront
+supporting_skills: [commercetools-commerce-patterns, commercetools-platform]
+
+requirement: >
+  The system SHALL accept a change to the buying company's master record — legal identity, billing
+  addresses or unit hierarchy — only from an associate whose role carries the matching company-level
+  permission, and refuse the attempt without applying any part of it otherwise.
+
+rationale: >
+  The company record decides who the seller invoices, under which tax identity, and at which
+  address, so an unauthorised edit is a financial event rather than a cosmetic one. The platform
+  evaluates the permission server-side and answers a request that lacks it with an error, which
+  means a storefront that only hides the edit control has not implemented the control at all.
+
+components:
+  - name: "Company name, legal info, tax IDs"
+    data_source: MIDDLEWARE
+    notes: Account master data
+  - name: Billing address
+    data_source: MIDDLEWARE
+    notes: Account address records
+  - name: Assigned account manager card
+    data_source: MIDDLEWARE
+    notes: CRM integration
+  - name: Edit controls
+    data_source: MIDDLEWARE
+    notes: Write to account service (admin only)
+  - name: "Linked sub-companies / business units"
+    data_source: MIDDLEWARE
+    notes: Account hierarchy
+
+scenarios:
+  - id: administrator-edits-billing-address
+    given: an associate whose role carries the permission to change company details
+    when: they submit a new registered billing address
+    then: the change is persisted on the company record and is visible to every associate of that company
+  - id: edit-without-permission-refused
+    given: an associate whose role carries no company-level permission
+    when: they submit a change to the company's legal name
+    then: the request is refused, the stored record is unchanged, and the refusal names the permission required
+  - id: sub-unit-without-its-own-address
+    given: a newly linked sub-unit that has no address of its own
+    when: the profile lists the company's sub-units
+    then: that sub-unit is shown as lacking an address, because addresses are never inherited from the parent unit
+  - id: account-manager-lookup-unavailable
+    given: the CRM holding the assigned account manager cannot be reached
+    when: the profile is opened
+    then: the rest of the record renders and the account manager card states that the contact could not be loaded
+
+success_criteria:
+  - id: no-unauthorised-write
+    metric: no company-record field is ever changed by an associate lacking the corresponding permission
+  - id: hierarchy-truth
+    metric: every sub-unit shown on the profile resolves to a unit whose parent is this company
+
+commercetools:
+  entities: [BusinessUnit, Associate, AssociateRole, Customer, Type, Store]
+  api_surface:
+    - kind: concept
+      ref: >
+        A BusinessUnit models the buyer organisation: a Company has no parentUnit, a Division
+        references one, every unit carries topLevelUnit, and hierarchies run up to 5 levels with up
+        to 4000 descendants per top-level unit
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/business-units
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: >
+        Through the as-associate endpoints, UpdateBusinessUnitDetails is required for every update
+        action except associate management (UpdateAssociates) and changeParentUnit
+        (UpdateParentUnit); a missing permission returns AssociateMissingPermission
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/associate-business-units
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: >
+        The me endpoints do not validate View permissions, so an associate can read every resource
+        exposed there regardless of their role - read gating on a company profile has to be designed
+        deliberately and cannot be assumed from the role model
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/associates-overview
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: >
+        Addresses and Custom Fields are never inherited between Business Units. A sub-unit that
+        inherits Stores and associates from its parent still needs its own addresses, and an order
+        cannot be placed for a unit that has none
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/model-buyer-organizations/stores-and-business-units
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: >
+        The BusinessUnit update actions cover name, addresses, contactEmail, stores, associates,
+        customer group assignments and custom fields - there is no action for a tax registration
+        identifier, so tax IDs are carried as Custom Fields via setCustomField
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/business-units
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: >
+        setUnitType is not available on the Me or as-associate API, and only one hierarchy move runs
+        at a time - a concurrent changeParentUnit, or an in-flight asynchronous topLevelUnit update,
+        returns ConcurrentModification
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/business-units
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: >
+        When an associate adds or changes associates through the as-associate endpoints, the API
+        accepts only AssociateRoles whose buyerAssignable property is true, so sensitive roles stay
+        outside the buyer portal
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/associate-business-units
+      verified_at: 2026-08-21
+  modeling_notes: >
+    The profile is one read/write surface over a single BusinessUnit, reached through the
+    as-associate endpoints so the platform - not the storefront - decides whether the edit is
+    allowed. Fields the seller's master data owns (legal name, tax identity) are candidates for a
+    read-only render sourced from the ERP even where commercetools holds a copy; decide which system
+    is authoritative before exposing an edit control for them. Because addresses do not inherit,
+    treat the sub-unit list as an operational checklist and surface units that are not yet
+    orderable.
+
+tasks_hint:
+  - "Read the acting associate's business unit and permissions and derive which profile fields are editable"
+  - "Implement company detail and address edits through the as-associate business unit endpoints"
+  - "Render the sub-unit list, flagging units that have no address of their own"
+  - "Degrade the account manager card independently when the CRM lookup fails"
+
+open_questions:
+  - "Is the seller's ERP or commercetools the master for legal name and tax identifiers, and is the storefront view read-only as a result?"
+  - "Which role in the buyer's own vocabulary maps to the permission that can change company details, and who assigns it during onboarding?"
+  - "Does the account manager assignment need to be visible to every associate, or only to administrators?"
+
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "3. B2B-Specific Pages › Company Profile Page"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

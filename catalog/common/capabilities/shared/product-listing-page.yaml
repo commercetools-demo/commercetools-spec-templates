@@ -1,0 +1,123 @@
+schema_version: 1
+id: base.product-listing-page
+version: 1.0.0
+title: Category listing with request-derived filter and page state
+kind: page
+status: published
+visibility: public
+industry: ["*"]
+business_models: ["*"]
+priority: P1
+epic: core-shopping
+page_group: "1. Core Shopping Pages"
+journeys: [B2C-1, B2B-3, B2B-8]
+domains: [catalog, search, pricing]
+skill: commercetools-storefront
+supporting_skills: [commercetools-platform, commercetools-commerce-patterns]
+
+requirement: >
+  The system SHALL derive a category listing's result set, active facets, sort order and page
+  position entirely from the request, so that the same request reproduces the same listing state for
+  the same buyer.
+
+rationale: >
+  A listing is only useful if a buyer can narrow it, share it and come back to it. State held in the
+  client instead of the request breaks the back button, breaks a pasted link and makes the page
+  impossible to cache, which matters most here because catalog cards are the largest shared payload
+  in the storefront. Keeping the state in the request is also what lets the shared card data be
+  cached while price and availability stay per-buyer.
+
+components:
+  - { name: "Breadcrumb navigation", data_source: CACHED,
+      notes: "Derived from category tree" }
+  - { name: "Category title and description", data_source: CACHED,
+      notes: "CMS or category metadata" }
+  - { name: "Faceted filters (brand, attributes, availability)", data_source: CACHED,
+      notes: "Facet config is cached; applied counts may be MIDDLEWARE if inventory is real-time" }
+  - { name: "Sort controls", data_source: STATIC,
+      notes: "UI config only" }
+  - { name: "Product cards — image, name, SKU", data_source: CACHED,
+      notes: "Catalog data, shared across users" }
+  - { name: "Product cards — price", data_source: MIDDLEWARE,
+      notes: "Contract / customer-group pricing; user-specific" }
+  - { name: "Product cards — availability indicator", data_source: MIDDLEWARE,
+      notes: "Real-time inventory per warehouse / delivery location" }
+  - { name: "Active filter tags and clear filters", data_source: STATIC,
+      notes: "UI state, client-side" }
+  - { name: "Pagination or infinite scroll", data_source: CACHED,
+      notes: "Page of products from catalog" }
+  - { name: "Results count indicator", data_source: CACHED,
+      notes: "Total results for the query" }
+
+scenarios:
+  - id: filters-survive-a-reload
+    given: a listing narrowed by two facets and sorted by a non-default order
+    when: the buyer reloads the page or opens the same link in a new session
+    then: the same facets, sort order and page are active, and the result count matches
+  - id: facet-combination-with-no-matches
+    given: a combination of facets that matches no product
+    when: the listing renders
+    then: the empty result is stated with the active facets still visible and individually removable
+  - id: no-price-for-this-buyer
+    given: a product in the listing with no price matching the buyer's currency and context
+    when: the card renders
+    then: the card states that no price is available to the buyer rather than showing zero or a price in another currency
+  - id: page-past-the-last-result
+    given: a page position beyond the total number of results
+    when: the listing is requested
+    then: the last page that has results is returned, not a blank grid
+
+success_criteria:
+  - { id: shareable-state, metric: every filter, sort and page combination reachable in the UI is reachable from the request alone }
+  - { id: cache-hit-on-cards, metric: card data is served from cache while price and availability are resolved per request }
+
+commercetools:
+  entities: [Product, ProductProjection, Category, Store, ProductSelection, StandalonePrice, InventoryEntry]
+  api_surface:
+    - kind: rest
+      ref: "Product Search takes a search-query-language body and returns total, offset, limit, count and results; the next page is the same query with offset advanced by limit, which makes page position a pure function of the request"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/product-search
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Product Search returns only matching Product IDs by default - full representations come from the GraphQL productsSearch query or a follow-up Product Projection read, while price selection and scoped-price filtering, faceting and sorting are Product Projection Search features rather than Product Search ones"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/storefront-search-overview
+      verified_at: 2026-08-21
+    - kind: rest
+      ref: "Setting limit to 0 on a Product Search request returns facet aggregations with no product results, which builds the filter UI without paying for product data"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/product-search
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Availability in search is doubly eventually consistent: InventoryEntry syncs asynchronously to ProductVariantAvailability, which syncs asynchronously to the search index, so an availability facet count can disagree with real stock"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-your-product-catalog/inventory-modeling/inventory-management
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Scoped Price search - filtering, faceting and sorting on the scoped price - works only with Embedded Prices; on Products with Standalone price mode the results are inconsistent because only Embedded Prices are considered"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/pricing-and-discounts-overview
+      verified_at: 2026-08-21
+  modeling_notes: >
+    Cache the card payload on a key of category, facets, sort, page and locale, and overlay price and
+    availability per request. That split is what makes the CACHED and MIDDLEWARE mix on this page
+    work: the catalog half is identical for every buyer, the commercial half never is. Decide early
+    whether price is a facet or a filter, because a price facet forces Embedded Prices.
+
+tasks_hint:
+  - "Map every listing URL parameter to a Product Search query, postFilter, sort and offset"
+  - "Overlay per-buyer price and availability onto cached card data at render time"
+
+open_questions:
+  - "Are prices modelled as Embedded or Standalone, given that a price facet or price sort constrains the choice?"
+  - "Should availability be an offered facet at all, given the indexing lag on availability data?"
+
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "1. Core Shopping Pages › Product Listing Page (PLP)"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

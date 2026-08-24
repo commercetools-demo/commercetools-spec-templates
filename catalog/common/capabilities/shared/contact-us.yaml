@@ -1,0 +1,66 @@
+schema_version: 1
+id: base.contact-us
+version: 1.0.0
+title: Contact page that confirms only enquiries support has accepted
+status: published
+visibility: public
+kind: page
+industry: ["*"]
+business_models: ["*"]
+priority: P1
+epic: content-support
+page_group: "4. Content & Support Pages"
+journeys: [B2C-5, B2C-6]
+domains: [customers, order-management]
+
+requirement: >
+  The system SHALL confirm an enquiry as received only after the seller's CRM or support system has
+  accepted it, so a submission that failed to route is never reported to the buyer as delivered.
+
+rationale: >
+  The form is the only element of this page that leaves the browser, and it is the one that can fail
+  invisibly. A dropped enquiry is worse than a form that is plainly unavailable, because the buyer
+  stops looking for another way through and waits for a reply that will never come. The phone,
+  email and office details are published as static content precisely so the page keeps working when
+  the routing does not.
+
+components:
+  - { name: "Contact info (phone, email, offices)", data_source: STATIC,   notes: CMS-managed }
+  - { name: Contact form submission,              data_source: MIDDLEWARE, notes: Routes to CRM / support ticketing }
+  - { name: Live chat widget,                     data_source: STATIC,     notes: Third-party script embed }
+
+scenarios:
+  - id: enquiry-accepted-downstream
+    given: a completed enquiry and an available support system
+    when: the buyer submits it
+    then: the confirmation names the channel that took the enquiry and carries a reference the buyer can quote when following up
+  - id: routing-unavailable
+    given: the CRM or ticketing endpoint returns an error or exceeds its timeout
+    when: the buyer submits the enquiry
+    then: the submission is reported as not sent, the entered text is preserved for a retry, and the phone and email channels are offered as the way through
+  - id: chat-script-absent
+    given: the third-party chat script is blocked by the visitor's consent choices or fails to load
+    when: the page renders
+    then: the remaining contact options are fully usable and no chat placeholder is shown that a visitor could wait on
+  - id: region-without-an-office
+    given: a visitor in a region for which no office is listed
+    when: they open the page
+    then: the channels that do serve that region are presented, rather than an empty office block
+
+success_criteria:
+  - { id: no-silent-drop, metric: every enquiry the buyer saw confirmed has a matching record in the CRM or ticketing system }
+  - { id: alternative-always-present, metric: at least one contact channel is reachable on the page while the form is failing }
+
+open_questions:
+  - "Does an authenticated buyer's enquiry carry an account or company identifier to the CRM, and which identifier is authoritative on that side?"
+  - "What is the retention and consent basis for the free-text field, given a buyer may paste order or payment details into it?"
+  - "Is the chat vendor in scope for the storefront's consent banner, and does the page remain compliant when chat is declined?"
+
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "4. Content & Support Pages › Contact Us"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

@@ -1,0 +1,160 @@
+schema_version: 1
+id: base.budget-and-spending-limits
+version: 1.0.0
+title: Budget monitoring against committed order spend
+status: published
+visibility: public
+kind: page
+industry: ["*"]
+business_models: [B2B, B2B2B]
+priority: P2
+epic: b2b-specific
+page_group: "3. B2B-Specific Pages"
+journeys: [B2B-2, B2B-6]
+domains: [customers, order-management]
+skill: commercetools-commerce-patterns
+supporting_skills: [commercetools-storefront, commercetools-connect]
+
+requirement: >
+  The system SHALL report, for every budget an administrator can see, the amount already committed
+  by placed orders in the current period and the amount remaining, derived from the same order
+  records the seller bills against rather than from a separately maintained counter.
+
+rationale: >
+  A budget figure that is maintained independently of the orders it constrains drifts within days,
+  and the first time anyone notices is when an approval is refused for a buyer who believed they had
+  headroom. Because the platform carries no budget resource and evaluates approval predicates
+  against a single order, the remaining-budget number is computed outside and has to be traceable
+  back to the orders that consumed it.
+
+components:
+  - name: "Budget overview cards (total, spent, remaining)"
+    data_source: MIDDLEWARE
+    notes: Account budget + order spend aggregation
+  - name: Spending progress bars
+    data_source: MIDDLEWARE
+    notes: Calculated from budget vs. orders
+  - name: "Budget list by cost center / user"
+    data_source: MIDDLEWARE
+    notes: Account configuration
+  - name: "Create / edit budget form"
+    data_source: MIDDLEWARE
+    notes: Write to account service
+  - name: Spending history chart
+    data_source: MIDDLEWARE
+    notes: Aggregated order data
+  - name: Alerts configuration
+    data_source: MIDDLEWARE
+    notes: Write to notification rules
+
+scenarios:
+  - id: committed-spend-reconciles
+    given: a budget with orders already placed against it in the current period
+    when: an administrator opens the budget overview
+    then: spent plus remaining equals the budget total, and the spent figure traces to the individual orders that produced it
+  - id: threshold-alert-fires-once
+    given: a budget with an alert threshold configured
+    when: a newly placed order takes committed spend across that threshold
+    then: the configured recipients are notified once for that crossing and the progress indicator reflects the new state
+  - id: order-beyond-remaining-budget-held
+    given: a buyer whose remaining budget is lower than the total of the order they submit
+    when: they place the order
+    then: the order is held for approval rather than proceeding, and the requester is shown the shortfall
+  - id: no-budgets-configured
+    given: a company that has defined no budgets
+    when: an administrator opens the page
+    then: the absence of budgets is stated explicitly with the path to create one, and no zero-valued figures are shown
+
+success_criteria:
+  - id: reconciliation
+    metric: the spent figure on every budget equals the sum of the orders attributed to it for the period
+  - id: no-silent-overspend
+    metric: no order that exceeds its budget's remaining amount reaches a placed state without an approval decision
+
+commercetools:
+  entities: [ApprovalRule, ApprovalFlow, AssociateRole, BusinessUnit, Cart, Order, CustomObject, Type]
+  api_surface:
+    - kind: constraint
+      ref: >
+        commercetools has no budget resource and no spend ledger. An Approval Rule predicate is an
+        Order Predicate evaluated against the single order being placed, so a cumulative
+        budget-to-date test cannot be expressed in it - compute the remaining budget outside, carry
+        it on the cart or order as a Custom Field, and gate on custom.<fieldName>
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/configure-approval-workflows/approval-rules-predicates-and-requesters
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: >
+        Approval governance acts on Orders, not Carts. The platform creates an ApprovalFlow when a
+        placed order matches an active rule, so any budget warning shown during cart building is a
+        storefront concern with no platform enforcement behind it
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/configure-approval-workflows/why-procurement-governance-matters
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: >
+        A threshold predicate on totalPrice.centAmount alone ignores currency and misfires for a
+        multi-currency buyer; pair it with totalPrice.currencyCode or use the money literal form
+        such as totalPrice > "50000.00 AUD"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/configure-approval-workflows/approval-rules-predicates-and-requesters
+      verified_at: 2026-08-21
+    - kind: concept
+      ref: >
+        An ApprovalRule belongs to one Business Unit and combines a predicate, requester Associate
+        Roles and an approver hierarchy of up to five sequential tiers; only Active rules are
+        evaluated, and a rule that references a field the order does not carry never matches
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/approval-rules
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: >
+        Approval Rule inheritance is additive: a Division set to ExplicitAndFromParent picks up every
+        parent rule in addition to its own and cannot exempt itself, so a company-wide budget rule
+        cannot be relaxed for one unit - it needs that unit set to Explicit instead
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/configure-approval-workflows/approval-rule-inheritance
+      verified_at: 2026-08-21
+    - kind: concept
+      ref: >
+        A buyer's credit limit or other organisation-wide configuration belongs in a Custom Object;
+        data that describes one cart, order or line item belongs in a Custom Field on that resource
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/implement-b2b-purchase-flows/the-b2b-cart
+      verified_at: 2026-08-21
+    - kind: rest
+      ref: >
+        Approval Rules are created and read through
+        /as-associate/{associateId}/in-business-unit/key={businessUnitKey}/approval-rules; managing
+        them requires manage_approval_rules and reading them view_approval_rules
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/configure-approval-workflows/approval-rules-predicates-and-requesters
+      verified_at: 2026-08-21
+  modeling_notes: >
+    Split the page into two responsibilities: budget definition, which is account configuration and
+    can live in Custom Objects keyed by unit and period; and budget consumption, which is an
+    aggregation over placed orders and belongs wherever order history is already queried. Enforcement
+    is a third thing again - an Approval Rule whose predicate reads a Custom Field the middleware
+    stamps on the cart with the remaining budget at the moment of submission. Keep the stamped value
+    and the displayed value from the same computation, or the buyer sees one number and the rule uses
+    another.
+
+tasks_hint:
+  - "Define the budget record and period model, and the aggregation that computes committed spend from placed orders"
+  - "Stamp the remaining budget onto the cart as a Custom Field at submission time"
+  - "Create the Approval Rules that gate on the budget custom field and on order total with currency constrained"
+  - "Implement threshold alert evaluation and once-only notification per crossing"
+
+open_questions:
+  - "Which system owns the budget period and the committed-spend figure - commercetools order data, or the finance system that also issues invoices?"
+  - "Does a budget bind to a cost center, a business unit, or an individual associate, and what happens to in-flight approvals when a budget is edited mid-period?"
+  - "Do quotes, recurring orders and orders awaiting approval count against committed spend, or only orders in a placed state?"
+
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "3. B2B-Specific Pages › Budget & Spending Limits Page"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

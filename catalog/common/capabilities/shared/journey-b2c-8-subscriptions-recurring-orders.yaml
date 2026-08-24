@@ -1,0 +1,79 @@
+schema_version: 1
+id: base.journey-b2c-8-subscriptions-recurring-orders
+version: 1.0.0
+title: B2C-8 — Subscriptions & recurring orders
+kind: journey
+status: published
+visibility: public
+industry: ["*"]
+business_models: ["*"]
+priority: P3
+epic: journeys
+domains: [order-management, pricing, checkout]
+journeys: [B2C-8]
+skill: commercetools-commerce-patterns
+supporting_skills: [commercetools-storefront]
+requirement: >
+  The storefront SHALL let a buyer set up a repeating order and afterwards change its schedule,
+  quantities or payment details without cancelling and rebuilding it.
+rationale: >
+  A recurring order is a standing commitment, and the commitment is what makes it valuable to both
+  sides. If the only way to change one is to cancel it, every change is a churn risk; and because a
+  recurring order spans months, whether its price is locked or re-evaluated is a decision the buyer
+  is entitled to understand up front.
+scenarios:
+  - id: recurring-order-created
+    given: a buyer with a cart they want repeated
+    when: the buyer sets a cadence and confirms
+    then: a recurring order exists with that schedule and the buyer can see when the next order will be generated
+  - id: schedule-changed-in-place
+    given: an active recurring order
+    when: the buyer changes the cadence or a quantity
+    then: the change applies from the next generated order and the recurring order is not recreated
+  - id: catalog-price-moved
+    given: an active recurring order whose product price has since changed
+    when: the next order is generated
+    then: whether the original or the new price applies follows the recurring order's configured price-selection behaviour, and the buyer was told which applies
+  - id: paused-or-cancelled
+    given: an active recurring order
+    when: the buyer pauses or cancels it
+    then: no further orders are generated and the buyer is told when the last one was
+success_criteria:
+  - { id: changeable-in-place, metric: every schedule, quantity and payment change is possible without cancelling the recurring order }
+commercetools:
+  entities: [RecurringOrder, RecurrencePolicy, Cart, LineItem, Order, Price]
+  api_surface:
+    - kind: concept
+      ref: "A recurring line item references a RecurrencePolicy; price selection first looks for a recurrence-specific Price using the same cascade and falls back to the standard one-time Price if none matches"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/recurring-orders-overview
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "PriceSelectionMode on each recurring line item decides how later price changes affect an active recurring order: Fixed locks the price at creation, Dynamic re-evaluates it each time an order is generated. This is a billing-predictability versus price-currency trade-off, not an implementation detail"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/recurring-orders-overview
+      verified_at: 2026-08-21
+    - kind: concept
+      ref: "For a fixed, scheduled cadence use a Recurring Order; for an ad-hoc repeat of a past purchase replicate the Cart or Order instead"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/implement-b2b-purchase-flows/the-b2b-cart
+      verified_at: 2026-08-21
+  modeling_notes: >
+    Fixed versus Dynamic price selection is the decision to make before building anything else here,
+    and it should be surfaced to the buyer in words rather than left implicit. Do not model an
+    ad-hoc reorder as a recurring order — replicating a cart or order is the right tool and avoids a
+    schedule nobody wanted.
+tasks_hint:
+  - "Create recurring orders with an explicit RecurrencePolicy and price-selection mode"
+  - "Implement in-place schedule, quantity and payment edits on an active recurring order"
+  - "State the price-locking behaviour to the buyer at setup"
+open_questions:
+  - "Fixed or Dynamic price selection — and is that a per-product or project-wide decision?"
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "User Journey Reference › B2C Journeys › B2C-8"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

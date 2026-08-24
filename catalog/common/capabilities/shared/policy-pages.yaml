@@ -1,0 +1,60 @@
+schema_version: 1
+id: base.policy-pages
+version: 1.0.0
+title: Policy pages stating the effective date of the text shown
+status: published
+visibility: public
+kind: page
+industry: ["*"]
+business_models: ["*"]
+priority: P1
+epic: content-support
+page_group: "4. Content & Support Pages"
+journeys: [B2C-4]
+domains: [checkout, fulfillment]
+
+requirement: >
+  The system SHALL serve the shipping and returns, terms and conditions, and privacy policies at
+  stable addresses, each stating the date on which the version being displayed took effect.
+
+rationale: >
+  These pages carry the terms a buyer is held to, so which text applied on which date is a matter of
+  record rather than presentation. Checkout links to them at the moment of consent, which means the
+  address has to outlive any restructure of the content system and the page has to be readable
+  without abandoning the purchase. The failure mode is a silent edit: a policy that changed with no
+  effective date cannot be reconciled against an order placed before the change.
+
+components:
+  - { name: All policy content, data_source: STATIC, notes: CMS or legal content management }
+
+scenarios:
+  - id: opened-from-checkout
+    given: a buyer part-way through checkout
+    when: they open a policy from the consent text
+    then: the policy is readable and they return to checkout with the cart, entered addresses and selections intact
+  - id: version-superseded
+    given: a policy that has been replaced by a newer version
+    when: the page is requested
+    then: the current text is served with its own effective date, and that date moves with the text rather than remaining at the previous value
+  - id: policy-not-translated
+    given: a policy with no translation for the buyer's locale
+    when: they open it
+    then: the fallback language version is served and identified as such, because an empty policy page blocks a lawful purchase
+
+success_criteria:
+  - { id: effective-date-present, metric: every policy page states the effective date of the text it displays }
+  - { id: consent-link-resolves, metric: every policy linked from checkout resolves without ending the buyer's session or cart }
+
+open_questions:
+  - "Which system of record holds superseded policy versions, so the text in force on a given order's date can be produced later?"
+  - "Do the policies vary by selling region, and is the variant chosen by the buyer's locale, the shipping destination, or the store the cart was created in?"
+  - "Does a material change to the terms require re-consent from buyers with an open standing order, and where is that consent recorded?"
+
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "4. Content & Support Pages › Policy Pages (Shipping, T&Cs, Privacy)"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21

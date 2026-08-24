@@ -1,0 +1,122 @@
+schema_version: 1
+id: base.saved-lists
+version: 1.0.0
+title: Saved and requisition lists with bulk add to cart
+status: published
+visibility: public
+kind: page
+industry: ["*"]
+business_models: ["*"]
+priority: P2
+epic: account-self-service
+page_group: "2. Account & Self-Service Pages"
+journeys: [B2C-8, B2B-4, B2B-8]
+domains: [customers, cart, pricing]
+skill: commercetools-storefront
+supporting_skills: [commercetools-commerce-patterns, commercetools-platform]
+
+requirement: >
+  The system SHALL add every line item on a saved list to the buyer's cart in one operation, naming
+  any line it could not add and leaving the lines it did add in the cart.
+
+rationale: >
+  A named list only earns its place if converting it back into a cart is a single act; a buyer who
+  reorders the same forty-line kit every month gains nothing from a list they have to re-key. The
+  failure mode that matters is the silent one: a discontinued or de-assorted line dropped without
+  comment is discovered at delivery, not at checkout, so the conversion has to be explicit about
+  what it left behind.
+
+components:
+  - { name: List of saved lists,                 data_source: MIDDLEWARE,
+      notes: Account's list records }
+  - { name: List detail with line items,         data_source: MIDDLEWARE,
+      notes: List plus resolved product data }
+  - { name: Line item prices,                    data_source: MIDDLEWARE,
+      notes: "Price resolved at view time, including an account contract price where one applies" }
+  - { name: Add all to cart action,              data_source: MIDDLEWARE,
+      notes: Bulk write to cart }
+  - { name: Share list with the account's users, data_source: MIDDLEWARE, business_models: [B2B],
+      notes: Account user management }
+
+scenarios:
+  - id: list-converted-in-one-operation
+    given: a saved list of twelve purchasable lines
+    when: the buyer chooses to add the whole list to their cart
+    then: all twelve lines are in the cart at the prices that buyer is entitled to, and the list itself is unchanged
+  - id: line-no-longer-purchasable
+    given: one line on the list references a product that has left the buyer's assortment
+    when: the buyer adds the whole list to their cart
+    then: the remaining lines are added and the excluded line is named with the reason it was excluded
+  - id: no-lists-yet
+    given: an account with no saved lists
+    when: the buyer opens the lists page
+    then: the absence is stated plainly and a path to create a first list from the current cart is offered
+  - id: colleagues-list-not-visible
+    business_models: [B2B]
+    given: a list created by another member of the company and a buyer whose role carries no permission over other members' lists
+    when: that buyer opens the list by its direct link
+    then: access is refused, rather than an empty list being rendered as if it had no contents
+
+success_criteria:
+  - { id: single-round-trip, metric: converting a list of any supported size to a cart takes one write to the cart }
+  - { id: no-silent-drops, metric: every line present on the list and absent from the resulting cart is named to the buyer }
+
+commercetools:
+  entities: [ShoppingList, Cart, BusinessUnit, AssociateRole, Store, Channel, Customer]
+  api_surface:
+    - kind: update-action
+      ref: "addShoppingList on the Cart copies every Line Item from the list onto the Cart in one call; passing distributionChannel on the action sets that Channel on each copied line so it resolves the buyer's negotiated Channel-scoped Price rather than an unscoped one"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/learning-model-b2b-commerce/discover-and-order-products-in-b2b/shopping-lists-for-b2b-purchasing
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "A ShoppingListLineItem carries productId, variantId, quantity and an embedded variant but no selected price, and the Shopping List endpoints expose no price-selection query parameters - list prices have to be resolved separately against the buyer's Store and distribution Channel"
+      grounded_by: oas-schemata
+      doc: https://docs.commercetools.com/api/projects/shoppingLists
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "A Shopping List holds at most 250 Line Items and 100 Text Line Items, so a requisition larger than that has to be split across several lists"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/shoppingLists
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "Shopping List access in a Business Unit is governed by paired My and Others Associate Permissions, and Others never implies My: a role granted only ViewOthersShoppingLists sees colleagues' lists but not its own, which is the usual cause of a buyer seeing everyone's lists except their own"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/associate-shopping-lists
+      verified_at: 2026-08-21
+    - kind: constraint
+      ref: "The me endpoints do not validate View Permissions, so an associate can read anything reachable through them regardless of role - list visibility has to be enforced on the as-associate endpoints, not the me endpoints"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/associates-overview
+      verified_at: 2026-08-21
+    - kind: rest
+      ref: "Company lists are created and queried through /{projectKey}/as-associate/{associateId}/in-business-unit/key={businessUnitKey}/shopping-lists; the Business Unit is taken from the path and any businessUnit in the request body is ignored, and a missing Permission returns AssociateMissingPermission"
+      grounded_by: docs-search
+      doc: https://docs.commercetools.com/api/projects/associate-shopping-lists
+      verified_at: 2026-08-21
+  modeling_notes: >
+    Decide who curates a list and who orders from it before designing roles, then grant both halves
+    of each My and Others permission pair deliberately. Create a company list through the
+    as-associate and in-business-unit path so it belongs to the company rather than to whoever typed
+    it, and scope it to the buyer's Store so it shares the commercial context of their carts. A list
+    is a template, not a quotation: it holds no price, so the price shown on the detail page and the
+    price that lands in the cart are two separate resolutions and can disagree if the channel differs.
+
+tasks_hint:
+  - "Implement list-to-cart conversion with addShoppingList, passing the buyer's distribution Channel"
+  - "Resolve and display list line prices against the buyer's Store and Channel, separately from the list read"
+  - "Model list sharing with My and Others associate permissions and enforce it on the as-associate endpoints"
+
+open_questions:
+  - "Where do list detail prices come from at view time - a price-selection read per line, or a throwaway cart? The first costs a round trip per render, the second creates carts the buyer never sees and never cleans up."
+  - "Does a shared list need visibility narrower than the Business Unit, for example one project team within a division? Associate permissions are per role and per unit, not per list."
+  - "What happens to a list line whose product is still purchasable but whose price has moved since the list was built - silently reprice, or surface the delta?"
+
+provenance:
+  # In-house material: commercetools authored the page inventory this was extracted
+  # from, and that document is not retained. `locator` names the section it came from.
+  source: authored
+  locator: "2. Account & Self-Service Pages › Saved Lists / Requisition Lists"
+  contributors: [behnam.tehrani@commercetools.com]
+  reviewed_by: []
+  reviewed_at: 2026-08-21
