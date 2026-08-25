@@ -21,7 +21,8 @@ collector answers as GitHub issues. With one public repository that option colla
 
 Answers arrive through a Google Form and never touch GitHub.
 
-`ctsx collect:render` emits one Apps Script per industry into `collector/forms/<industry>.gs`. The
+`ctsx collect:render` emits one Apps Script into `collector/forms/expert-intake.gs` — one form for
+every industry, per [ADR 7](./0007-one-form-industry-as-a-question.md). The
 admin pastes it into script.google.com and runs `setup` once; it creates (or reuses, by title) the
 form and its responses spreadsheet under the admin's own Workspace account. Responses are exported
 as CSV and read by `ctsx collect:ingest`, which writes one pseudonymized YAML per response into a

@@ -125,8 +125,10 @@ test("every field in the map appears in the result, answered or not", () => {
 // is always exercised — without any test asserting which questions exist.
 // ---------------------------------------------------------------------------------------------
 test("the live generated map maps a well-formed response cleanly", () => {
-  const live = JSON.parse(fs.readFileSync(
-    path.join(ROOT, "collector/forms/form-map-grocery-v1.json"), "utf8"));
+  const newest = fs.readdirSync(path.join(ROOT, "collector/forms"))
+    .filter((f) => /^form-map-v\d+\.json$/.test(f))
+    .sort((a, b) => Number(b.match(/v(\d+)/)[1]) - Number(a.match(/v(\d+)/)[1]))[0];
+  const live = JSON.parse(fs.readFileSync(path.join(ROOT, "collector/forms", newest), "utf8"));
   assert.ok(live.fields.length, "the questionnaire has no questions");
 
   const cells = {};

@@ -39,34 +39,45 @@ edit. The commercetools overlay is separate:
 
 ## B. Open a collection round
 
-Steps 1–5 are one-time per industry.
+There is **one form for every industry** — the industry is its first question — so steps 1–5 are
+done once, ever, not once per industry.
 
-1. Confirm the industry exists in `taxonomy/industries.yaml`. If not, do procedure **C** first.
-2. `node bin/ctsx.mjs collect:render`
-3. Open [script.google.com](https://script.google.com) > **New project**, and paste
-   `collector/forms/<industry>.gs` over the placeholder.
-4. Pick **`setup`** in the function dropdown beside **Run**, click **Run**, and allow the
+1. `node bin/ctsx.mjs build` (or `collect:render`, which does just the form).
+2. Open [script.google.com](https://script.google.com) > **New project**, and paste
+   `collector/forms/expert-intake.gs` over the placeholder.
+3. Pick **`setup`** in the function dropdown beside **Run**, click **Run**, and allow the
    authorization prompt (Forms, Drive, Sheets).
    **Do not use Deploy.** This is not a web app; deploying it gives
    `Script function not found: doGet`. The script builds a Google Form and is finished once it has
    run — the form is what has a URL.
-5. Copy the URL under `=== PASTE THIS INTO SLACK ===` in the **Execution log** at the bottom.
-   Re-running `setup` reuses the same form; it never creates a second one.
-6. `node bin/ctsx.mjs collect:invite --industry <industry> --url <published URL>`
+4. Copy the URL under `=== PASTE THIS INTO SLACK ===` in the **Execution log** at the bottom. Keep
+   it; it is the only URL you will ever need to share.
+5. Keep the script project. Re-running `setup` is how you update the live form (procedure **C**).
+6. `node bin/ctsx.mjs collect:invite --url <published URL>` for the all-industries post, or add
+   `--industry <industry>` to tailor the wording for one channel. **The URL is the same either
+   way** — only the words change.
 7. Paste the printed message into Slack, and DM the named experts. Set the reminder it prints.
 8. When responses have landed: in Sheets, **File > Download > Comma-separated values**.
 9. ```bash
    export COLLECTOR_PSEUDONYM_KEY='<from the team vault>'
-   node bin/ctsx.mjs collect:ingest --csv ~/Downloads/responses.csv --industry <industry>
+   node bin/ctsx.mjs collect:ingest --csv ~/Downloads/responses.csv
    ```
-10. Exit 1 means some responses are in `inbox/raw/<round>/_needs-a-human/`. Nothing was dropped —
-   read each file's `mapping` block and fix by hand.
+   Every industry in the export is ingested, each response filed by its own answer. Add
+   `--industry <industry>` to ingest only one industry's rows.
+10. Read the output:
+   - **exit 1** — some responses are in `inbox/raw/<round>/_needs-a-human/`. Nothing was dropped;
+     read each file's `mapping` block and fix by hand.
+   - **exit 2, "duplicated column heading"** — the sheet has two columns under one heading, so
+     one would silently overwrite the other. Delete the *empty* duplicate in Sheets and export
+     again.
+   - **`filed as 'unlisted'`** — someone picked *Something else* in the dropdown. Their answer
+     names an industry we do not have. Read it: that is the argument for the next vertical.
 
 `inbox/` is gitignored. Never commit a raw response; commit the reviewed capability instead.
 
 ---
 
-## C. Add a collector for a new industry
+## C. Add an industry to the collector
 
 1. Add four lines to `taxonomy/industries.yaml`:
    ```yaml
@@ -75,14 +86,19 @@ Steps 1–5 are one-time per industry.
        group: industrial          # must exist under `groups:` in the same file
        maturity: draft
    ```
-2. `node bin/ctsx.mjs collect:render`
-3. Commit `taxonomy/industries.yaml` and the generated
-   `collector/forms/<industry>.gs` and `form-map-<industry>-v<n>.json`.
-4. Continue with procedure **B** from step 3.
+2. `node bin/ctsx.mjs build`
+3. Commit `taxonomy/industries.yaml` and the regenerated `collector/forms/expert-intake.gs` and
+   `form-map-v<n>.json`. (`lint` fails with exit 3 if you skip the rebuild.)
+4. In the **same** Apps Script project from procedure B, paste the regenerated
+   `expert-intake.gs` over the old one and Run **`setup`** again.
 
-Nothing else is authored — the questionnaire is shared and the industry name is interpolated at
-render time. `maturity: draft` keeps the industry out of the developer tool until it has published
-capabilities.
+Same form, same URL, same responses sheet — the dropdown just gains an option. The log should say
+`Updated N question(s) in place`. If it says the shape changed instead, the questionnaire itself
+was edited, not just the taxonomy; export the sheet before trusting it, because rebuilt questions
+start new empty columns beside the old ones.
+
+Nothing else is authored — the questionnaire is shared and the industry is a question, not a form.
+`maturity: draft` keeps the industry out of the developer tool until it has published capabilities.
 
 **If you change a question**, bump `version:` in `collector/questions/expert-intake.yaml` before
 re-rendering. Form maps are versioned by filename and old ones are kept, so earlier rounds still

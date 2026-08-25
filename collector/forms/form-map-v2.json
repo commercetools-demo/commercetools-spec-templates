@@ -1,12 +1,31 @@
 {
-  "map_version": 3,
-  "source": "fashion.gs",
-  "industry": "fashion",
+  "map_version": 4,
+  "source": "expert-intake.gs",
   "questionnaire": "expert-intake",
-  "questionnaire_version": 1,
+  "questionnaire_version": 2,
+  "industry_field": "industry",
+  "industry_options": {
+    "Grocery & q-commerce": "grocery",
+    "Telecommunications": "telecom",
+    "Fashion & apparel": "fashion"
+  },
   "fields": [
     {
-      "label": "Which business models have you seen Fashion & apparel run as?",
+      "label": "Which industry are you answering about?",
+      "id": "industry",
+      "type": "dropdown",
+      "multiple": false,
+      "required": true,
+      "options": [
+        "Grocery & q-commerce",
+        "Telecommunications",
+        "Fashion & apparel",
+        "Something else — I'll name it in the boxes below"
+      ],
+      "max_length": null
+    },
+    {
+      "label": "Which business models have you seen this industry run as?",
       "id": "business_models",
       "type": "multi",
       "multiple": true,
@@ -20,7 +39,7 @@
       "max_length": null
     },
     {
-      "label": "Feature 1: what would you add to a bare storefront to make it work for Fashion & apparel?",
+      "label": "Feature 1: what would you add to a bare storefront to make it work for the industry you picked?",
       "id": "feature_1",
       "type": "long_text",
       "multiple": false,
@@ -29,7 +48,7 @@
       "max_length": 1500
     },
     {
-      "label": "Feature 2: what would you add to a bare storefront to make it work for Fashion & apparel?",
+      "label": "Feature 2: what would you add to a bare storefront to make it work for the industry you picked?",
       "id": "feature_2",
       "type": "long_text",
       "multiple": false,
@@ -38,7 +57,7 @@
       "max_length": 1500
     },
     {
-      "label": "Feature 3: what would you add to a bare storefront to make it work for Fashion & apparel?",
+      "label": "Feature 3: what would you add to a bare storefront to make it work for the industry you picked?",
       "id": "feature_3",
       "type": "long_text",
       "multiple": false,

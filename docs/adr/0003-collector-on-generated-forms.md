@@ -21,6 +21,10 @@ industry** at build time (`ctsx collect:render`) and distribute the link through
 Superseded in part by [ADR 4](./0004-one-private-repo.md): the forms live on **this** repo, which is
 private, not on a separate internal repo.
 
+The per-industry fan-out is superseded by [ADR 7](./0007-one-form-industry-as-a-question.md): the
+platform constraint above still holds, but the industry became the form's first *question* rather
+than the choice of which form to open. One form, one URL, one responses sheet.
+
 ## Consequences
 
 - Build-time fan-out dissolves the interpolation problem: industry becomes the choice of form, so

@@ -144,8 +144,8 @@ grocery|B2B2C: derived match
 node bin/ctsx.mjs build            # regenerate registry.json, dist/, rendered/, collector/forms/
 node bin/ctsx.mjs lint --strict    # 0 ok · 1 errors · 3 golden drift
 node bin/ctsx.mjs coverage         # the industry × model matrix
-node bin/ctsx.mjs collect:render   # regenerate the collector's per-industry forms
-npm test                           # 25 tests, offline
+node bin/ctsx.mjs collect:render   # regenerate the collector form (build does this too)
+npm test                           # offline; includes the generated Apps Script, run against a fake Forms API
 ```
 
 The full procedure is `plugin/skills/commercetools-vertical-authoring/SKILL.md`, including how to
