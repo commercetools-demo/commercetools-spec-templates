@@ -43,8 +43,10 @@ There is **one form for every industry** — the industry is its first question 
 done once, ever, not once per industry.
 
 1. `node bin/ctsx.mjs build` (or `collect:render`, which does just the form).
-2. Open [script.google.com](https://script.google.com) > **New project**, and paste
-   `collector/forms/expert-intake.gs` over the placeholder.
+2. Open [script.google.com](https://script.google.com) > **New project**. Click into `Code.gs`,
+   select all, and paste `collector/forms/expert-intake.gs` over it. **Keep the project at one
+   file** — every `.gs` in a project shares one global scope, so a second copy fails with
+   `SyntaxError: Identifier 'TITLE' has already been declared` before anything runs.
 3. Pick **`setup`** in the function dropdown beside **Run**, click **Run**, and allow the
    authorization prompt (Forms, Drive, Sheets).
    **Do not use Deploy.** This is not a web app; deploying it gives
@@ -73,6 +75,14 @@ done once, ever, not once per industry.
    - **`filed as 'unlisted'`** — someone picked *Something else* in the dropdown. Their answer
      names an industry we do not have. Read it: that is the argument for the next vertical.
 
+Three errors the Apps Script editor can give you, and what each means:
+
+| What you see | What it is |
+| --- | --- |
+| `SyntaxError: Identifier 'TITLE' has already been declared` | Two copies of the script in one project. Keep one file; paste over it, not beside it. |
+| `Script function not found: doGet` | You used **Deploy**. This is not a web app — pick `setup` and press **Run**. |
+| `The form currently has no response destination` | An older copy of the generated script. Re-render and paste the current one. |
+
 `inbox/` is gitignored. Never commit a raw response; commit the reviewed capability instead.
 
 ---
@@ -89,8 +99,9 @@ done once, ever, not once per industry.
 2. `node bin/ctsx.mjs build`
 3. Commit `taxonomy/industries.yaml` and the regenerated `collector/forms/expert-intake.gs` and
    `form-map-v<n>.json`. (`lint` fails with exit 3 if you skip the rebuild.)
-4. In the **same** Apps Script project from procedure B, paste the regenerated
-   `expert-intake.gs` over the old one and Run **`setup`** again.
+4. In the **same** Apps Script project from procedure B, select all in the file you pasted last
+   time, paste the regenerated `expert-intake.gs` over it, and Run **`setup`** again. Paste over
+   the file, never beside it — see step B2.
 
 Same form, same URL, same responses sheet — the dropdown just gains an option. The log should say
 `Updated N question(s) in place`. If it says the shape changed instead, the questionnaire itself
