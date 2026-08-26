@@ -4,6 +4,8 @@ node_modules
 .tmp-cts-*
 
 # This repo is PUBLIC. Collector answers are colleague opinions that may name customers, so they
-# live in a separate private repo and must never be committable here even by accident.
+# never enter version control at all: the live copy is a Google Sheet in the admin's own Drive
+# (ADR 7), and `ctsx collect:ingest` writes pseudonymized YAML into inbox/ for local triage only.
+# What gets committed is the reviewed capability under catalog/, never a raw response.
 inbox/
 .github/ISSUE_TEMPLATE/collect-*.yml
