@@ -89,3 +89,35 @@ test("scenarios and components are narrowed per model, and exclusions are report
   assert.deepEqual(mkt.scenarios.map((s) => s.id), ["always", "marketplace-only"]);
   assert.equal(mkt.components_excluded.length, 0);
 });
+
+// ---------------------------------------------------------------------------------------------
+// One test against the real repo, guarding a class of bug rather than a value: loadCatalog used to
+// read a hardcoded list of subdirectories under catalog/common/capabilities, so a capability filed
+// in a new folder was silently never loaded — no error, no warning, just absent from every render.
+// ---------------------------------------------------------------------------------------------
+test("every capability YAML on disk is loaded, whatever folder it is filed in", async () => {
+  const fs = await import("node:fs");
+  const path = await import("node:path");
+  const { fileURLToPath } = await import("node:url");
+  const { loadCatalog } = await import("../lib/catalog.mjs");
+  const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+
+  const onDisk = [];
+  const walk = (dir) => {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      const p = path.join(dir, e.name);
+      if (e.isDirectory()) walk(p);
+      else if (e.name.endsWith(".yaml") && e.name !== "vertical.yaml") {
+        onDisk.push(path.relative(root, p));
+      }
+    }
+  };
+  for (const d of ["catalog/common/capabilities", "catalog/verticals"]) {
+    const abs = path.join(root, d);
+    if (fs.existsSync(abs)) walk(abs);
+  }
+  // Rights records live beside capabilities but are not capabilities.
+  const expected = onDisk.filter((p) => !p.includes("/sources/")).sort();
+  const loaded = loadCatalog(root).capabilities.map((c) => c._file).sort();
+  assert.deepEqual(loaded, expected);
+});
