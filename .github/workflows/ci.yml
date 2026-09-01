@@ -45,11 +45,11 @@ jobs:
             echo "::error::source files with no SPDX header:"; echo "$missing"; exit 1
           fi
 
-      # Gate 4: the output satisfies the target framework's OWN validator, not ours.
+      # Gate 4: the output satisfies the target framework's OWN validator, not ours. OpenSpec finds
+      # its root by walking up from the process cwd — there is no flag or env var for it — so the
+      # validator has to run from inside the probe, exactly as docs/runbook.md tells a human to.
       - name: validate against real OpenSpec
         run: |
-          mkdir -p /tmp/probe && cp -R fixtures/openspec-init/. /tmp/probe/
+          rm -rf /tmp/probe && mkdir -p /tmp/probe && cp -R fixtures/openspec-init/. /tmp/probe/
           node bin/cts.mjs apply --cwd /tmp/probe --industry grocery --model B2C --no-overlay
-          npx -y @fission-ai/openspec@latest validate --specs --strict
-        working-directory: ${{ github.workspace }}
-        env: { OPENSPEC_CWD: /tmp/probe }
+          (cd /tmp/probe && npx -y @fission-ai/openspec@latest validate --specs --strict)
