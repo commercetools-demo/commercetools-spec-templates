@@ -1,3 +1,9 @@
+/*
+ * SPDX-License-Identifier: MIT
+ * Copyright (c) 2026 commercetools GmbH
+ * Freely available, AS IS and UNSUPPORTED. See LICENSE.
+ */
+
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { checkRights } from "../lib/rights.mjs";

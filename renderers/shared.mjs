@@ -1,3 +1,9 @@
+/*
+ * SPDX-License-Identifier: MIT
+ * Copyright (c) 2026 commercetools GmbH
+ * Freely available, AS IS and UNSUPPORTED. See LICENSE.
+ */
+
 // Helpers every renderer shares. Keeping these here is what makes a third framework cheap:
 // a renderer is six functions and no duplicated formatting logic.
 
@@ -7,6 +13,24 @@ export const pad3 = (n) => String(n).padStart(3, "0");
 
 /** Collapse the runaway blank lines that templating naturally produces, and end with exactly one. */
 export const tidy = (text) => text.replace(/[ \t]+$/gm, "").replace(/\n{3,}/g, "\n\n").replace(/\n*$/, "\n");
+
+/**
+ * The licence notice every rendered file carries. Rendered specs are copied into a developer's own
+ * project, far away from this repo's LICENSE, so the notice has to travel in the file or not at all.
+ *
+ * HTML comment rather than a heading on purpose: a `#` line would give every spec a second H1, and
+ * OpenSpec's own `validate --strict` — which CI runs for real — rejects that.
+ */
+export const LICENSE_NOTICE = [
+  "<!-- SPDX-License-Identifier: MIT -->",
+  "<!-- Copyright (c) 2026 commercetools GmbH. Freely available, AS IS and UNSUPPORTED. -->",
+].join("\n");
+
+/**
+ * Prefix rendered markdown with the licence notice. Deliberately a sibling of `tidy` rather than
+ * part of it: a function named "tidy" that also licenses its input is a trap for the next renderer.
+ */
+export const licensed = (text) => `${LICENSE_NOTICE}\n\n${text}`;
 
 /** The `| Component | Data Source | Notes |` table, as used in both hand-built spec sets. */
 export function componentsTable(components) {

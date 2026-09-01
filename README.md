@@ -2,6 +2,11 @@
 
 Industry vertical specs for commercetools, rendered into your spec-driven development project.
 
+> **Freely available, AS IS and UNSUPPORTED.** This is reference code published
+> by commercetools: no SLA, no security patching, not covered by commercetools
+> Support. Issues are answered best-effort and it may be archived without
+> notice. See [SUPPORT.md](SUPPORT.md) before you build on it.
+
 > **This repository is public, and it is the only one.** The engine, the catalog, the taxonomy and
 > the rendered specs all live here under MIT. Collector *answers* do not: they arrive through a
 > Google Form, never touch GitHub, and are ingested into a gitignored `inbox/`. What gets committed
@@ -9,8 +14,8 @@ Industry vertical specs for commercetools, rendered into your spec-driven develo
 
 ```bash
 # in a project already initialized with `openspec init` (or `specify init`)
-npx @commercetools-demo/commercetools-spec-templates plan --industry grocery --model B2C
-npx @commercetools-demo/commercetools-spec-templates apply --industry grocery --model B2C
+npx @ct-builders/commercetools-spec-templates plan --industry grocery --model B2C
+npx @ct-builders/commercetools-spec-templates apply --industry grocery --model B2C
 ```
 
 That writes the grocery B2C spec set into `openspec/specs/`, runs the
@@ -151,8 +156,16 @@ npm test                           # offline; includes the generated Apps Script
 The full procedure is `plugin/skills/commercetools-vertical-authoring/SKILL.md`, including how to
 turn a source PDF into capability YAML without ever committing the PDF.
 
+## Support
+
+There is none, and that is deliberate — see **[SUPPORT.md](SUPPORT.md)**. No SLA, no security
+patching, not covered by commercetools Support, issues answered best-effort, and it may be archived
+without notice. If you need it changed for a project, fork it: that is the intended use.
+
 ## Licence
 
-MIT throughout — see `LICENSE-MIT`. That covers the engine and the rendered specs the npm package
-ships. If the catalog is ever opened up under a separate content licence, that is a decision to
-take then, with a licence file to match; there is no second licence today.
+MIT throughout — see `LICENSE`. That covers the engine and the rendered specs the npm package
+ships, and every rendered spec carries an `SPDX-License-Identifier` comment of its own so the
+licence travels with the file once it is copied into your project. If the catalog is ever opened up
+under a separate content licence, that is a decision to take then, with a licence file to match;
+there is no second licence today.

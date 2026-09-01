@@ -1,4 +1,11 @@
 #!/usr/bin/env node
+
+/*
+ * SPDX-License-Identifier: MIT
+ * Copyright (c) 2026 commercetools GmbH
+ * Freely available, AS IS and UNSUPPORTED. See LICENSE.
+ */
+
 // ctsx — authoring tooling. NEVER shipped to a developer; it is not in package.json "files".
 //
 //   ctsx build     YAML -> registry.json, dist/questions/*.json, rendered/**   (all committed)
@@ -86,6 +93,8 @@ function build() {
         }
         const manifest = {
           manifest_version: 1,
+          // JSON takes no comment, so the licence the markdown carries inline goes in a key here.
+          license: "MIT",
           industry, model, framework: fwName, placement,
           content_version: catalog.meta.content_version,
           files: files.map((f) => ({
@@ -125,6 +134,7 @@ function build() {
   // 3. registry.json — the single discovery root.
   const registry = {
     $schema: "./registry.schema.json",
+    license: "MIT",
     registry_version: 1,
     content_version: catalog.meta.content_version,
     compat: Object.fromEntries(

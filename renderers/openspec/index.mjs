@@ -1,3 +1,9 @@
+/*
+ * SPDX-License-Identifier: MIT
+ * Copyright (c) 2026 commercetools GmbH
+ * Freely available, AS IS and UNSUPPORTED. See LICENSE.
+ */
+
 // OpenSpec renderer.
 //
 // Two placements:
@@ -15,7 +21,7 @@
 // `## commercetools skills` section below is what keeps the [SKILL:] contract visible in that mode.
 
 import {
-  slugOf, tidy, componentsTable, DATA_SOURCE_LEGEND, excludedFooter,
+  slugOf, tidy, licensed, componentsTable, DATA_SOURCE_LEGEND, excludedFooter,
   platformSection, skillsSection, openQuestionsSection, gapQuestions,
 } from "../shared.mjs";
 
@@ -63,7 +69,7 @@ function specBody(cap, model, { deltaHeader, all = [] } = {}) {
   if (oq) parts.push("## Open questions", "", oq, "");
   const excluded = excludedFooter(cap.components_excluded, model);
   if (excluded) parts.push("---", "", excluded, "");
-  return tidy(parts.join("\n"));
+  return licensed(tidy(parts.join("\n")));
 }
 
 function proposal(resolved, epic, caps) {
@@ -92,7 +98,7 @@ function proposal(resolved, epic, caps) {
   ];
   const questions = [...caps.flatMap((c) => c.open_questions ?? []), ...gapQuestions(resolved.gaps, resolved.model)];
   if (questions.length) parts.push("## Open Questions", "", ...questions.map((q) => `- ${q}`), "");
-  return tidy(parts.join("\n"));
+  return licensed(tidy(parts.join("\n")));
 }
 
 function tasks(caps) {
@@ -107,7 +113,7 @@ function tasks(caps) {
     });
     parts.push("");
   }
-  return tidy(parts.join("\n"));
+  return licensed(tidy(parts.join("\n")));
 }
 
 /**

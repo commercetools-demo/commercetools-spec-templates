@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 commercetools GmbH
+# Freely available, AS IS and UNSUPPORTED. See LICENSE.
+
 schema_version: 1
 id: base.product-detail-page
 version: 1.0.0
@@ -133,6 +137,6 @@ provenance:
   # from, and that document is not retained. `locator` names the section it came from.
   source: authored
   locator: "1. Core Shopping Pages › Product Detail Page (PDP)"
-  contributors: [behnam.tehrani@commercetools.com]
+  contributors: ["@behnamt"]
   reviewed_by: []
   reviewed_at: 2026-08-21

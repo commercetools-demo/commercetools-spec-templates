@@ -1,5 +1,5 @@
 {
-  "name": "@commercetools-demo/commercetools-spec-templates",
+  "name": "@ct-builders/commercetools-spec-templates",
   "version": "0.1.0",
   "description": "Industry vertical spec templates for commercetools, rendered into GitHub Spec Kit or OpenSpec projects.",
   "type": "module",
@@ -14,7 +14,7 @@
     "rendered/",
     "registry.json",
     "README.md",
-    "LICENSE-MIT"
+    "LICENSE"
   ],
   "scripts": {
     "build": "node bin/ctsx.mjs build",
@@ -39,7 +39,7 @@
   "author": "commercetools",
   "repository": {
     "type": "git",
-    "url": "https://github.com/commercetools-demo/commercetools-spec-templates.git"
+    "url": "https://github.com/ct-builders/commercetools-spec-templates.git"
   },
   "publishConfig": {
     "access": "public"

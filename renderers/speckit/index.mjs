@@ -1,3 +1,9 @@
+/*
+ * SPDX-License-Identifier: MIT
+ * Copyright (c) 2026 commercetools GmbH
+ * Freely available, AS IS and UNSUPPORTED. See LICENSE.
+ */
+
 // GitHub Spec Kit renderer — declared, not yet implemented (month 1 on the agreed build order).
 //
 // The contract it must honour, already established from a real .specify/ project, so it is
@@ -18,6 +24,10 @@
 //     `### Key Entities`, `## Success Criteria *(mandatory)*` / `### Measurable Outcomes` (SC-###),
 //     `## Assumptions`. The hand-built B2B set adds `**Page Group**`, `**User Journeys**` and a
 //     `## Components` table; keep those.
+//   * Every emitted file must start with the shared `licensed()` prefix from ../shared.mjs. These
+//     specs are copied into a developer's project, away from this repo's LICENSE, so the notice
+//     only reaches them if it is in the file. It is an HTML comment, not a heading, so it cannot
+//     collide with the mandatory `# Feature Specification: <title>` H1 above.
 
 export const name = "speckit";
 export const label = "GitHub Spec Kit";

@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 commercetools GmbH
+# Freely available, AS IS and UNSUPPORTED. See LICENSE.
+
 # GLOBAL epics — the page groups every storefront has, in build order. A vertical's own
 # `vertical.yaml.epics` are industry deltas and sort AFTER these: build the base storefront,
 # then layer the industry on top.

@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 commercetools GmbH
+# Freely available, AS IS and UNSUPPORTED. See LICENSE.
+
 schema_version: 1
 id: grocery.out-of-stock-substitutions
 version: 1.0.0
@@ -116,6 +120,6 @@ open_questions:
 provenance:
   # Authored from the commercetools documentation, grounded via the commercetools-knowledge MCP.
   source: authored
-  contributors: [behnam.tehrani@commercetools.com]
+  contributors: ["@behnamt"]
   reviewed_by: []
   reviewed_at: 2026-08-21

@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 commercetools GmbH
+# Freely available, AS IS and UNSUPPORTED. See LICENSE.
+
 # commercetools-spec-collector — the questionnaire, as data.
 #
 # ONE form for every industry. `ctsx collect:render` emits a single Apps Script, and the industry

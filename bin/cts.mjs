@@ -1,4 +1,11 @@
 #!/usr/bin/env node
+
+/*
+ * SPDX-License-Identifier: MIT
+ * Copyright (c) 2026 commercetools GmbH
+ * Freely available, AS IS and UNSUPPORTED. See LICENSE.
+ */
+
 // cts — the shipped engine. Zero runtime dependencies: it reads only generated JSON
 // (registry.json, dist/questions/*.json, rendered/**/manifest.json) and markdown.
 //

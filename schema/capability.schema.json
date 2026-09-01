@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/commercetools-demo/commercetools-spec-templates/schema/capability.schema.json",
+  "$id": "https://github.com/ct-builders/commercetools-spec-templates/schema/capability.schema.json",
   "title": "commercetools vertical capability",
   "description": "One file = one capability = exactly one normative requirement. Framework-agnostic: no FR-###, no user stories, no ADDED Requirements. Renderers add framework vocabulary.",
   "type": "object",

@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 commercetools GmbH
+# Freely available, AS IS and UNSUPPORTED. See LICENSE.
+
 # The only legal values for a capability's `skill:` / `supporting_skills:`. Kept in step with
 # the commercetools plugin's shipped skills; `ctsx lint` fails if this list and the installed
 # plugin disagree.

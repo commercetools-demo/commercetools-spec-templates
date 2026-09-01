@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 commercetools GmbH
+# Freely available, AS IS and UNSUPPORTED. See LICENSE.
+
 # Tool 1's interactive flow, as data. Add, remove, reword, reorder or re-condition any
 # question here and run `npm run build`. No code changes. Ever.
 #

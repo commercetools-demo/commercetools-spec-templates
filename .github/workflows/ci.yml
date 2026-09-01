@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 commercetools GmbH
+# Freely available, AS IS and UNSUPPORTED. See LICENSE.
+
 name: ci
 on: [push, pull_request]
 
@@ -26,7 +30,22 @@ jobs:
       # Gate 2: unit + end-to-end, offline (the overlay is a separate package).
       - run: npm test
 
-      # Gate 3: the output satisfies the target framework's OWN validator, not ours.
+      # Gate 3: every source file carries its licence. This repo is consumed by copy-paste — a
+      # rendered spec lands in someone else's project with no LICENSE near it — so the header is
+      # the only part of the licensing that travels. Generated trees are excluded because the
+      # renderers emit the notice into them; fixtures/openspec-init/ is excluded because it is a
+      # verbatim copy of `openspec init` output and stamping our copyright on it would be a lie.
+      - name: every source file has an SPDX header
+        run: |
+          missing=$(git ls-files '*.mjs' '*.yaml' '*.yml' \
+            | grep -vE '^(rendered|dist|collector/forms)/' \
+            | grep -vE '^fixtures/openspec-init/' \
+            | xargs grep -L 'SPDX-License-Identifier')
+          if [ -n "$missing" ]; then
+            echo "::error::source files with no SPDX header:"; echo "$missing"; exit 1
+          fi
+
+      # Gate 4: the output satisfies the target framework's OWN validator, not ours.
       - name: validate against real OpenSpec
         run: |
           mkdir -p /tmp/probe && cp -R fixtures/openspec-init/. /tmp/probe/

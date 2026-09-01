@@ -1,3 +1,9 @@
+/*
+ * SPDX-License-Identifier: MIT
+ * Copyright (c) 2026 commercetools GmbH
+ * Freely available, AS IS and UNSUPPORTED. See LICENSE.
+ */
+
 // The generated Apps Script, executed.
 //
 // `lint` gate J proves collector/forms/*.gs PARSES. Parsing is not much: every bug this script

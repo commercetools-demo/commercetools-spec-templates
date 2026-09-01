@@ -9,3 +9,8 @@ node_modules
 # What gets committed is the reviewed capability under catalog/, never a raw response.
 inbox/
 .github/ISSUE_TEMPLATE/collect-*.yml
+
+# Local environment files -- never commit these.
+.env
+.env.*
+!.env.example

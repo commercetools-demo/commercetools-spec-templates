@@ -1,290 +1,291 @@
 {
   "manifest_version": 1,
+  "license": "MIT",
   "industry": "_base",
   "model": "B2B2C",
   "framework": "openspec",
   "placement": "change",
-  "content_version": "0.1.0",
+  "content_version": "0.2.0",
   "files": [
     {
       "path": "openspec/changes/add-_base-b2b2c-journeys/proposal.md",
       "capability": null,
       "priority": "P1",
       "epic": "journeys",
-      "sha256": "023b49b508553a1c51523f849cf6cf11c59d6e7d1c3ad55f68fd3c95e12928bf"
+      "sha256": "90505f4e5be5d462273505a8281033e92bd5a09f5c22947c60518dd9217682da"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-journeys/tasks.md",
       "capability": null,
       "priority": "P1",
       "epic": "journeys",
-      "sha256": "badc79d3fa18316ffd49a0a912e4191a8753531547cb274c1ff2e14ac20d6fef"
+      "sha256": "1f416b131d471fe593645d986812c7b38ee06fc3d38a0c67e760edbb71ae1f16"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-journeys/specs/journey-b2c-1-discovery-browse/spec.md",
       "capability": "base.journey-b2c-1-discovery-browse",
       "priority": "P1",
       "epic": "journeys",
-      "sha256": "d04a7bab62b868c2400feadca421a64d67ffd66796d49ef73381bf03ca6778bb"
+      "sha256": "e4b681e61e3782b8304b9727d3c137a5da329d1b499784ba9abfb2d86546e3a0"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-journeys/specs/journey-b2c-2-cart-management/spec.md",
       "capability": "base.journey-b2c-2-cart-management",
       "priority": "P1",
       "epic": "journeys",
-      "sha256": "74fd19804e1fbf6598fef999a7002a340d1b25d50c22f5a015622f68152d618e"
+      "sha256": "c0eb84b6bea56501bd8b23cab9c51017667dc10fd466a7b0699eb6bbae27115c"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-journeys/specs/journey-b2c-3-authentication-identity/spec.md",
       "capability": "base.journey-b2c-3-authentication-identity",
       "priority": "P1",
       "epic": "journeys",
-      "sha256": "2652eee1ed042a1f71e67f3842fe5f59106a929c0fd92103176509b263d53c31"
+      "sha256": "247db63e0abb80a1ffa6010aa60dc63d273e050224d9dcecd938c6323db1c8b0"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-journeys/specs/journey-b2c-4-checkout/spec.md",
       "capability": "base.journey-b2c-4-checkout",
       "priority": "P1",
       "epic": "journeys",
-      "sha256": "4e9491a5e187ca3c08c8bd0ce645e40b83bbcbf021b9ac777734a0a3a7da20ca"
+      "sha256": "d5273533d4e796303eddff5d3896639d32b9467daf60b2c9e4524a3e85234a68"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-journeys/specs/journey-b2c-5-order-management/spec.md",
       "capability": "base.journey-b2c-5-order-management",
       "priority": "P2",
       "epic": "journeys",
-      "sha256": "895a891b84a0d244806ad5f11eac406f1b85f8bb4b98af8a7d8e5e5ef91adcde"
+      "sha256": "5cb3bd242817de73c14a09f7c8efcea17d023d93db2c9b56c7d646411a720156"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-journeys/specs/journey-b2c-6-account-self-service/spec.md",
       "capability": "base.journey-b2c-6-account-self-service",
       "priority": "P2",
       "epic": "journeys",
-      "sha256": "0d8dee78ccc412c4cbffa8bbe1cc3f660520ff5b2375c622a80bf8156a6783ed"
+      "sha256": "d0a9b50d6021307fdf2b37ecc07887ca6c1d340842d8076ce113646a9f0fdc71"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-journeys/specs/journey-b2c-7-switching-region-or-language/spec.md",
       "capability": "base.journey-b2c-7-switching-region-or-language",
       "priority": "P2",
       "epic": "journeys",
-      "sha256": "528674f992ef33e6d693ea0a62a14d531570bbea30fda48997341e88b69fcad3"
+      "sha256": "481d526e3f56fa5e746cbb606fa64db3aeddc27b606f4af49bf6a2d39ed54472"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-journeys/specs/journey-b2c-8-subscriptions-recurring-orders/spec.md",
       "capability": "base.journey-b2c-8-subscriptions-recurring-orders",
       "priority": "P3",
       "epic": "journeys",
-      "sha256": "a3e5a981c6791b2ebce70db379820984bd94331e41d1c9ad56a548540e04ffb6"
+      "sha256": "e8fcc46141eeb261d1f038cdb0bc6a9d52f3910f836d55bae5b86b6acbfb21da"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-core-shopping/proposal.md",
       "capability": null,
       "priority": "P1",
       "epic": "core-shopping",
-      "sha256": "2f9485330328fe8802abe29488fff7aded59e5ec080f7f1be785dcefd8234676"
+      "sha256": "c6bf9e9fbe77ae30f554c6c0ad0438e4b25081b18449808bbb3cf7b9de69bd29"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-core-shopping/tasks.md",
       "capability": null,
       "priority": "P1",
       "epic": "core-shopping",
-      "sha256": "9fe8021147a28fc8af8a65b7f9eb4b50acce9b3cdfbc3a65348c15fda20aec1c"
+      "sha256": "530e30a9ca0847f8f5c021e94f36380722ef222af48d6110849d2a0890500003"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-core-shopping/specs/cart-page/spec.md",
       "capability": "base.cart-page",
       "priority": "P1",
       "epic": "core-shopping",
-      "sha256": "a71b68a97b244e6c097682454b67bbdc7859b94bb578842b40ea22c1276ebada"
+      "sha256": "22e1b1c99caebfdb74f51b823441f164ed5cfaf1528b60aa910b7029738c69c3"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-core-shopping/specs/checkout-page/spec.md",
       "capability": "base.checkout-page",
       "priority": "P1",
       "epic": "core-shopping",
-      "sha256": "584eee4dfefd46191da5917f7b028f82c0d3151e0b639a34b79d0d8ebaf1a8ab"
+      "sha256": "b1e46415b52c110bfd3afe6488413e011fd52c4853948f9a760d25713e7337ee"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-core-shopping/specs/home-landing-page/spec.md",
       "capability": "base.home-landing-page",
       "priority": "P1",
       "epic": "core-shopping",
-      "sha256": "04bbe512a396837ce5ec46c1c8b7c22c808f8801ea376ea645a69d8ac88ac7ed"
+      "sha256": "6e6d20e7a0c12f4c98c4185754a58dc49802af847174e05fee88d0f432f59575"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-core-shopping/specs/order-confirmation-page/spec.md",
       "capability": "base.order-confirmation-page",
       "priority": "P1",
       "epic": "core-shopping",
-      "sha256": "f5b86e5a8437c771fa80e7ec916eb7231aad652b2fe6eca2e3a92df2371daed1"
+      "sha256": "fb2e9caa594bc1a96f6a1542445cd82e45614bb39fa61bd92d260357eac93d76"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-core-shopping/specs/product-detail-page/spec.md",
       "capability": "base.product-detail-page",
       "priority": "P1",
       "epic": "core-shopping",
-      "sha256": "2317b5df9931b4f9ec8806b5403d01a2607e96c1aa8bd94914b9da7852f87510"
+      "sha256": "6bec7b67a42419de38cc27ea7f4604cd13a61a0785bfab724fd6333e25f5584f"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-core-shopping/specs/product-listing-page/spec.md",
       "capability": "base.product-listing-page",
       "priority": "P1",
       "epic": "core-shopping",
-      "sha256": "e6b2ee716546b12bbeee6f5f5c4980a4f4262df6dcb0edbc82efad5ede65846d"
+      "sha256": "1799bc17ac67b14e3dbe56d8290f387893fceb811570c3eba18fec2784186baa"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-core-shopping/specs/search-results-page/spec.md",
       "capability": "base.search-results-page",
       "priority": "P2",
       "epic": "core-shopping",
-      "sha256": "7d965a1a19e10ba5ac33a66816644e09e96a020bd1ab72d69ec59b3df29e1bfc"
+      "sha256": "ffe6d64fc954ca4e391be50fdf5f3852c0689be3ab66f1770d1f937129f1c567"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-account-self-service/proposal.md",
       "capability": null,
       "priority": "P1",
       "epic": "account-self-service",
-      "sha256": "8843614adf99c328a8e49e0b49d4a103773e5d72470caab9767b71ae54fec2f5"
+      "sha256": "5bc13cfae4175eaa1202a018975dbfb6bcc85b173cdac612f6e307d3aca450d2"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-account-self-service/tasks.md",
       "capability": null,
       "priority": "P1",
       "epic": "account-self-service",
-      "sha256": "181c5fa94c330fbbf77e5625b20910292153ca9ead4f414ebc3c3fc9141a482a"
+      "sha256": "7272cf4cd12af47080700826153404a99860684e7fdb0bfb2340a2de20f0f70c"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-account-self-service/specs/account-registration-request/spec.md",
       "capability": "base.account-registration-request",
       "priority": "P1",
       "epic": "account-self-service",
-      "sha256": "6e56cc1ab7fc634805b21fcf4128e98afe1643ae2b3a33121204bd9d22c254bb"
+      "sha256": "5686204c5304294b6f4b97e454e86a6548e6cdf3b699ad36a3612d2bbc7dd054"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-account-self-service/specs/account-sign-in/spec.md",
       "capability": "base.account-sign-in",
       "priority": "P1",
       "epic": "account-self-service",
-      "sha256": "32df1bc4e9bc095710af3c24b5af6951ae5544749540d9058b920ea5b753cb3e"
+      "sha256": "a0767b71d2b0a95cf08c37f3fbf13430d27bb939749a4778ec9b99fbd4b32db2"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-account-self-service/specs/address-book/spec.md",
       "capability": "base.address-book",
       "priority": "P1",
       "epic": "account-self-service",
-      "sha256": "bc200db5ce78a227ce060c1d8b71f253957c4e484c181f8bd562f278bb94ddb1"
+      "sha256": "be7c966b3446fcedee58a2323ca1640ac6c887d3efde46489ea80b7d44ef7de1"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-account-self-service/specs/order-history/spec.md",
       "capability": "base.order-history",
       "priority": "P1",
       "epic": "account-self-service",
-      "sha256": "2701a9675f361887279e1862c3790bb62d7a96a551730968b7be7b2035f65531"
+      "sha256": "bbe53fca4748e9f7cf023d4e50d9ada94f4e620c13f005bf1726bd4c40c6cd02"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-account-self-service/specs/account-dashboard/spec.md",
       "capability": "base.account-dashboard",
       "priority": "P2",
       "epic": "account-self-service",
-      "sha256": "ebf3644239d0cbba518aeaf6ae8220afa59bc3d71793ff78bc41e7ce73d95ada"
+      "sha256": "d64ed2250b0a6f6a70430a0d88502cb95b120d597176e16bbd67fdff41e96096"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-account-self-service/specs/payment-methods/spec.md",
       "capability": "base.payment-methods",
       "priority": "P2",
       "epic": "account-self-service",
-      "sha256": "087bea9de96b4c50aebce5a4e1ccedc29ca9773129919e99dbb0c5dccd1e3c50"
+      "sha256": "67c9264d6394bb9d75ad4e9ae13d1f94f8a65dfc6a5fdcd0e5463295a4a194f9"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-account-self-service/specs/saved-lists/spec.md",
       "capability": "base.saved-lists",
       "priority": "P2",
       "epic": "account-self-service",
-      "sha256": "c49179e26b634f0a8c686dd575795d59d8a392fde9fc6344e85c97346f5e5bd1"
+      "sha256": "317335fd07310ad52c6504c1942d6dca74a1e1b53f90cd0860cb0550ad2bdce3"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-content-support/proposal.md",
       "capability": null,
       "priority": "P1",
       "epic": "content-support",
-      "sha256": "1b549dc633f1587991c353f55ed7800c87adeea860526440c39b59ab1919293e"
+      "sha256": "ffec2d1b355171be59b78b80f356f3ed06f8a8dc9d68361befd0c7576e8ca85a"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-content-support/tasks.md",
       "capability": null,
       "priority": "P1",
       "epic": "content-support",
-      "sha256": "491040add15c9c2c7cb3c215b6a7a47756bf274e61994751c46d8922e649199c"
+      "sha256": "6272e0d8d4ba36b13a307839656c0a674d02e26b4b5eac505d268d3590ac9e93"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-content-support/specs/contact-us/spec.md",
       "capability": "base.contact-us",
       "priority": "P1",
       "epic": "content-support",
-      "sha256": "9f667ce34a67bb31605e15bee752700aca35b6a18c56e3fd509d52788aefed52"
+      "sha256": "0b5d1b30973237d72ca8d39434c29c8de3d3d199adb750e0d76ced2bf7cd9389"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-content-support/specs/policy-pages/spec.md",
       "capability": "base.policy-pages",
       "priority": "P1",
       "epic": "content-support",
-      "sha256": "7fcda79e56431b0a584095328bd621b9ec22e5ee5447892940ccdfccf4cc87e3"
+      "sha256": "8318e9c7981fbf1c2b6c61d9db56621dbe3a2ca3076013152aa55045d6dea5d7"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-content-support/specs/about-us/spec.md",
       "capability": "base.about-us",
       "priority": "P2",
       "epic": "content-support",
-      "sha256": "e84cfd590eeab18c1d74debf7edb8a39af98dad3cc07dcbab4eb55edfd59cdb6"
+      "sha256": "8bac9c5eb7707aafecef19d463e0abb37a01c884f7aae9398c63c0fc84538074"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-content-support/specs/faq/spec.md",
       "capability": "base.faq",
       "priority": "P2",
       "epic": "content-support",
-      "sha256": "7752020d8ebafa072ea26a7c23c5640f018b0319ae30f2fa4453fea87a101280"
+      "sha256": "05c24b656709ac2be76938697b17b23b5c45a4907802f7e9f7f4a20d48cbea91"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-content-support/specs/blog-resources/spec.md",
       "capability": "base.blog-resources",
       "priority": "P3",
       "epic": "content-support",
-      "sha256": "06e89964a335cf77602b1b7b135ece86f12603d82ba3295f75e044679e0a40df"
+      "sha256": "aea4d8fa5ad11f4cc4d6f64eda7f4fccc7a9cab90b43decbb6a694f4d3eb3987"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-utility-system/proposal.md",
       "capability": null,
       "priority": "P1",
       "epic": "utility-system",
-      "sha256": "c98402312e528a5828b7c312a32d24d6e94e6884b26bce81e3203280dc271972"
+      "sha256": "d48e7cbe51f8458afd07f78d423f4dea2e9a389e93b7d2d19cfae8024954a7ee"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-utility-system/tasks.md",
       "capability": null,
       "priority": "P1",
       "epic": "utility-system",
-      "sha256": "82763eda0a55726adae300a0d745e03a3d27c6096ff11fa32ea189bdc57fcbc0"
+      "sha256": "60e44890a916c370829f139530c8790e1ed5c2acdd963b2a624fa01ee8d78142"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-utility-system/specs/error-pages/spec.md",
       "capability": "base.error-pages",
       "priority": "P1",
       "epic": "utility-system",
-      "sha256": "e5444cdc50c42d77781b6298fa7817c321de778fff8c248addc25759c8c2cdb4"
+      "sha256": "a4533ecb52d9a5c61eb29aac631118c66bf79c4b97e312f1b6265366736fbc21"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-utility-system/specs/password-reset/spec.md",
       "capability": "base.password-reset",
       "priority": "P1",
       "epic": "utility-system",
-      "sha256": "115bf501169b2c2ae479da288d134775263a62a99156d0c052cff92a94c67861"
+      "sha256": "c29aafd10dfb37b55b1682cf1d0e743f986f3b219ee169dc40dedd0012ca2697"
     },
     {
       "path": "openspec/changes/add-_base-b2b2c-utility-system/specs/email-verification/spec.md",
       "capability": "base.email-verification",
       "priority": "P2",
       "epic": "utility-system",
-      "sha256": "1e97c25de7ca7a6e866152af8b7260a90c2149a2d80c964afea8b0c671ec51d9"
+      "sha256": "5ca2add7e6e4373b91e61fd6633bada7eb7af49a90bb26efeb5db1c9f6d585bc"
     }
   ]
 }

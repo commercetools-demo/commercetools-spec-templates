@@ -1,7 +1,8 @@
 {
   "$schema": "./registry.schema.json",
+  "license": "MIT",
   "registry_version": 1,
-  "content_version": "0.1.0",
+  "content_version": "0.2.0",
   "compat": {
     "openspec": {
       "label": "OpenSpec",
@@ -265,9 +266,7 @@
         "B2B",
         "B2B2C"
       ],
-      "owners": [
-        "grocery-guild@commercetools.com"
-      ],
+      "owners": [],
       "counts": {
         "B2C": 33,
         "B2B": 50,
@@ -357,12 +356,12 @@
         "openspec:specs": {
           "path": "rendered/_base/b2c/openspec-specs",
           "files": 30,
-          "sha256": "386720a56c8ce9bc1c723a2dfffb0ace06a39e5dc59d092359f59bb4c883ccd4"
+          "sha256": "b27222e9394afe4002900d85d0a769d1d72690c6dd95755984aaaa52a750efc3"
         },
         "openspec:change": {
           "path": "rendered/_base/b2c/openspec-change",
           "files": 40,
-          "sha256": "99529718654a37c2beb7792280042b97d7aa3f15a412a740c7ec85a7c5cc6837"
+          "sha256": "48b30224f54bc75014cb6822ac4c5f6b2ad48ca8edfee940df0eefa11b4d76e6"
         }
       }
     },
@@ -436,12 +435,12 @@
         "openspec:specs": {
           "path": "rendered/_base/b2b/openspec-specs",
           "files": 48,
-          "sha256": "3a6cfb341ac576c30c2eced2b9ecd394c2c3536c1d9fd3ab0612e603be05b29f"
+          "sha256": "efbbd2616d4d1d2a74f758b469b4200e2685378bb0a92ae82802d6e9a0967416"
         },
         "openspec:change": {
           "path": "rendered/_base/b2b/openspec-change",
           "files": 62,
-          "sha256": "01a4fd847f6e2d81f72e2afea0ab8116000b067dd9c2c1fe54bf9caddf0f25d5"
+          "sha256": "8bc1a743c72f5838d16c8edb7e1420d46ad9006350d11033715d2b4e715dfc10"
         }
       }
     },
@@ -515,12 +514,12 @@
         "openspec:specs": {
           "path": "rendered/_base/b2b2c/openspec-specs",
           "files": 30,
-          "sha256": "eca67b805e0b7f54cd59fdcfcd44b233554f1457e1e5688cad89e30215247918"
+          "sha256": "93259e50e76056656fcef39132364e2cf28e17b42188364a2840046204063b86"
         },
         "openspec:change": {
           "path": "rendered/_base/b2b2c/openspec-change",
           "files": 40,
-          "sha256": "9719a9dcd41818e4328c67fd7e362755f9eddea7ed1743e75ba26e4b7acb478a"
+          "sha256": "8cfad3b23b4df73634e8fe18fafaa116fe371110cd831996c3457bc8a64bf2a3"
         }
       }
     },
@@ -598,12 +597,12 @@
         "openspec:specs": {
           "path": "rendered/_base/b2b2b/openspec-specs",
           "files": 48,
-          "sha256": "3a6cfb341ac576c30c2eced2b9ecd394c2c3536c1d9fd3ab0612e603be05b29f"
+          "sha256": "efbbd2616d4d1d2a74f758b469b4200e2685378bb0a92ae82802d6e9a0967416"
         },
         "openspec:change": {
           "path": "rendered/_base/b2b2b/openspec-change",
           "files": 62,
-          "sha256": "071c5fc03c0bf9f9fc623d79e9f376469de52e3cc71cc707a907508cc7c3c4b4"
+          "sha256": "6ffd31c80418ef6c8a328f0490006c69490406d9d4891b32c2985400aeaa5a64"
         }
       }
     },
@@ -687,12 +686,12 @@
         "openspec:specs": {
           "path": "rendered/grocery/b2c/openspec-specs",
           "files": 33,
-          "sha256": "286e97c6c666cce07fd81e97bd8d6628407834e1d8d5b390a23b3292b44b73c2"
+          "sha256": "a14b34924c1816ea791ea3ae1a65f47cb2bf6faa13d0461b5da59848711cef34"
         },
         "openspec:change": {
           "path": "rendered/grocery/b2c/openspec-change",
           "files": 49,
-          "sha256": "9f302aedf345aecc8f327e69f98d338ebf769f88d4e951223c77caab38dd8756"
+          "sha256": "b1a7ed304a51a79895d0fda6f6821492f97bb59c008d6da30cbe35cc634aefe4"
         }
       }
     },
@@ -776,12 +775,12 @@
         "openspec:specs": {
           "path": "rendered/grocery/b2b/openspec-specs",
           "files": 50,
-          "sha256": "53d2ea585beaddf5eef4ba6f9a28c98fd5d8f57f58a2882f5c644cb95ca35b74"
+          "sha256": "7597cda71b126d0e6bf629b39891c4d0feaf157d361cdbbd23b82921cf5f2fac"
         },
         "openspec:change": {
           "path": "rendered/grocery/b2b/openspec-change",
           "files": 68,
-          "sha256": "ce9da6e955f0ee421fed224c0b69e0f80dcc25aee878d9c52225c99fc3568446"
+          "sha256": "97f5d2a5a7a9db1b0803c24c5c2a9ab03086b3d62d7a69f9c85d5e88e9dd6557"
         }
       }
     },
@@ -870,12 +869,12 @@
         "openspec:specs": {
           "path": "rendered/grocery/b2b2c/openspec-specs",
           "files": 33,
-          "sha256": "b509ba3b259d6bc1e0843d0f68d5b4ba9a0b7640baec739a0f860ea05fee081e"
+          "sha256": "fe438a4f66efd954eb290608218eb559e0ea655ef1680d8a16186911cb3d3a45"
         },
         "openspec:change": {
           "path": "rendered/grocery/b2b2c/openspec-change",
           "files": 49,
-          "sha256": "4592d7a1a87527c898e499a53d691a3f6a3408d115f1d9ef3141c08d0e6fc1cf"
+          "sha256": "451084ebcb51d4085ffcf30f69ee62777ae31a9fb6dc2114fcd30154c2742546"
         }
       }
     }

@@ -3,7 +3,7 @@
 Procedures only. For why any of it is shaped this way, see the [README](../README.md) and
 [`docs/adr/`](./adr).
 
-The published package is `@commercetools-demo/commercetools-spec-templates` and its binary is
+The published package is `@ct-builders/commercetools-spec-templates` and its binary is
 `cts`. Examples below spell the package out; once it is installed, `cts <command>` is the same
 thing.
 
@@ -19,7 +19,7 @@ Run from the target project, not from this repo.
 
 1. Make sure the project has a spec framework. If not, run its own initializer —
    `npx -y @fission-ai/openspec@latest init` — never create `openspec/` or `.specify/` by hand.
-2. `npx @commercetools-demo/commercetools-spec-templates init`
+2. `npx @ct-builders/commercetools-spec-templates init`
 3. Answer the questions. Pick **Generic** if your industry is not listed.
 4. Read the file list, then confirm.
 5. Verify: `npx -y @fission-ai/openspec@latest validate --specs --strict`
@@ -27,11 +27,11 @@ Run from the target project, not from this repo.
 Skip the questions if you already know the answers:
 
 ```bash
-npx @commercetools-demo/commercetools-spec-templates plan  --industry grocery --model B2B   # writes nothing
-npx @commercetools-demo/commercetools-spec-templates apply --industry grocery --model B2B
+npx @ct-builders/commercetools-spec-templates plan  --industry grocery --model B2B   # writes nothing
+npx @ct-builders/commercetools-spec-templates apply --industry grocery --model B2B
 ```
 
-Undo: `npx @commercetools-demo/commercetools-spec-templates remove` — takes back only files it wrote and you did not
+Undo: `npx @ct-builders/commercetools-spec-templates remove` — takes back only files it wrote and you did not
 edit. The commercetools overlay is separate:
 `npx -y @commercetools/commercetools-ai-plugin-sdd remove`.
 
