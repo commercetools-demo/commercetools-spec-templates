@@ -1,6 +1,6 @@
 {
   "name": "@ct-builders/commercetools-spec-templates",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Industry vertical spec templates for commercetools, rendered into GitHub Spec Kit or OpenSpec projects.",
   "type": "module",
   "bin": {
