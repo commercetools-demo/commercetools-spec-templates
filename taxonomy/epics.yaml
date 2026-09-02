@@ -2,9 +2,15 @@
 # Copyright (c) 2026 commercetools GmbH
 # Freely available, AS IS and UNSUPPORTED. See LICENSE.
 
-# GLOBAL epics — the page groups every storefront has, in build order. A vertical's own
+# GLOBAL epics — the industry-agnostic groups, in build order. A vertical's own
 # `vertical.yaml.epics` are industry deltas and sort AFTER these: build the base storefront,
 # then layer the industry on top.
+#
+# These were "the page groups every storefront has" until ADR 8. `seller-operations` breaks that
+# reading on purpose: a seller portal is two products in one deployment — a storefront to buy
+# through, and an admin console to run a store with — and roughly two thirds of the console had
+# no epic to land in. It is still global (it belongs to no industry); it is simply not a page
+# group every storefront has.
 schema_version: 1
 epics:
   - { slug: journeys,             title: "User journeys",
@@ -15,6 +21,8 @@ epics:
       description: "Buyer control over account, orders and purchasing tools without contacting the seller. Almost entirely session-specific." }
   - { slug: b2b-specific,         title: "B2B-specific pages",
       description: "Financial controls, contractual agreements and operational complexity with no B2C equivalent. Almost entirely MIDDLEWARE." }
+  - { slug: seller-operations,    title: "Seller operations",
+      description: "Running a store rather than buying through one: which products it carries, what it charges, what it promotes, who its customers are, what it is owed. Only resolves on a seller-portal side. Almost entirely MIDDLEWARE." }
   - { slug: content-support,      title: "Content & support pages",
       description: "CMS-managed informational pages with no commerce API dependency. Almost entirely STATIC." }
   - { slug: utility-system,       title: "Utility & system pages",

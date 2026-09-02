@@ -3,6 +3,7 @@
   "license": "MIT",
   "industry": "_base",
   "model": "B2B",
+  "side": null,
   "framework": "openspec",
   "placement": "specs",
   "content_version": "0.2.0",

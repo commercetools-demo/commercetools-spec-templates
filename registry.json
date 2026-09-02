@@ -1,7 +1,7 @@
 {
   "$schema": "./registry.schema.json",
   "license": "MIT",
-  "registry_version": 1,
+  "registry_version": 2,
   "content_version": "0.2.0",
   "compat": {
     "openspec": {
@@ -59,6 +59,11 @@
       "slug": "b2b-specific",
       "title": "B2B-specific pages",
       "description": "Financial controls, contractual agreements and operational complexity with no B2C equivalent. Almost entirely MIDDLEWARE."
+    },
+    {
+      "slug": "seller-operations",
+      "title": "Seller operations",
+      "description": "Running a store rather than buying through one: which products it carries, what it charges, what it promotes, who its customers are, what it is owed. Only resolves on a seller-portal side. Almost entirely MIDDLEWARE."
     },
     {
       "slug": "content-support",
@@ -215,28 +220,72 @@
     "B2C": {
       "label": "B2C",
       "description": "Direct to consumer",
-      "inherits": []
+      "inherits": [],
+      "sides": []
     },
     "B2B": {
       "label": "B2B",
       "description": "Business buyers",
-      "inherits": []
+      "inherits": [],
+      "sides": []
     },
     "B2B2C": {
       "label": "B2B2C",
-      "description": "Marketplace or franchise selling through to consumers",
-      "inherits": [
-        "B2C"
+      "description": "Selling through an intermediary to consumers",
+      "inherits": [],
+      "sides": [
+        "seller-portal",
+        "consumer-storefront"
       ]
     },
     "B2B2B": {
       "label": "B2B2B",
       "description": "Distributor selling through to business buyers",
-      "inherits": [
-        "B2B"
+      "inherits": [],
+      "sides": [
+        "seller-portal",
+        "business-storefront"
       ]
     }
   },
+  "sides": {
+    "seller-portal": {
+      "label": "The seller portal",
+      "description": "Where your sellers sign in: they buy from you here, and they run the store they sell from here. A B2B storefront plus the tools to run a store — which products it carries, what it charges, what it promotes, who its customers are, and what it is owed.",
+      "inherits": [
+        "B2B"
+      ],
+      "supported_models": [
+        "B2B2C",
+        "B2B2B"
+      ]
+    },
+    "consumer-storefront": {
+      "label": "The shopper storefront",
+      "description": "The shop your sellers' own customers buy from. A B2C storefront where assortment, price, content and stock are all resolved from the one seller the shopper is bound to.",
+      "inherits": [
+        "B2C"
+      ],
+      "supported_models": [
+        "B2B2C"
+      ]
+    },
+    "business-storefront": {
+      "label": "The business-buyer storefront",
+      "description": "The shop your sellers' business customers buy from. The shopper storefront, plus a company account area — approvals, roles, company profile, shared lists — that appears once the person signing in turns out to be buying on a company's behalf.",
+      "inherits": [
+        "B2C",
+        "B2B"
+      ],
+      "supported_models": [
+        "B2B2B"
+      ]
+    }
+  },
+  "multi_sided_models": [
+    "B2B2C",
+    "B2B2B"
+  ],
   "industries": {
     "_base": {
       "label": "Generic",
@@ -253,8 +302,10 @@
       "counts": {
         "B2C": 30,
         "B2B": 48,
-        "B2B2C": 30,
-        "B2B2B": 48
+        "B2B2C|seller-portal": 48,
+        "B2B2C|consumer-storefront": 30,
+        "B2B2B|seller-portal": 48,
+        "B2B2B|business-storefront": 48
       }
     },
     "grocery": {
@@ -270,7 +321,8 @@
       "counts": {
         "B2C": 33,
         "B2B": 50,
-        "B2B2C": 33
+        "B2B2C|seller-portal": 49,
+        "B2B2C|consumer-storefront": 33
       }
     },
     "telecom": {
@@ -292,6 +344,8 @@
   },
   "combinations": {
     "_base|B2C": {
+      "side": null,
+      "side_label": null,
       "match": "exact",
       "capability_count": 30,
       "p1_count": 18,
@@ -366,6 +420,8 @@
       }
     },
     "_base|B2B": {
+      "side": null,
+      "side_label": null,
       "match": "exact",
       "capability_count": 48,
       "p1_count": 29,
@@ -444,95 +500,27 @@
         }
       }
     },
-    "_base|B2B2C": {
-      "match": "derived",
-      "capability_count": 30,
-      "p1_count": 18,
-      "native": 30,
-      "derived": 0,
-      "gaps": [
-        "seller-onboarding",
-        "seller-scoped-assortment",
-        "commission-and-payout",
-        "split-fulfillment"
-      ],
-      "open_questions": 64,
-      "skills": [
-        "commercetools-storefront",
-        "commercetools-platform",
-        "commercetools-checkout",
-        "commercetools-commerce-patterns",
-        "commercetools-connect"
-      ],
-      "journeys": [
-        "B2B-1",
-        "B2B-2",
-        "B2B-3",
-        "B2B-4",
-        "B2B-5",
-        "B2B-6",
-        "B2B-7",
-        "B2B-8",
-        "B2B-9",
-        "B2C-1",
-        "B2C-2",
-        "B2C-3",
-        "B2C-4",
-        "B2C-5",
-        "B2C-6",
-        "B2C-7",
-        "B2C-8"
-      ],
-      "epics": [
-        {
-          "slug": "journeys",
-          "title": "User journeys",
-          "count": 8
-        },
-        {
-          "slug": "core-shopping",
-          "title": "Core shopping pages",
-          "count": 7
-        },
-        {
-          "slug": "account-self-service",
-          "title": "Account & self-service pages",
-          "count": 7
-        },
-        {
-          "slug": "content-support",
-          "title": "Content & support pages",
-          "count": 5
-        },
-        {
-          "slug": "utility-system",
-          "title": "Utility & system pages",
-          "count": 3
-        }
-      ],
-      "rendered": {
-        "openspec:specs": {
-          "path": "rendered/_base/b2b2c/openspec-specs",
-          "files": 30,
-          "sha256": "93259e50e76056656fcef39132364e2cf28e17b42188364a2840046204063b86"
-        },
-        "openspec:change": {
-          "path": "rendered/_base/b2b2c/openspec-change",
-          "files": 40,
-          "sha256": "8cfad3b23b4df73634e8fe18fafaa116fe371110cd831996c3457bc8a64bf2a3"
-        }
-      }
-    },
-    "_base|B2B2B": {
+    "_base|B2B2C|seller-portal": {
+      "side": "seller-portal",
+      "side_label": "The seller portal",
       "match": "derived",
       "capability_count": 48,
       "p1_count": 29,
-      "native": 48,
-      "derived": 0,
+      "native": 30,
+      "derived": 18,
       "gaps": [
         "seller-onboarding",
-        "reseller-tiered-pricing",
-        "commission-and-payout"
+        "seller-scoped-assortment",
+        "seller-tailored-product-content",
+        "store-scoped-selling-price",
+        "cost-price-separate-from-resale-price",
+        "seller-scoped-promotions",
+        "seller-order-book",
+        "seller-store-identity",
+        "assisted-ordering",
+        "commission-and-payout",
+        "brand-guardrails",
+        "seller-customer-roster"
       ],
       "open_questions": 112,
       "skills": [
@@ -595,18 +583,295 @@
       ],
       "rendered": {
         "openspec:specs": {
-          "path": "rendered/_base/b2b2b/openspec-specs",
+          "path": "rendered/_base/b2b2c/seller-portal/openspec-specs",
           "files": 48,
           "sha256": "efbbd2616d4d1d2a74f758b469b4200e2685378bb0a92ae82802d6e9a0967416"
         },
         "openspec:change": {
-          "path": "rendered/_base/b2b2b/openspec-change",
+          "path": "rendered/_base/b2b2c/seller-portal/openspec-change",
           "files": 62,
-          "sha256": "6ffd31c80418ef6c8a328f0490006c69490406d9d4891b32c2985400aeaa5a64"
+          "sha256": "cb9f67d68a37be93da3b04f0fc887eaf4ffd49cfd85a0ac2590e54a828dd61c7"
+        }
+      }
+    },
+    "_base|B2B2C|consumer-storefront": {
+      "side": "consumer-storefront",
+      "side_label": "The shopper storefront",
+      "match": "derived",
+      "capability_count": 30,
+      "p1_count": 18,
+      "native": 30,
+      "derived": 0,
+      "gaps": [
+        "seller-scope-resolution",
+        "seller-directory",
+        "seller-scoped-assortment",
+        "seller-tailored-product-content",
+        "single-seller-cart",
+        "seller-attribution-on-order",
+        "split-fulfillment",
+        "assisted-ordering"
+      ],
+      "open_questions": 64,
+      "skills": [
+        "commercetools-storefront",
+        "commercetools-platform",
+        "commercetools-checkout",
+        "commercetools-commerce-patterns",
+        "commercetools-connect"
+      ],
+      "journeys": [
+        "B2B-1",
+        "B2B-2",
+        "B2B-3",
+        "B2B-4",
+        "B2B-5",
+        "B2B-6",
+        "B2B-7",
+        "B2B-8",
+        "B2B-9",
+        "B2C-1",
+        "B2C-2",
+        "B2C-3",
+        "B2C-4",
+        "B2C-5",
+        "B2C-6",
+        "B2C-7",
+        "B2C-8"
+      ],
+      "epics": [
+        {
+          "slug": "journeys",
+          "title": "User journeys",
+          "count": 8
+        },
+        {
+          "slug": "core-shopping",
+          "title": "Core shopping pages",
+          "count": 7
+        },
+        {
+          "slug": "account-self-service",
+          "title": "Account & self-service pages",
+          "count": 7
+        },
+        {
+          "slug": "content-support",
+          "title": "Content & support pages",
+          "count": 5
+        },
+        {
+          "slug": "utility-system",
+          "title": "Utility & system pages",
+          "count": 3
+        }
+      ],
+      "rendered": {
+        "openspec:specs": {
+          "path": "rendered/_base/b2b2c/consumer-storefront/openspec-specs",
+          "files": 30,
+          "sha256": "93259e50e76056656fcef39132364e2cf28e17b42188364a2840046204063b86"
+        },
+        "openspec:change": {
+          "path": "rendered/_base/b2b2c/consumer-storefront/openspec-change",
+          "files": 40,
+          "sha256": "2c7c0d9f61b41e5b11aa7f07cfc71f3e13d22af73193a288450dd281f76bbcf7"
+        }
+      }
+    },
+    "_base|B2B2B|seller-portal": {
+      "side": "seller-portal",
+      "side_label": "The seller portal",
+      "match": "derived",
+      "capability_count": 48,
+      "p1_count": 29,
+      "native": 48,
+      "derived": 0,
+      "gaps": [
+        "seller-onboarding",
+        "seller-scoped-assortment",
+        "seller-tailored-product-content",
+        "store-scoped-selling-price",
+        "cost-price-separate-from-resale-price",
+        "seller-scoped-promotions",
+        "seller-order-book",
+        "seller-store-identity",
+        "assisted-ordering",
+        "supplier-account-statement",
+        "buyer-account-roster",
+        "buyer-credit-standing",
+        "buyer-seller-assignment",
+        "reseller-tiered-pricing"
+      ],
+      "open_questions": 112,
+      "skills": [
+        "commercetools-platform",
+        "commercetools-storefront",
+        "commercetools-commerce-patterns",
+        "commercetools-checkout",
+        "commercetools-connect"
+      ],
+      "journeys": [
+        "B2B-1",
+        "B2B-2",
+        "B2B-3",
+        "B2B-4",
+        "B2B-5",
+        "B2B-6",
+        "B2B-7",
+        "B2B-8",
+        "B2B-9",
+        "B2C-1",
+        "B2C-2",
+        "B2C-3",
+        "B2C-4",
+        "B2C-5",
+        "B2C-6",
+        "B2C-7",
+        "B2C-8"
+      ],
+      "epics": [
+        {
+          "slug": "journeys",
+          "title": "User journeys",
+          "count": 17
+        },
+        {
+          "slug": "core-shopping",
+          "title": "Core shopping pages",
+          "count": 7
+        },
+        {
+          "slug": "account-self-service",
+          "title": "Account & self-service pages",
+          "count": 10
+        },
+        {
+          "slug": "b2b-specific",
+          "title": "B2B-specific pages",
+          "count": 6
+        },
+        {
+          "slug": "content-support",
+          "title": "Content & support pages",
+          "count": 5
+        },
+        {
+          "slug": "utility-system",
+          "title": "Utility & system pages",
+          "count": 3
+        }
+      ],
+      "rendered": {
+        "openspec:specs": {
+          "path": "rendered/_base/b2b2b/seller-portal/openspec-specs",
+          "files": 48,
+          "sha256": "efbbd2616d4d1d2a74f758b469b4200e2685378bb0a92ae82802d6e9a0967416"
+        },
+        "openspec:change": {
+          "path": "rendered/_base/b2b2b/seller-portal/openspec-change",
+          "files": 62,
+          "sha256": "3cb15adb3d8bbbdadde3ec1f33d8c7a16a3c1b335fb6bcd54df86911c00390e3"
+        }
+      }
+    },
+    "_base|B2B2B|business-storefront": {
+      "side": "business-storefront",
+      "side_label": "The business-buyer storefront",
+      "match": "derived",
+      "capability_count": 48,
+      "p1_count": 29,
+      "native": 48,
+      "derived": 0,
+      "gaps": [
+        "seller-scope-resolution",
+        "seller-directory",
+        "seller-scoped-assortment",
+        "single-seller-cart",
+        "buying-capacity-resolution",
+        "two-owner-cart",
+        "cross-company-isolation",
+        "seller-entitlement-for-buyer",
+        "buyer-seller-assignment",
+        "seller-attribution-on-order",
+        "split-fulfillment",
+        "assisted-ordering"
+      ],
+      "open_questions": 112,
+      "skills": [
+        "commercetools-platform",
+        "commercetools-storefront",
+        "commercetools-commerce-patterns",
+        "commercetools-checkout",
+        "commercetools-connect"
+      ],
+      "journeys": [
+        "B2B-1",
+        "B2B-2",
+        "B2B-3",
+        "B2B-4",
+        "B2B-5",
+        "B2B-6",
+        "B2B-7",
+        "B2B-8",
+        "B2B-9",
+        "B2C-1",
+        "B2C-2",
+        "B2C-3",
+        "B2C-4",
+        "B2C-5",
+        "B2C-6",
+        "B2C-7",
+        "B2C-8"
+      ],
+      "epics": [
+        {
+          "slug": "journeys",
+          "title": "User journeys",
+          "count": 17
+        },
+        {
+          "slug": "core-shopping",
+          "title": "Core shopping pages",
+          "count": 7
+        },
+        {
+          "slug": "account-self-service",
+          "title": "Account & self-service pages",
+          "count": 10
+        },
+        {
+          "slug": "b2b-specific",
+          "title": "B2B-specific pages",
+          "count": 6
+        },
+        {
+          "slug": "content-support",
+          "title": "Content & support pages",
+          "count": 5
+        },
+        {
+          "slug": "utility-system",
+          "title": "Utility & system pages",
+          "count": 3
+        }
+      ],
+      "rendered": {
+        "openspec:specs": {
+          "path": "rendered/_base/b2b2b/business-storefront/openspec-specs",
+          "files": 48,
+          "sha256": "efbbd2616d4d1d2a74f758b469b4200e2685378bb0a92ae82802d6e9a0967416"
+        },
+        "openspec:change": {
+          "path": "rendered/_base/b2b2b/business-storefront/openspec-change",
+          "files": 62,
+          "sha256": "d466ad29b0d701774df506977fe76cb083f0b6a8ac5c69a3029734b0066c3f32"
         }
       }
     },
     "grocery|B2C": {
+      "side": null,
+      "side_label": null,
       "match": "exact",
       "capability_count": 33,
       "p1_count": 21,
@@ -696,6 +961,8 @@
       }
     },
     "grocery|B2B": {
+      "side": null,
+      "side_label": null,
       "match": "exact",
       "capability_count": 50,
       "p1_count": 31,
@@ -784,17 +1051,122 @@
         }
       }
     },
-    "grocery|B2B2C": {
+    "grocery|B2B2C|seller-portal": {
+      "side": "seller-portal",
+      "side_label": "The seller portal",
+      "match": "derived",
+      "capability_count": 49,
+      "p1_count": 30,
+      "native": 31,
+      "derived": 18,
+      "gaps": [
+        "seller-onboarding",
+        "seller-scoped-assortment",
+        "seller-tailored-product-content",
+        "store-scoped-selling-price",
+        "cost-price-separate-from-resale-price",
+        "seller-scoped-promotions",
+        "seller-order-book",
+        "seller-store-identity",
+        "assisted-ordering",
+        "commission-and-payout",
+        "brand-guardrails",
+        "seller-customer-roster"
+      ],
+      "open_questions": 114,
+      "skills": [
+        "commercetools-platform",
+        "commercetools-storefront",
+        "commercetools-commerce-patterns",
+        "commercetools-checkout",
+        "commercetools-connect"
+      ],
+      "journeys": [
+        "B2B-1",
+        "B2B-2",
+        "B2B-3",
+        "B2B-4",
+        "B2B-5",
+        "B2B-6",
+        "B2B-7",
+        "B2B-8",
+        "B2B-9",
+        "B2C-1",
+        "B2C-2",
+        "B2C-3",
+        "B2C-4",
+        "B2C-5",
+        "B2C-6",
+        "B2C-7",
+        "B2C-8"
+      ],
+      "epics": [
+        {
+          "slug": "journeys",
+          "title": "User journeys",
+          "count": 17
+        },
+        {
+          "slug": "core-shopping",
+          "title": "Core shopping pages",
+          "count": 7
+        },
+        {
+          "slug": "account-self-service",
+          "title": "Account & self-service pages",
+          "count": 10
+        },
+        {
+          "slug": "b2b-specific",
+          "title": "B2B-specific pages",
+          "count": 6
+        },
+        {
+          "slug": "content-support",
+          "title": "Content & support pages",
+          "count": 5
+        },
+        {
+          "slug": "utility-system",
+          "title": "Utility & system pages",
+          "count": 3
+        },
+        {
+          "slug": "basket-and-pricing",
+          "title": "Basket & pricing",
+          "count": 1
+        }
+      ],
+      "rendered": {
+        "openspec:specs": {
+          "path": "rendered/grocery/b2b2c/seller-portal/openspec-specs",
+          "files": 49,
+          "sha256": "2c980c6b2e9f4c737bf15295f99fa20b81ab7eac9a074e464a0c5140ab1183b4"
+        },
+        "openspec:change": {
+          "path": "rendered/grocery/b2b2c/seller-portal/openspec-change",
+          "files": 65,
+          "sha256": "ead99d4cc8259230c619dcd327029571d320c482ac9c2e470d594acc2b8413e5"
+        }
+      }
+    },
+    "grocery|B2B2C|consumer-storefront": {
+      "side": "consumer-storefront",
+      "side_label": "The shopper storefront",
       "match": "derived",
       "capability_count": 33,
       "p1_count": 21,
       "native": 33,
       "derived": 0,
       "gaps": [
-        "seller-onboarding",
+        "seller-scope-resolution",
+        "seller-directory",
         "seller-scoped-assortment",
-        "commission-and-payout",
-        "split-fulfillment"
+        "seller-tailored-product-content",
+        "single-seller-cart",
+        "seller-attribution-on-order",
+        "split-fulfillment",
+        "assisted-ordering"
       ],
       "open_questions": 70,
       "skills": [
@@ -867,14 +1239,14 @@
       ],
       "rendered": {
         "openspec:specs": {
-          "path": "rendered/grocery/b2b2c/openspec-specs",
+          "path": "rendered/grocery/b2b2c/consumer-storefront/openspec-specs",
           "files": 33,
           "sha256": "fe438a4f66efd954eb290608218eb559e0ea655ef1680d8a16186911cb3d3a45"
         },
         "openspec:change": {
-          "path": "rendered/grocery/b2b2c/openspec-change",
+          "path": "rendered/grocery/b2b2c/consumer-storefront/openspec-change",
           "files": 49,
-          "sha256": "451084ebcb51d4085ffcf30f69ee62777ae31a9fb6dc2114fcd30154c2742546"
+          "sha256": "78c9e48bde09176acec5228a729654ab460db34e6ad10ebc65241b261d20e97f"
         }
       }
     }

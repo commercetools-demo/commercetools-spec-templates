@@ -11,6 +11,7 @@ visibility: public
 kind: page
 industry: ["*"]
 business_models: [B2B, B2B2B]
+sides: [seller-portal, business-storefront]
 priority: P1
 epic: account-self-service
 page_group: "2. Account & Self-Service Pages"

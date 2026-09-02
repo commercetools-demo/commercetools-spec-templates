@@ -1,7 +1,7 @@
 # 8. B2B2X is a pair of storefronts, modelled as sides
 
-Status: **proposed** · 2026-08-26 · awaiting decision · would supersede the B2B2X modelling in
-`taxonomy/business-models.yaml` (schema_version 1)
+Status: **accepted** · 2026-09-02 · supersedes the B2B2X modelling in
+`taxonomy/business-models.yaml` (schema_version 1 → 2)
 
 ## Context
 
@@ -22,13 +22,18 @@ evidence forced, including three places it contradicted the initial design.
 ### The defect this fixes
 
 `_base|B2B2C` today resolves **30 capabilities — identical to B2C, zero native**, because B2B2C
-inherits from B2C only. Meanwhile 21 published capabilities are tagged `[B2B, B2B2B]`, and the
+inherits from B2C only. Meanwhile 18 published capabilities are tagged `[B2B, B2B2B]`, and the
 seller portal in *both* starters implements every one of them verbatim: contract pricing, approval
 workflows, quote negotiation, role administration, company profile, the nine B2B journeys.
 
 So a developer building a B2B2C seller portal is handed 30 consumer page specs and told it is an
-exact match. Moving `inherits` from the model onto the *side* resolves all 21 with **no capability
-authored and no file edited**. That single move is the highest-value change in the analysis.
+exact match. Moving `inherits` from the model onto the *side* resolves them all with **no
+capability authored and no file edited**. That single move is the highest-value change here.
+
+_Corrected during implementation: the survey said 21 capabilities carry `[B2B, B2B2B]`. The
+catalog says **18** — `_base x B2B` is 48 = 30 wildcard + 18 B2B — and 21 is the count of
+capabilities naming any paired model, i.e. those 18 plus grocery's 3 `[B2C, B2B2C]`. All 21 needed
+a `sides:` tag; 18 are what the seller portal gains by inheritance._
 
 ## Decision
 
@@ -39,17 +44,17 @@ carrying `inherits` itself.
 schema_version: 2
 sides:
   seller-portal:
-    label: The portal your sellers sign in to — where they buy from you and run the store they sell from
+    label: The seller portal
     inherits: [B2B]
     supported_models: [B2B2C, B2B2B]
     gap_capabilities: [seller-onboarding, seller-scoped-assortment, ...]   # shared by both models
   consumer-storefront:
-    label: The shop your sellers' own customers buy from
+    label: The shopper storefront
     inherits: [B2C]
     supported_models: [B2B2C]
     gap_capabilities: [...]
   business-storefront:
-    label: The shop your sellers' business customers buy from
+    label: The business-buyer storefront
     inherits: [B2C, B2B]
     supported_models: [B2B2B]
     gap_capabilities: [...]
@@ -165,7 +170,8 @@ mirroring the existing per-component and per-scenario `business_models` narrowin
   seven B2B2X combinations.
 - **Four ways this could silently ship the wrong bundle**, all of which must be closed in the same
   change rather than discovered later:
-  1. Defaulting a missing side. Must throw.
+  1. Defaulting a missing side. Must throw. — *done: `resolveCombination` throws, `bundle` exits 2
+     naming both sides, and an e2e test asserts nothing is written.*
   2. A capability tagged `[B2B2C]` with no `sides:` lands on **both** sides — commission content on
      a consumer storefront, the seller directory inside a portal. Requires a lint gate: any
      capability naming a multi-sided model **must** declare `sides:`.
@@ -178,10 +184,18 @@ mirroring the existing per-component and per-scenario `business_models` narrowin
   bar will see all B2B2X content permanently fail it.
 - **`_base|B2B2C` jumps 30 → ~48 capabilities with nothing authored.** Anyone comparing counts across
   content versions sees what looks like new content and is not.
-- **Applying both sides into one repo clobbers the receipt.** A monorepo holding both apps is the
-  natural layout — both starters are exactly that — and `RECEIPT_PATH` is one file per project. The
-  second apply sees the first's files as `foreign`, exits 6, and `--force` then drops them from the
-  receipt. Must be resolved in `lib/receipt.mjs` as part of this change.
+- **Applying both sides into one repo is refused, not accommodated.** This ADR left it as an
+  either/or; the implementation chose refusal. The two bundles write the *same* spec paths with
+  different content, so there is no per-side receipt scheme that makes a single directory correct —
+  one shop's `openspec/specs/cart-page/spec.md` would still overwrite the other's. `lib/plan.mjs`
+  therefore trusts a receipt only when its `side` matches, so the other side's files read as
+  `foreign`, and `cmdApply` explains *why* rather than reporting a generic overwrite refusal.
+  `--force` remains available and is described as what it is. The natural layout is what the two
+  reference implementations already do: two apps, two directories, `--cwd` each.
+  `RECEIPT_PATH` is unchanged; the receipt gains `side` and `receipt_version` 2.
+- **An unsupported combination is reported before the side is asked.** Whether content exists
+  does not depend on the side, so `grocery x B2B2B` exits 5 with "does not support B2B2B" rather
+  than first making the developer choose a side for a dead end.
 - **Question order becomes load-bearing**: `business_model → side → industry`. The industry question
   interpolates `{{option.capability_count}}`, which now differs per side (~50 portal vs ~30
   storefront), so asking for the side after the industry quotes a number that is wrong for one of
@@ -190,3 +204,27 @@ mirroring the existing per-component and per-scenario `business_models` narrowin
   B2B2B starter uses it for company-over-associate approval rules. Two unrelated concepts, one word.
   This ADR uses `brand-guardrails` for the first and leaves the second to `base.approval-workflows`.
   Reintroducing `governance` as a gap token or epic slug will author the two into each other.
+
+## Implementation notes
+
+Three things surfaced only once the code existed, and each is now covered by a test:
+
+- **`questions.mjs` silently ignored `description_when`** — only `label_when` was honoured, and
+  only on inline options, not on `options_append`. The first use of it would have been dropped
+  without a word. `pickVariant` now serves all three variants on both paths.
+- **`humanize()` cannot abbreviate**, and `interpolate` only accepts a quoted string as a second
+  argument, so a twelve-item gap list rendered as one unreadable sentence. Added `brief()`, which
+  names three and counts the rest.
+- **`build` left the old B2B2X directories behind as empty shells.** The sweep deleted stale files
+  but never the directories, and git does not track empty directories — so nothing would have
+  failed and the tree would have accumulated the skeleton of every past layout.
+
+Deliberately not done here, and still open:
+
+- The 18 capabilities the seller portal inherits are the right mechanism with the **wrong actor**
+  (their prose says a business buying from a brand). They resolve as `derived`, which understates
+  it. Revising them is authoring work, tracked with the rest of the work list.
+- `vertical.yaml` still declares `supported_models`, not sides. `grocery x B2B2C x seller-portal`
+  therefore resolves 49 specs, none authored for a seller portal, correctly labelled `derived`.
+- The collector questionnaire cannot say which side an expert's answer is about. Accepted
+  explicitly, with the reasoning recorded in `collector/questions/expert-intake.yaml`.

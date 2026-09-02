@@ -11,6 +11,7 @@ visibility: public
 kind: page
 industry: ["*"]
 business_models: [B2B, B2B2B]
+sides: [seller-portal, business-storefront]
 priority: P3
 epic: b2b-specific
 page_group: "3. B2B-Specific Pages"

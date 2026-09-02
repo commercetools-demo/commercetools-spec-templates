@@ -67,6 +67,13 @@ industry vertical. Renderers own OpenSpec and Spec Kit shape; you never write fr
    Narrow `business_models` to what you can defend; `["*"]` is almost always wrong. Unknowns go in
    `open_questions`, never into invented requirement text.
 
+   **If `business_models` names a paired model (B2B2C, B2B2B), `sides:` is mandatory.** Those
+   models are two storefronts — a seller portal and the storefront the seller's own customers buy
+   from — and an absent `sides` means EVERY side, which puts commission content on a consumer
+   storefront and the seller directory inside a portal. Lint refuses it. `sides` narrows at the
+   same three levels `business_models` does: the capability, each `components[]` entry, and each
+   `scenarios[]` entry. `node bin/ctsx.mjs coverage` lists the legal side tokens.
+
 4. **Assign the skill annotation.** `skill:` is the single hardest judgement here; the rest go in
    `supporting_skills`.
 
@@ -99,7 +106,8 @@ industry vertical. Renderers own OpenSpec and Spec Kit shape; you never write fr
    | Content | Path |
    | :--- | :--- |
    | Published capability, one industry | `catalog/verticals/<v>/capabilities/<slug>.yaml` |
-   | Applies to every industry | `catalog/common/capabilities/{shared,b2c,b2b}/<slug>.yaml` |
+   | Applies to every industry | `catalog/common/capabilities/<any-folder>/<slug>.yaml` |
+   | Only one side of a paired model | same place, with `sides: [<side>]` — the folder is filing, `sides` is the contract |
    | Vertical metadata, epic order, supported models | `catalog/verticals/<v>/vertical.yaml` |
    | Rights record, **only** for material we did not author | `catalog/verticals/<v>/sources/<id>.provenance.yaml` |
    | The source document itself | **nowhere in git** — the DMS URI in the rights record is the reference |
@@ -121,6 +129,8 @@ industry vertical. Renderers own OpenSpec and Spec Kit shape; you never write fr
 
    ```bash
    node bin/cts.mjs apply --cwd /tmp/probe --industry <v> --model <m> --no-overlay
+   # a paired model needs --side, and each side needs its own directory
+   node bin/cts.mjs apply --cwd /tmp/probe-portal --industry <v> --model B2B2C --side seller-portal --no-overlay
    (cd /tmp/probe && openspec validate --specs --strict)
    ```
 
@@ -137,6 +147,8 @@ industry vertical. Renderers own OpenSpec and Spec Kit shape; you never write fr
 | **One giant spec** — a 20-requirement `grocery.yaml` | One capability per testable requirement; `depends_on` links them |
 | **Framework vocabulary in the source** — `FR-003`, "user story", "ADDED Requirements", "Phase 2", `tasks.md` | Plain normative prose; the renderer adds framework vocabulary. Lint rejects these |
 | `business_models: ["*"]` to avoid deciding | Tag only what you can defend; inheritance handles the rest |
+| Naming B2B2C or B2B2B and leaving `sides` off | Decide which shop it belongs to. Both is a legitimate answer; not saying is not |
+| Authoring an operator/brand-facing capability | There is no side for the brand. Do not file it under `seller-portal` — see ADR 8 |
 | Two modal verbs in one `requirement` | Split into two capabilities |
 | Hand-edit `rendered/`, `registry.json`, `dist/` or `collector/forms/` | Re-run `ctsx build` |
 | Name a customer in any field | Describe the pattern; set `visibility: internal` if the pattern itself is confidential |
@@ -147,6 +159,7 @@ industry vertical. Renderers own OpenSpec and Spec Kit shape; you never write fr
 - [ ] `docs-search.mjs` ran first and its results grounded the work
 - [ ] Existing capabilities were revised, not duplicated
 - [ ] Every `requirement` has exactly one SHALL/MUST and at least one scenario
+- [ ] Every capability naming B2B2C or B2B2B declares `sides:`
 - [ ] A rights record exists for every non-`authored` source, and none was created for in-house material
 - [ ] Every `api_surface` entry has `grounded_by`, `doc` and `verified_at`; unverified claims were deleted
 - [ ] Every capability with a `commercetools:` block has a `skill:` from the closed set, and vice versa

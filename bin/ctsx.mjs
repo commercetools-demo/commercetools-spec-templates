@@ -10,7 +10,7 @@
 //
 //   ctsx build     YAML -> registry.json, dist/questions/*.json, rendered/**   (all committed)
 //   ctsx lint      schema + referential integrity + golden drift               (exit 3 on drift)
-//   ctsx coverage  what each (industry x model) combination actually resolves to
+//   ctsx coverage  what each (industry x model x side) combination actually resolves to
 
 import fs from "node:fs";
 import path from "node:path";
@@ -21,7 +21,7 @@ import { mapResponse } from "../lib/response.mjs";
 import { parseCsvObjects } from "../lib/csv.mjs";
 import { pseudonym, collisions, generateKey, KEY_ENV } from "../lib/pseudonym.mjs";
 import { loadCatalog, loadQuestionnaire } from "../lib/catalog.mjs";
-import { resolveCombination } from "../lib/resolve.mjs";
+import { resolveCombination, sidesOf } from "../lib/resolve.mjs";
 import { sha256 } from "../lib/receipt.mjs";
 import { checkRights } from "../lib/rights.mjs";
 import { FRAMEWORKS } from "../lib/detect.mjs";
@@ -41,18 +41,27 @@ const write = (rel, content) => {
   return true;
 };
 
+// (industry x model x side). A paired model contributes one triple per side; a single-storefront
+// model one with `side: null`, which keeps its render path and registry key exactly as they were.
 function combinations(catalog) {
   const list = [];
+  const push = (industry, model) => {
+    const sides = sidesOf(model, catalog.business_models);
+    if (sides.length) for (const side of sides) list.push({ industry, model, side });
+    else list.push({ industry, model, side: null });
+  };
   // `_base` first: the industry-agnostic storefront, and the fallback for "my industry isn't
   // listed". Every business model that has any common content gets a _base bundle.
-  for (const model of Object.keys(catalog.business_models)) list.push({ industry: "_base", model });
+  for (const model of Object.keys(catalog.business_models)) push("_base", model);
   for (const industry of Object.keys(catalog.verticals)) {
-    for (const model of catalog.verticals[industry].supported_models) {
-      list.push({ industry, model });
-    }
+    for (const model of catalog.verticals[industry].supported_models) push(industry, model);
   }
   return list;
 }
+
+/** The registry key for a combination. The side segment appears only for a paired model. */
+const comboKey = (industry, model, side) =>
+  side ? `${industry}|${model}|${side}` : `${industry}|${model}`;
 
 function build() {
   const catalog = loadCatalog(ROOT);
@@ -67,10 +76,12 @@ function build() {
   // 2. rendered/** per combination per framework, plus the registry entry describing it.
   const registryCombos = {};
   const rendered = new Set();
-  for (const { industry, model } of combinations(catalog)) {
-    const resolved = resolveCombination({ industry, model, catalog });
+  for (const { industry, model, side } of combinations(catalog)) {
+    const resolved = resolveCombination({ industry, model, side, catalog });
     if (resolved.status !== "ok" || resolved.capability_count === 0) continue;
     const entry = {
+      side,
+      side_label: resolved.side_label,
       match: resolved.match,
       capability_count: resolved.capability_count,
       p1_count: resolved.p1_count,
@@ -86,7 +97,10 @@ function build() {
     for (const [fwName, renderer] of Object.entries(RENDERERS)) {
       for (const placement of fwName === "openspec" ? ["specs", "change"] : ["default"]) {
         const files = renderer.render(resolved, { placement });
-        const base = `rendered/${industry}/${model.toLowerCase()}/${fwName}-${placement}`;
+        // The side segment is absent for a single-storefront model, so the B2C and B2B goldens
+        // do not move and the churn from ADR 8 is contained to the B2B2X combinations.
+        const base = `rendered/${industry}/${model.toLowerCase()}` +
+          `${side ? `/${side}` : ""}/${fwName}-${placement}`;
         for (const f of files) {
           if (write(`${base}/${f.path}`, f.content)) changed++;
           rendered.add(`${base}/${f.path}`);
@@ -95,7 +109,7 @@ function build() {
           manifest_version: 1,
           // JSON takes no comment, so the licence the markdown carries inline goes in a key here.
           license: "MIT",
-          industry, model, framework: fwName, placement,
+          industry, model, side, framework: fwName, placement,
           content_version: catalog.meta.content_version,
           files: files.map((f) => ({
             path: f.path, capability: f.capability ?? null,
@@ -112,7 +126,7 @@ function build() {
         };
       }
     }
-    registryCombos[`${industry}|${model}`] = entry;
+    registryCombos[comboKey(industry, model, side)] = entry;
   }
 
   // Delete rendered files that no longer have a source — otherwise a deleted capability lingers.
@@ -129,13 +143,47 @@ function build() {
       }
     };
     walk(renderedRoot);
+    // ...then the directories the sweep emptied. ADR 8 moved every B2B2X bundle down a level,
+    // which orphaned a few hundred directories; git does not track empty directories, so nothing
+    // would have failed and the tree would just have accumulated shells of old layouts.
+    const prune = (dir) => {
+      for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+        if (e.isDirectory()) prune(path.join(dir, e.name));
+      }
+      if (dir !== renderedRoot && !fs.readdirSync(dir).length) fs.rmdirSync(dir);
+    };
+    prune(renderedRoot);
   }
+
+  // A paired model has no `<industry>|<model>` key at all, so "is there content?" and "how many
+  // specs?" both have to look per side. `counts` is keyed `model|side` for a paired model, which
+  // is what lets the industry question quote the right number once a side has been chosen — the
+  // seller portal and the storefront differ by roughly 18 specs.
+  const hasCombo = (industry, model) => {
+    const sides = sidesOf(model, catalog.business_models);
+    return sides.length
+      ? sides.some((sd) => registryCombos[comboKey(industry, model, sd)])
+      : !!registryCombos[comboKey(industry, model, null)];
+  };
+  const countsFor = (industry, modelList) => Object.fromEntries(
+    modelList.filter((m) => hasCombo(industry, m)).flatMap((m) => {
+      const sides = sidesOf(m, catalog.business_models);
+      if (!sides.length) {
+        return [[m, registryCombos[comboKey(industry, m, null)]?.capability_count ?? 0]];
+      }
+      return sides
+        .filter((sd) => registryCombos[comboKey(industry, m, sd)])
+        .map((sd) => [`${m}|${sd}`, registryCombos[comboKey(industry, m, sd)].capability_count]);
+    }),
+  );
 
   // 3. registry.json — the single discovery root.
   const registry = {
     $schema: "./registry.schema.json",
     license: "MIT",
-    registry_version: 1,
+    // 2: a combination key gained a side segment for paired models (ADR 8). A reader that still
+    // looks up `<industry>|B2B2C` gets undefined, so the version bump is not cosmetic.
+    registry_version: 2,
     content_version: catalog.meta.content_version,
     compat: Object.fromEntries(
       Object.entries(FRAMEWORKS).map(([k, v]) => [
@@ -154,9 +202,31 @@ function build() {
     industry_groups: catalog.industry_groups,
     business_models: Object.fromEntries(
       Object.entries(catalog.business_models).map(([k, v]) => [
-        k, { label: v.label, description: v.description, inherits: v.inherits ?? [] },
+        k, {
+          label: v.label,
+          description: v.description,
+          inherits: v.inherits ?? [],
+          // Present only for a paired model; its absence is what tells a consumer that this
+          // model is one storefront.
+          sides: v.sides ? Object.keys(v.sides) : [],
+        },
       ]),
     ),
+    // The `options_from` source for the side question, and the `ask_when` operand that decides
+    // whether to ask it at all. Both derive from the taxonomy, so declaring a side is enough.
+    sides: Object.fromEntries(
+      Object.entries(catalog.sides).map(([k, v]) => [
+        k, {
+          label: v.label,
+          description: (v.description ?? "").trim(),
+          inherits: v.inherits ?? [],
+          supported_models: v.supported_models ?? [],
+        },
+      ]),
+    ),
+    multi_sided_models: Object.entries(catalog.business_models)
+      .filter(([, v]) => v.sides && Object.keys(v.sides).length)
+      .map(([k]) => k),
     industries: Object.fromEntries([
       // `_base` is resolvable but hidden from the industry question — it is what
       // `on_other: {resolve_to: _base}` falls back to, not a choice on the menu.
@@ -165,14 +235,9 @@ function build() {
         group: null,
         maturity: "stable",
         hidden: true,
-        supported_models: Object.keys(catalog.business_models)
-          .filter((m) => registryCombos[`_base|${m}`]),
+        supported_models: Object.keys(catalog.business_models).filter((m) => hasCombo("_base", m)),
         owners: [],
-        counts: Object.fromEntries(
-          Object.keys(catalog.business_models)
-            .filter((m) => registryCombos[`_base|${m}`])
-            .map((m) => [m, registryCombos[`_base|${m}`].capability_count]),
-        ),
+        counts: countsFor("_base", Object.keys(catalog.business_models)),
       }],
       ...Object.entries(catalog.industries).map(([id, meta]) => {
         const v = catalog.verticals[id];
@@ -185,9 +250,7 @@ function build() {
           owners: v?.owners ?? [],
           // Per-model, because the count differs sharply by model (grocery is 33 for B2C and
           // 50 for B2B). A single number here misreports whichever model was not chosen.
-          counts: Object.fromEntries(
-            supported.map((m) => [m, registryCombos[`${id}|${m}`]?.capability_count ?? 0]),
-          ),
+          counts: countsFor(id, supported),
         }];
       }),
     ]),
@@ -208,33 +271,47 @@ function coverage() {
   const catalog = loadCatalog(ROOT);
   const rows = [];
   const base = {};
+  // A paired model has one row per side, keyed `model|side` in `base` so an industry row
+  // subtracts the right baseline. The seller portal and the storefront differ by ~18 specs;
+  // one row per model would report whichever side happened to be first.
+  const pairs = (model) => {
+    const sides = sidesOf(model, catalog.business_models);
+    return sides.length ? sides.map((side) => ({ model, side })) : [{ model, side: null }];
+  };
+  const cell = ({ model, side }) => `${model}${side ? ` x ${side}` : ""}`.padEnd(34);
+
   for (const model of Object.keys(catalog.business_models)) {
-    const r = resolveCombination({ industry: "_base", model, catalog });
-    base[model] = r.capability_count;
-    rows.push(
-      `${"_base".padEnd(10)} x ${model.padEnd(6)} : ${String(r.capability_count).padStart(3)} caps ` +
-        `(industry-agnostic storefront), ${r.gaps.length} gap(s) -> ${r.match}`,
-    );
+    for (const p of pairs(model)) {
+      const r = resolveCombination({ industry: "_base", model, side: p.side, catalog });
+      base[cell(p)] = r.capability_count;
+      rows.push(
+        `${"_base".padEnd(10)} x ${cell(p)} : ${String(r.capability_count).padStart(3)} caps ` +
+          `(industry-agnostic storefront), ${r.gaps.length} gap(s) -> ${r.match}`,
+      );
+    }
   }
   rows.push("");
   for (const industry of Object.keys(catalog.industries)) {
     const hasVertical = !!catalog.verticals[industry];
     for (const model of Object.keys(catalog.business_models)) {
-      const r = resolveCombination({ industry, model, catalog });
-      if (r.status === "unsupported") {
-        rows.push(`${industry.padEnd(10)} x ${model.padEnd(6)} : not supported (vertical.yaml)`);
-        continue;
+      for (const p of pairs(model)) {
+        const r = resolveCombination({ industry, model, side: p.side, catalog });
+        if (r.status === "unsupported") {
+          rows.push(`${industry.padEnd(10)} x ${cell(p)} : not supported (vertical.yaml)`);
+          continue;
+        }
+        // Separate what the vertical adds from what it inherits from the base, so a "42 caps" row
+        // for an industry with no vertical.yaml cannot be mistaken for industry-specific content.
+        const baseline = base[cell(p)] ?? 0;
+        const own = r.capability_count - baseline;
+        const note = hasVertical
+          ? `${String(own).padStart(2)} industry + ${String(baseline).padStart(3)} base`
+          : `base only — no vertical.yaml`;
+        rows.push(
+          `${industry.padEnd(10)} x ${cell(p)} : ${String(r.capability_count).padStart(3)} caps ` +
+            `(${note}), ${r.gaps.length} gap(s) -> ${r.match}`,
+        );
       }
-      // Separate what the vertical adds from what it inherits from the base, so a "42 caps" row
-      // for an industry with no vertical.yaml cannot be mistaken for industry-specific content.
-      const own = r.capability_count - (base[model] ?? 0);
-      const note = hasVertical
-        ? `${String(own).padStart(2)} industry + ${String(base[model] ?? 0).padStart(3)} base`
-        : `base only — no vertical.yaml`;
-      rows.push(
-        `${industry.padEnd(10)} x ${model.padEnd(6)} : ${String(r.capability_count).padStart(3)} caps ` +
-          `(${note}), ${r.gaps.length} gap(s) -> ${r.match}`,
-      );
     }
   }
   out(rows.join("\n"));
@@ -249,6 +326,15 @@ function lint({ strict }) {
   const legalDomains = new Set(Object.keys(catalog.domains));
   const legalIndustries = new Set(Object.keys(catalog.industries));
   const legalModels = new Set(Object.keys(catalog.business_models));
+  const legalSides = new Set(Object.keys(catalog.sides ?? {}));
+  // Models that are a PAIR of storefronts. Naming one of these obliges a capability to say which
+  // side it belongs on — see gate L, which is the only thing standing between the convenient
+  // default (absent `sides` = every side) and a bundle with the wrong content in it.
+  const pairedSides = new Map(
+    Object.entries(catalog.business_models)
+      .filter(([, v]) => v.sides && Object.keys(v.sides).length)
+      .map(([k, v]) => [k, Object.keys(v.sides)]),
+  );
   const FRAMEWORK_WORDS = /\b(FR-\d|SC-\d|user story|ADDED Requirements|tasks\.md|proposal\.md|Phase \d)\b/i;
 
   for (const c of catalog.capabilities) {
@@ -274,6 +360,33 @@ function lint({ strict }) {
     for (const i of c.industry ?? []) if (i !== "*" && !legalIndustries.has(i)) errors.push(`${at}: unknown industry '${i}'`);
     for (const m of c.business_models ?? []) if (m !== "*" && !legalModels.has(m)) errors.push(`${at}: unknown business model '${m}'`);
     for (const d of c.domains ?? []) if (!legalDomains.has(d)) errors.push(`${at}: unknown domain '${d}'`);
+
+    // L: sides. Three separate ways to get this wrong, all of them silent at build time.
+    const sideTokens = [
+      ...(c.sides ?? []).map((v) => ({ v, where: "" })),
+      ...(c.scenarios ?? []).flatMap((x) => (x.sides ?? []).map((v) => ({ v, where: ` scenario '${x.id}'` }))),
+      ...(c.components ?? []).flatMap((x) => (x.sides ?? []).map((v) => ({ v, where: ` component '${x.name}'` }))),
+    ];
+    for (const { v, where } of sideTokens) {
+      if (v !== "*" && !legalSides.has(v)) errors.push(`${at}:${where} unknown side '${v}'`);
+    }
+    const namedPairs = (c.business_models ?? []).filter((m) => pairedSides.has(m));
+    if (namedPairs.length && !(c.sides ?? []).length) {
+      errors.push(
+        `${at}: names ${namedPairs.join(", ")}, which is a pair of storefronts, so it must declare ` +
+        `'sides:'. Leaving it off puts this capability on BOTH sides of that pair`);
+    }
+    if (namedPairs.length && (c.sides ?? []).length) {
+      const usable = new Set(namedPairs.flatMap((m) => pairedSides.get(m)));
+      for (const v of c.sides) {
+        if (v !== "*" && legalSides.has(v) && !usable.has(v)) {
+          errors.push(`${at}: side '${v}' belongs to no model this capability names (${namedPairs.join(", ")})`);
+        }
+      }
+    }
+    if (!namedPairs.length && (c.sides ?? []).length) {
+      errors.push(`${at}: declares 'sides:' but names no paired model — sides mean nothing here`);
+    }
     if (c.skill && !legalSkills.has(c.skill)) errors.push(`${at}: unknown skill '${c.skill}'`);
     for (const s of c.supporting_skills ?? []) if (!legalSkills.has(s)) errors.push(`${at}: unknown supporting skill '${s}'`);
     // E: skill and commercetools block imply each other
@@ -324,6 +437,33 @@ function lint({ strict }) {
         errors.push(`collector/forms/${f}: generated script does not parse — ${e.message}`);
       }
     }
+
+  // M: every side a model names must exist in the top-level `sides:` block, and every declared
+  // side must be reachable. A side declared and never referenced is dead vocabulary; a side
+  // referenced and never declared resolves to no inherits at all, which silently produces a
+  // bundle of only the `*` capabilities.
+  for (const [model, sides] of pairedSides) {
+    for (const sd of sides) {
+      if (!legalSides.has(sd)) {
+        errors.push(`taxonomy/business-models.yaml: ${model} names side '${sd}', which is not declared under 'sides:'`);
+      }
+    }
+  }
+  for (const [sd, def] of Object.entries(catalog.sides ?? {})) {
+    if (!(def.inherits ?? []).length) {
+      errors.push(`taxonomy/business-models.yaml: side '${sd}' has no 'inherits' — it would resolve only wildcard capabilities`);
+    }
+    for (const m of def.inherits ?? []) {
+      if (!legalModels.has(m)) errors.push(`taxonomy/business-models.yaml: side '${sd}' inherits unknown model '${m}'`);
+    }
+    const claimed = (def.supported_models ?? []).filter((m) => !pairedSides.get(m)?.includes(sd));
+    for (const m of claimed) {
+      errors.push(`taxonomy/business-models.yaml: side '${sd}' claims supported_models '${m}', but ${m} does not name it`);
+    }
+    if (!Object.keys(catalog.business_models).some((m) => pairedSides.get(m)?.includes(sd))) {
+      errors.push(`taxonomy/business-models.yaml: side '${sd}' is declared but no model uses it`);
+    }
+  }
 
   // K: the questionnaire must still carry exactly one industry question. One responses sheet now
   // holds every industry's answers, and `collect:ingest` files each response by that answer —
@@ -869,7 +1009,7 @@ const USAGE = `ctsx — authoring tooling for commercetools-spec-templates
 
   ctsx build              regenerate registry.json, dist/, rendered/, collector/forms/
   ctsx lint [--strict]    validate sources; --strict also enforces rights clearance
-  ctsx coverage           print the industry x business-model matrix
+  ctsx coverage           print the industry x model x side matrix
   ctsx collect:render     regenerate the collector Apps Script and its form map
   ctsx collect:invite     print the Slack message (--url <published form URL> [--industry <i>])
   ctsx collect:ingest     read a responses CSV into inbox/ (--csv <file> [--industry <i>] [--round <r>])

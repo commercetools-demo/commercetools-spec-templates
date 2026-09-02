@@ -122,6 +122,64 @@ test("an unsupported combination refuses and writes nothing", () => {
   assert.ok(!fs.existsSync(path.join(dir, ".commercetools")));
 });
 
+test("a paired model refuses to apply without a side, and writes nothing", () => {
+  const dir = project();
+  const outp = cts(["apply", "--cwd", dir, "--industry", "grocery", "--model", "B2B2C", "--no-overlay"], { expect: 2 });
+  // Both sides must be offered by name. Defaulting is the failure this replaces: it handed a
+  // seller-portal build the consumer bundle and reported success.
+  assert.match(outp, /two separate shops/);
+  assert.match(outp, /--side seller-portal/);
+  assert.match(outp, /--side consumer-storefront/);
+  assert.match(outp, /Nothing has been written/);
+  assert.ok(!fs.existsSync(path.join(dir, ".commercetools")), "nothing was written");
+  assert.ok(!fs.existsSync(path.join(dir, "openspec", "specs", "cart-page")), "no specs either");
+});
+
+test("an unsupported combination says so before asking which side", () => {
+  // grocery does not support B2B2B, and B2B2B is a pair. Whether the content exists does not
+  // depend on the side, so the refusal must come first rather than after a pointless choice.
+  const outp = cts(["apply", "--cwd", project(), "--industry", "grocery", "--model", "B2B2B", "--no-overlay"], { expect: 5 });
+  assert.match(outp, /does not support B2B2B/);
+  assert.doesNotMatch(outp, /--side/, "picking a side for a dead end is two trips to the same wall");
+});
+
+test("the two sides of a pair cannot be applied over each other", () => {
+  const dir = project();
+  cts(["apply", "--cwd", dir, "--industry", "grocery", "--model", "B2B2C", "--side", "seller-portal", "--no-overlay"]);
+  const receipt = JSON.parse(fs.readFileSync(path.join(dir, ".commercetools/spec-templates.lock.json"), "utf8"));
+  assert.equal(receipt.side, "seller-portal");
+  assert.equal(receipt.receipt_version, 2);
+
+  // The two bundles use the SAME spec paths with different content, so the second one must not
+  // quietly replace the first. --force is still offered, but the reason has to be stated.
+  const outp = cts([
+    "apply", "--cwd", dir, "--industry", "grocery", "--model", "B2B2C",
+    "--side", "consumer-storefront", "--no-overlay",
+  ], { expect: 6 });
+  assert.match(outp, /already holds the B2B2C specs/);
+  assert.match(outp, /separate projects/);
+  assert.match(outp, /Nothing has been written/);
+
+  // And the seller portal's files are untouched.
+  const after = JSON.parse(fs.readFileSync(path.join(dir, ".commercetools/spec-templates.lock.json"), "utf8"));
+  assert.equal(after.side, "seller-portal");
+  assert.deepEqual(after.files.map((f) => f.path).sort(), receipt.files.map((f) => f.path).sort());
+});
+
+test("a receipt written before the split explains itself rather than inviting a bad re-apply", () => {
+  const dir = project();
+  cts(["apply", "--cwd", dir, "--industry", "grocery", "--model", "B2B2C", "--side", "seller-portal", "--no-overlay"]);
+  const lock = path.join(dir, ".commercetools/spec-templates.lock.json");
+  const r = JSON.parse(fs.readFileSync(lock, "utf8"));
+  delete r.side;                                  // as a pre-ADR-8 receipt would be
+  fs.writeFileSync(lock, JSON.stringify(r, null, 2));
+
+  const outp = cts(["status", "--cwd", dir]);
+  assert.match(outp, /has since been split into two separate shops/);
+  assert.match(outp, /re-applying now needs --side/);
+  assert.doesNotMatch(outp, /Content is current/, "a stale-shape receipt must not read as fine");
+});
+
 test("an industry with no published content refuses and writes nothing", () => {
   const dir = project();
   const outp = cts(["apply", "--cwd", dir, "--industry", "telecom", "--model", "B2C", "--no-overlay"], { expect: 5 });
@@ -218,21 +276,63 @@ test("the gap acknowledgement is asked only when the match is not exact", () => 
   assert.equal(finished.outputs.scope, "all");
   assert.equal(finished.outputs.as_change, false);
 
-  // A derived match must raise gap_ack before anything else that would hide the gaps.
+  // A derived match must raise gap_ack before anything else that would hide the gaps. B2B2C is a
+  // pair of shops, so the side has to be answered first — asking it later would let the industry
+  // question quote a spec count that is wrong for one of the two.
   const derived = JSON.parse(cts([
     "questions", "--cwd", project(),
-    "--answers", JSON.stringify({ framework_state: "have", framework: "openspec", business_model: "B2B2C", industry: "grocery", scope: "all" }),
+    "--answers", JSON.stringify({
+      framework_state: "have", framework: "openspec", business_model: "B2B2C",
+      side: "seller-portal", industry: "grocery", scope: "all",
+    }),
   ]));
   assert.equal(derived.done, false);
   assert.equal(derived.question.id, "gap_ack");
   // The real gaps must be named — in prose, not as raw ids (the vocabulary guard covers the ids).
+  // A paired side carries a dozen, which is why the prompt names the first few and counts the
+  // rest instead of rendering the whole list into one unreadable sentence.
   const gaps = JSON.parse(fs.readFileSync(path.join(ROOT, "registry.json"), "utf8"))
-    .combinations["grocery|B2B2C"].gaps;
+    .combinations["grocery|B2B2C|seller-portal"].gaps;
+  assert.ok(gaps.length > 3, "this fixture is only interesting while the list needs abbreviating");
   assert.match(derived.question.prompt, new RegExp(`${gaps.length} things`), "the real count is quoted");
-  for (const g of gaps) {
+  for (const g of gaps.slice(0, 3)) {
     assert.match(derived.question.prompt, new RegExp(g.replace(/-/g, " ")), `'${g}' must be named`);
   }
+  assert.match(derived.question.prompt, new RegExp(`and ${gaps.length - 3} more`), "the rest are counted");
   assert.match(derived.question.prompt, /open questions rather than guess/, "it must promise not to invent");
+});
+
+test("the side is asked before the industry, because the industry note quotes a per-side count", () => {
+  const answers = { framework_state: "have", framework: "openspec", business_model: "B2B2C" };
+  const asked = JSON.parse(cts(["questions", "--cwd", project(), "--answers", JSON.stringify(answers)]));
+  assert.equal(asked.question.id, "side", "a paired model must be split before anything is counted");
+  assert.equal(asked.question.options.length, 2);
+  assert.ok(asked.question.options.every((o) => !/portal|storefront/.test(o.value) === false));
+
+  const registry = JSON.parse(fs.readFileSync(path.join(ROOT, "registry.json"), "utf8"));
+  // The two sides differ by ~18 specs, so a count quoted before the side is chosen is wrong for
+  // one of them. Assert the industry question quotes THIS side's number, not the model's.
+  for (const side of ["seller-portal", "consumer-storefront"]) {
+    const next = JSON.parse(cts([
+      "questions", "--cwd", project(), "--answers", JSON.stringify({ ...answers, side }),
+    ]));
+    assert.equal(next.question.id, "industry");
+    const grocery = next.question.options.find((o) => o.value === "grocery");
+    const expected = registry.industries.grocery.counts[`B2B2C|${side}`];
+    assert.ok(expected > 0);
+    assert.match(grocery.description, new RegExp(`${expected} specs`),
+      `the ${side} option must quote ${expected}, not the other side's count`);
+  }
+});
+
+test("a single-storefront model is never asked which side it is", () => {
+  for (const model of ["B2C", "B2B"]) {
+    const asked = JSON.parse(cts([
+      "questions", "--cwd", project(),
+      "--answers", JSON.stringify({ framework_state: "have", framework: "openspec", business_model: model }),
+    ]));
+    assert.notEqual(asked.question.id, "side", `${model} is one shop`);
+  }
 });
 
 

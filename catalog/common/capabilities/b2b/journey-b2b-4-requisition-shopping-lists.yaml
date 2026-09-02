@@ -11,6 +11,7 @@ status: published
 visibility: public
 industry: ["*"]
 business_models: [B2B, B2B2B]
+sides: [seller-portal, business-storefront]
 priority: P1
 epic: journeys
 domains: [cart, catalog, customers]

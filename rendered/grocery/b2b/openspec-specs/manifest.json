@@ -3,6 +3,7 @@
   "license": "MIT",
   "industry": "grocery",
   "model": "B2B",
+  "side": null,
   "framework": "openspec",
   "placement": "specs",
   "content_version": "0.2.0",

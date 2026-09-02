@@ -61,7 +61,7 @@ const QUESTIONS = [
   { kind: "CHECKBOX", required: false,
     title: "Which areas do your features touch?",
     help: "",
-    choices: ["Catalog & product data","Search & discovery","Cart & basket","Pricing & promotions","Checkout & payment","Shipping & fulfillment","Order management","Customers & accounts","Other"] },
+    choices: ["Catalog & product data","Search & discovery","Cart & basket","Pricing & promotions","Checkout & payment","Shipping & fulfillment","Order management","Customers & accounts","Credit & receivables","Other"] },
   { kind: "TEXT", required: false,
     title: "A retailer or competitor doing this well (optional)",
     help: "No customer names under NDA — describe the pattern instead.",

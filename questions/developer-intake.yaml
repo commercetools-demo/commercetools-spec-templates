@@ -22,7 +22,7 @@
 schema: commercetools.spec-templates.questionnaire/v1
 schema_version: 1
 id: developer-intake
-version: 2
+version: 3
 surfaces: [agent, cli]
 limits:
   agent: { max_options: 4, header_max_chars: 12 }
@@ -67,15 +67,35 @@ questions:
     prompt: "Who does this storefront sell to?"
     options_from: registry.business_models
 
+  # Asked only for a business model that is a pair of shops, and asked BEFORE the industry:
+  # the industry question quotes a spec count, and the two sides differ by roughly 18 specs, so
+  # asking afterwards would quote a number that is wrong for one of them.
+  - id: side
+    type: single
+    required: true
+    header: Which shop
+    prompt: "A {{answers.business_model.label}} setup is two shops. Which one are you building here?"
+    hint: >
+      They are separate projects with separate specs. Run this again in the other project to get
+      the other set.
+    ask_when: { in: [answers.business_model.value, registry.multi_sided_models] }
+    options_from: registry.sides
+    options_filter: { supports_model: answers.business_model.value }
+
   - id: industry
     type: single
     required: true
     header: Industry
     prompt: "Which industry is this {{answers.business_model.label}} storefront for?"
+    prompt_when:
+      - when: { in: [answers.business_model.value, registry.multi_sided_models] }
+        prompt: "Which industry is it for?"
     hint: >
       Only industries with specs written for {{answers.business_model.label}} are listed.
     options_from: registry.industries
-    options_filter: { supports_model: answers.business_model.value }
+    options_filter:
+      supports_model: answers.business_model.value
+      supports_side: answers.side.value
     option_badge: maturity
     option_note: "{{option.capability_count}} specs"
     options_append:
@@ -84,6 +104,11 @@ questions:
         description: >
           Not industry-specific. You get the full {{answers.business_model.label}} storefront specs
           and nothing invented on top.
+        description_when:
+          - when: { in: [answers.business_model.value, registry.multi_sided_models] }
+            description: >
+              Not industry-specific. You get the full spec set for {{answers.side.label}} and
+              nothing invented on top.
     overflow:
       group_by: group
       group_source: registry.industry_groups
@@ -117,8 +142,16 @@ questions:
       There are no specs written specifically for {{answers.industry.label}} +
       {{answers.business_model.label}}, so I will use the closest set that applies.
       {{len(resolved.gaps)}} things a {{answers.business_model.label}} build usually needs are not
-      covered: {{humanize(resolved.gaps)}}. I will write those up as open questions rather than
+      covered: {{brief(resolved.gaps)}}. I will write those up as open questions rather than
       guess at them. Go ahead?
+    prompt_when:
+      - when: { in: [answers.business_model.value, registry.multi_sided_models] }
+        prompt: >
+          Nothing has been written specifically for {{answers.industry.label}} yet, so I will use
+          the closest set that applies to {{answers.side.plain}}. {{len(resolved.gaps)}} things
+          this kind of shop usually needs have no specs at all, including
+          {{brief(resolved.gaps)}}. I will write those up as open questions rather than guess at
+          them. Go ahead?
     ask_when: { ne: [resolved.match, exact] }
     options:
       - value: continue
@@ -150,6 +183,7 @@ questions:
 outputs:
   framework:      resolved.framework
   business_model: answers.business_model.value
+  side:           answers.side.value
   industry:       answers.industry.value
   scope:          answers.scope.value
   as_change:      "answers.openspec_target == 'change'"

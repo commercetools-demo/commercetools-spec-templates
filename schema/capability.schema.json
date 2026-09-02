@@ -166,6 +166,13 @@
             "items": {
               "type": "string"
             }
+          },
+          "sides": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Which sides this component appears on. Absent means every side."
           }
         }
       }
@@ -201,6 +208,13 @@
               "type": "string"
             },
             "description": "Scenario-level narrowing; omit when it applies to every model the capability does."
+          },
+          "sides": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Which sides this scenario applies to. Absent means every side."
           }
         }
       }
@@ -367,7 +381,7 @@
         },
         "locator": {
           "type": "string",
-          "description": "Enough for a human to re-find the passage, e.g. 'p. 34 \u00a74.2'."
+          "description": "Enough for a human to re-find the passage, e.g. 'p. 34 §4.2'."
         },
         "contributors": {
           "type": "array",
@@ -424,7 +438,14 @@
     },
     "page_group": {
       "type": "string",
-      "description": "For kind: page \u2014 the source document's page group. Usually mirrors `epic`."
+      "description": "For kind: page — the source document's page group. Usually mirrors `epic`."
+    },
+    "sides": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Which sides of a paired (B2B2X) model this applies to. Absent means every side, exactly as an absent business_models means every model. Required by lint whenever business_models names a model that declares sides — the default of every-side would otherwise land commission content on a consumer storefront."
     }
   }
 }

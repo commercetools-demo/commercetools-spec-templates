@@ -48,11 +48,12 @@ const USAGE = `cts — commercetools industry spec templates (content ${registry
   cts list [--industry <i>]                   what content is available
   cts questions [--answers '<json>']          drive the intake flow
   cts plan   --industry <i> --model <m> [...] preview what would be written
+                                              a B2B2C/B2B2B model also needs --side
   cts apply  [--plan <file>] [...]            write it
   cts status | cts remove                     inspect or undo what we wrote
   cts why    --industry <i> --model <m>       explain a resolution
 
-Options: --framework openspec|speckit · --placement specs|change · --scope all|mvp
+Options: --framework openspec|speckit · --side <s> · --placement specs|change · --scope all|mvp
          --cwd <dir> · --force · --dry-run · --json · --no-overlay`;
 
 function parseArgs(argv) {
@@ -71,22 +72,58 @@ function parseArgs(argv) {
 }
 
 /** Resolve the bundle for a combination, or explain precisely why we cannot. */
-function bundle({ industry, model, framework, placement }) {
-  const combo = registry.combinations[`${industry}|${model}`];
-  if (!combo) {
-    const ind = registry.industries[industry];
-    if (!ind) {
-      const known = Object.keys(registry.industries).join(", ");
-      throw exit(5, `No industry '${industry}'. Known industries: ${known}.`);
-    }
-    if (!ind.supported_models.length) {
-      throw exit(5,
-        `The ${ind.label} vertical has no published content yet (maturity: ${ind.maturity}).\n` +
-        `Nothing has been written. Pick another industry, or author it — see docs/authoring.md.`);
-    }
+/** The registry key. The side segment exists only for a model that is a pair of storefronts. */
+const comboKey = (industry, model, side) =>
+  side ? `${industry}|${model}|${side}` : `${industry}|${model}`;
+
+/** The sides a model has, or [] when it is a single storefront. */
+const sidesFor = (model) => registry.business_models[model]?.sides ?? [];
+
+/** The message for "this model is a pair and you did not say which one". Used in three places. */
+function sideRequired(model) {
+  const lines = [`${model} is two separate shops, and they get different specs. Pick one:`];
+  for (const sd of sidesFor(model)) {
+    lines.push(`  --side ${sd.padEnd(20)} ${registry.sides[sd]?.label ?? ""}`);
+  }
+  lines.push(`Nothing has been written. Run this again in the other project for the other set.`);
+  return lines.join("\n");
+}
+
+function bundle({ industry, model, side, framework, placement }) {
+  // Whether the content exists AT ALL is decided first, and does not depend on the side. Asking
+  // a developer to pick a side and only then telling them the combination is unsupported is two
+  // round trips to the same dead end.
+  const ind = registry.industries[industry];
+  if (!ind) {
+    const known = Object.keys(registry.industries).join(", ");
+    throw exit(5, `No industry '${industry}'. Known industries: ${known}.`);
+  }
+  if (!ind.supported_models.length) {
+    throw exit(5,
+      `The ${ind.label} vertical has no published content yet (maturity: ${ind.maturity}).\n` +
+      `Nothing has been written. Pick another industry, or author it — see docs/authoring.md.`);
+  }
+  if (!ind.supported_models.includes(model)) {
     throw exit(5,
       `${ind.label} does not support ${model}. Supported: ${ind.supported_models.join(", ")}.\n` +
       `Nothing has been written. This is a deliberate exclusion in vertical.yaml, not a gap.`);
+  }
+
+  const sides = sidesFor(model);
+  // Refusing beats defaulting. Before ADR 8 a paired model resolved the consumer set silently,
+  // so a developer building a seller portal got 30 consumer page specs and a success message.
+  if (sides.length && !side) throw exit(2, sideRequired(model));
+  if (sides.length && !sides.includes(side)) {
+    throw exit(2, `${model} has no side '${side}'.\n${sideRequired(model)}`);
+  }
+  if (!sides.length && side) {
+    throw exit(2, `${model} is one shop, not a pair — drop --side.\nNothing has been written.`);
+  }
+  const combo = registry.combinations[comboKey(industry, model, side)];
+  if (!combo) {
+    throw exit(5,
+      `${ind.label} lists ${model} as supported but has no ${side ?? "default"} bundle.\n` +
+      `Nothing has been written. This is a content bug — run \`ctsx build\` and \`ctsx coverage\`.`);
   }
   if (!registry.compat[framework]?.implemented) {
     throw exit(7,
@@ -110,7 +147,8 @@ const humanize = (ids) => (ids ?? []).map((g) => g.replace(/-/g, " ")).join(", "
 /** What is about to happen, in words. Labels, never ids; no resolution jargon. */
 function describe(plan, combo) {
   const lines = [
-    `${label("industries", plan.industry)} · ${label("business_models", plan.model)} · ` +
+    `${label("industries", plan.industry)} · ${label("business_models", plan.model)}` +
+      `${plan.side ? ` · ${registry.sides[plan.side]?.label ?? plan.side}` : ""} · ` +
       `${registry.compat[plan.framework].label} → ${plan.placement === "change" ? "openspec/changes/" : plan.placement === "specs" ? "openspec/specs/" : "specs/"}`,
   ];
   const n = plan.entries.length;
@@ -172,9 +210,14 @@ function cmdList(flags) {
     out(`${id}  ${ind.label} (${ind.maturity})`);
     if (!ind.supported_models.length) { out("  no published content yet"); continue; }
     for (const m of ind.supported_models) {
-      const c = registry.combinations[`${id}|${m}`];
-      out(`  ${m.padEnd(6)} ${String(c.capability_count).padStart(2)} specs · ${c.match}` +
-          (c.gaps.length ? ` · ${c.gaps.length} gap(s): ${c.gaps.join(", ")}` : ""));
+      const sides = sidesFor(m);
+      for (const sd of sides.length ? sides : [null]) {
+        const c = registry.combinations[comboKey(id, m, sd)];
+        if (!c) continue;
+        const name = sd ? `${m} ${sd}` : m;
+        out(`  ${name.padEnd(28)} ${String(c.capability_count).padStart(2)} specs · ${c.match}` +
+            (c.gaps.length ? ` · ${c.gaps.length} gap(s): ${c.gaps.join(", ")}` : ""));
+      }
     }
   }
   return 0;
@@ -186,8 +229,11 @@ const questionnaire = () => readJson(path.join(PKG, "dist/questions/developer-in
 function buildState(cwd, answers, flags) {
   const d = detect(cwd);
   let resolved = {};
-  if (answers.industry && answers.business_model) {
-    const c = registry.combinations[`${answers.industry}|${answers.business_model}`];
+  // A paired model needs the side answered before anything resolves; until then `resolved` stays
+  // empty, so `scope` and `gap_ack` cannot fire against the wrong bundle's numbers.
+  const needsSide = sidesFor(answers.business_model).length > 0;
+  if (answers.industry && answers.business_model && (!needsSide || answers.side)) {
+    const c = registry.combinations[comboKey(answers.industry, answers.business_model, answers.side ?? null)];
     resolved = c
       ? { ...c, framework: answers.framework ?? d.framework }
       : { match: "none", capability_count: 0, p1_count: 0, gaps: [], framework: answers.framework ?? d.framework };
@@ -326,6 +372,7 @@ function resolveTarget(cwd, flags) {
     framework,
     industry: flags.industry,
     model: flags.model,
+    side: flags.side ?? null,
     placement: flags.placement ?? (framework === "openspec" ? "specs" : "default"),
     scope: flags.scope ?? "all",
   };
@@ -363,7 +410,7 @@ function cmdApply(cwd, flags) {
   if (flags.plan) {
     const saved = readJson(flags.plan);
     const rebuilt = makePlan(cwd, {
-      ...flags, industry: saved.industry, model: saved.model,
+      ...flags, industry: saved.industry, model: saved.model, side: saved.side ?? null,
       framework: saved.framework, placement: saved.placement, scope: saved.scope,
     });
     if (rebuilt.plan.plan_hash !== saved.plan_hash) {
@@ -378,6 +425,21 @@ function cmdApply(cwd, flags) {
 
   const b = blockers(plan);
   if (b.length && !flags.force) {
+    // The commonest way to hit this now is applying both shops of a pair into one project: the
+    // two bundles use the SAME spec paths with different content, so the second one reads as
+    // foreign. Saying "we did not write these" would be misleading — we wrote them, for the
+    // other shop — and --force would silently replace one shop's specs with the other's.
+    const prior = readReceipt(cwd);
+    if (prior && prior.model === target.model && (prior.side ?? null) !== (target.side ?? null)) {
+      warn(`This project already holds the ${target.model} specs for "${label("sides", prior.side)}", ` +
+           `and the two shops use the same paths with different content.`);
+      warn(`Nothing has been written.`);
+      warn(`The two shops are separate projects. Apply this one somewhere else:`);
+      warn(`  --cwd <the other project>`);
+      warn(`Or, if this project really should switch shops: \`cts remove\` first, then apply.`);
+      warn(`--force would overwrite ${b.length} of those ${b.length === 1 ? "spec" : "specs"} in place.`);
+      return 6;
+    }
     warn(`Refusing to overwrite ${b.length} file(s) we did not write, or that you edited. ` +
          `Nothing has been written.`);
     for (const e of b) warn(`  ${e.action} ${e.path}`);
@@ -417,9 +479,19 @@ function cmdStatus(cwd, flags) {
   if (!r) { out(`No receipt at ${RECEIPT_PATH} — nothing was written here by this tool.`); return 0; }
   const states = r.files.map((f) => ({ ...f, state: fileState(cwd, f) }));
   if (flags.json) return json({ ...r, files: states }), 0;
-  out(`${r.industry} x ${r.model} -> ${r.framework}/${r.placement}, content ${r.content_version}, applied ${r.applied_at}`);
+  out(`${r.industry} x ${r.model}${r.side ? ` x ${r.side}` : ""} -> ${r.framework}/${r.placement}, ` +
+      `content ${r.content_version}, applied ${r.applied_at}`);
   const current = registry.content_version === r.content_version;
-  out(current ? `Content is current.` : `Content ${registry.content_version} is available (you have ${r.content_version}).`);
+  // A receipt written before ADR 8 has no side, and its model may now be a pair. Saying
+  // "content N is available" would invite a re-apply that exits 2 with no explanation.
+  if (!r.side && sidesFor(r.model).length) {
+    out(`${r.model} has since been split into two separate shops, each with its own specs:`);
+    for (const sd of sidesFor(r.model)) out(`  ${sd.padEnd(20)} ${registry.sides[sd]?.label ?? ""}`);
+    out(`What is here was written before that split. \`cts remove\` still takes it back, and`);
+    out(`re-applying now needs --side. Nothing has changed on disk.`);
+  } else {
+    out(current ? `Content is current.` : `Content ${registry.content_version} is available (you have ${r.content_version}).`);
+  }
   for (const f of states) out(`  ${f.state.padEnd(10)} ${f.path}`);
   return 0;
 }
@@ -447,11 +519,13 @@ function cmdRemove(cwd, flags) {
 }
 
 function cmdWhy(flags) {
-  const key = `${flags.industry}|${flags.model}`;
+  if (sidesFor(flags.model).length && !flags.side) { warn(sideRequired(flags.model)); return 2; }
+  const key = comboKey(flags.industry, flags.model, flags.side ?? null);
   const c = registry.combinations[key];
   if (!c) { warn(`No combination ${key}. Try \`cts list\`.`); return 5; }
   if (flags.json) return json(c), 0;
   out(`${key}: ${c.match} match`);
+  if (c.side) out(`  side: ${registry.sides[c.side]?.label ?? c.side}`);
   out(`  ${c.capability_count} capabilit(ies): ${c.native} native to ${flags.model}, ${c.derived} inherited`);
   out(`  ${c.p1_count} at P1 · ${c.open_questions} open question(s) carried into the specs`);
   out(c.gaps.length

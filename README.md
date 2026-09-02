@@ -148,7 +148,7 @@ grocery|B2B2C: derived match
 ```bash
 node bin/ctsx.mjs build            # regenerate registry.json, dist/, rendered/, collector/forms/
 node bin/ctsx.mjs lint --strict    # 0 ok · 1 errors · 3 golden drift
-node bin/ctsx.mjs coverage         # the industry × model matrix
+node bin/ctsx.mjs coverage         # the industry × model × side matrix
 node bin/ctsx.mjs collect:render   # regenerate the collector form (build does this too)
 npm test                           # offline; includes the generated Apps Script, run against a fake Forms API
 ```

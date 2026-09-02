@@ -127,3 +127,117 @@ test("every capability YAML on disk is loaded, whatever folder it is filed in", 
   const loaded = loadCatalog(root).capabilities.map((c) => c._file).sort();
   assert.deepEqual(loaded, expected);
 });
+
+// ---------------------------------------------------------------------------------------------
+// SIDES (ADR 8). A paired model is TWO storefronts with different inheritance roots. The fixture
+// above deliberately keeps a sideless B2B2C, because "a model with no sides resolves exactly as
+// it did before" is itself the contract that stops this change touching B2C and B2B.
+// ---------------------------------------------------------------------------------------------
+
+const paired = {
+  business_models: {
+    B2C: { label: "B2C", inherits: [] },
+    B2B: { label: "B2B", inherits: [] },
+    B2B2C: {
+      label: "B2B2C",
+      sides: {
+        "seller-portal": { gap_capabilities: ["commission"] },
+        "consumer-storefront": {},
+      },
+    },
+  },
+  sides: {
+    "seller-portal": { label: "The seller portal", inherits: ["B2B"], gap_capabilities: ["onboarding"] },
+    "consumer-storefront": { label: "The shopper storefront", inherits: ["B2C"], gap_capabilities: ["directory"] },
+  },
+  verticals: {},
+  capabilities: [
+    cap({ id: "base.b2b-only", industry: ["*"], business_models: ["B2B"], epic: "first" }),
+    cap({ id: "base.b2c-only", industry: ["*"], business_models: ["B2C"], epic: "first" }),
+    cap({ id: "base.everywhere", industry: ["*"], business_models: ["*"], epic: "first" }),
+    cap({
+      id: "base.portal-only", industry: ["*"], business_models: ["B2B2C"],
+      sides: ["seller-portal"], epic: "first",
+    }),
+    cap({ id: "base.commission", industry: ["*"], business_models: ["B2B2C"], sides: ["seller-portal"], epic: "first" }),
+  ],
+};
+
+test("a paired model refuses to resolve without a side, rather than picking one", () => {
+  assert.throws(
+    () => resolveCombination({ industry: "_base", model: "B2B2C", catalog: paired }),
+    /pair of storefronts/,
+    "defaulting here is what handed a seller-portal build 30 consumer specs",
+  );
+});
+
+test("an unknown side, and a side on a single-storefront model, both throw", () => {
+  assert.throws(
+    () => resolveCombination({ industry: "_base", model: "B2B2C", side: "nope", catalog: paired }),
+    /no side 'nope'/,
+  );
+  assert.throws(
+    () => resolveCombination({ industry: "_base", model: "B2B", side: "seller-portal", catalog: paired }),
+    /has no sides/,
+  );
+});
+
+test("each side inherits from its OWN root, which is the whole point of the change", () => {
+  assert.deepEqual(
+    effectiveModels("B2B2C", paired.business_models, "seller-portal", paired.sides).sort(),
+    ["B2B", "B2B2C"],
+  );
+  assert.deepEqual(
+    effectiveModels("B2B2C", paired.business_models, "consumer-storefront", paired.sides).sort(),
+    ["B2B2C", "B2C"],
+  );
+
+  const portal = resolveCombination({ industry: "_base", model: "B2B2C", side: "seller-portal", catalog: paired });
+  const shop = resolveCombination({ industry: "_base", model: "B2B2C", side: "consumer-storefront", catalog: paired });
+  assert.ok(portal.capabilities.map((c) => c.id).includes("base.b2b-only"), "the portal must reach B2B content");
+  assert.ok(!portal.capabilities.map((c) => c.id).includes("base.b2c-only"));
+  assert.ok(shop.capabilities.map((c) => c.id).includes("base.b2c-only"));
+  assert.ok(!shop.capabilities.map((c) => c.id).includes("base.b2b-only"));
+});
+
+test("a capability scoped to one side is absent from the other, not merely derived", () => {
+  const shop = resolveCombination({ industry: "_base", model: "B2B2C", side: "consumer-storefront", catalog: paired });
+  assert.ok(!shop.capabilities.map((c) => c.id).includes("base.portal-only"),
+    "an untagged side default would have put commission content on a consumer storefront");
+  const portal = resolveCombination({ industry: "_base", model: "B2B2C", side: "seller-portal", catalog: paired });
+  const it = portal.capabilities.find((c) => c.id === "base.portal-only");
+  assert.equal(it.derivation, "native", "it names both the model and this side");
+});
+
+test("scenarios and components narrow by side as well as by model", () => {
+  const c = {
+    ...cap({ id: "base.z", industry: ["*"], business_models: ["B2B2C"], sides: ["seller-portal", "consumer-storefront"], epic: "first" }),
+    scenarios: [
+      { id: "both", when: "w", then: "t" },
+      { id: "portal-only", sides: ["seller-portal"], when: "w", then: "t" },
+    ],
+    components: [
+      { name: "shared", data_source: "CACHED" },
+      { name: "payout", data_source: "MIDDLEWARE", sides: ["seller-portal"] },
+    ],
+  };
+  const cat = { ...paired, capabilities: [c] };
+  const shop = resolveCombination({ industry: "_base", model: "B2B2C", side: "consumer-storefront", catalog: cat }).capabilities[0];
+  assert.deepEqual(shop.scenarios.map((s) => s.id), ["both"]);
+  assert.deepEqual(shop.components_included.map((k) => k.name), ["shared"]);
+  assert.deepEqual(shop.components_excluded.map((k) => k.name), ["payout"]);
+
+  const portal = resolveCombination({ industry: "_base", model: "B2B2C", side: "seller-portal", catalog: cat }).capabilities[0];
+  assert.deepEqual(portal.scenarios.map((s) => s.id), ["both", "portal-only"]);
+  assert.equal(portal.components_excluded.length, 0);
+});
+
+test("gaps are the side's shared list unioned with the model's delta, minus what is covered", () => {
+  const portal = resolveCombination({ industry: "_base", model: "B2B2C", side: "seller-portal", catalog: paired });
+  // side declares `onboarding`; B2B2C adds `commission` for this side; base.commission covers
+  // the latter by id, so only onboarding is still missing.
+  assert.deepEqual(portal.gaps, ["onboarding"]);
+  const shop = resolveCombination({ industry: "_base", model: "B2B2C", side: "consumer-storefront", catalog: paired });
+  assert.deepEqual(shop.gaps, ["directory"], "the other side's gaps must not leak across");
+  assert.equal(shop.side_label, "The shopper storefront");
+});

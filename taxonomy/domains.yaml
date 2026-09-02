@@ -12,4 +12,7 @@ domains:
   fulfillment:      { label: Shipping & fulfillment }
   order-management: { label: Order management }
   customers:        { label: Customers & accounts }
+  # Distributor networks sell on credit: statements, balances, past-due and credit standing are a
+  # domain of their own, not a flavour of pricing or of order management.
+  credit-and-receivables: { label: Credit & receivables }
   other:            { label: Other }

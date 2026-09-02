@@ -21,6 +21,9 @@ Run from the target project, not from this repo.
    `npx -y @fission-ai/openspec@latest init` — never create `openspec/` or `.specify/` by hand.
 2. `npx @ct-builders/commercetools-spec-templates init`
 3. Answer the questions. Pick **Generic** if your industry is not listed.
+   If you pick **B2B2C** or **B2B2B**, you are also asked *which shop*: those models are a pair —
+   the seller portal, and the storefront the seller's own customers buy from. They are separate
+   projects with separate specs, so run this again in the other project for the other set.
 4. Read the file list, then confirm.
 5. Verify: `npx -y @fission-ai/openspec@latest validate --specs --strict`
 
@@ -29,6 +32,10 @@ Skip the questions if you already know the answers:
 ```bash
 npx @ct-builders/commercetools-spec-templates plan  --industry grocery --model B2B   # writes nothing
 npx @ct-builders/commercetools-spec-templates apply --industry grocery --model B2B
+
+# A paired model needs --side. Without it: exit 2, both sides named, nothing written — never a
+# default, because the default used to hand a seller-portal build the consumer specs.
+npx @ct-builders/commercetools-spec-templates apply --industry grocery --model B2B2C --side seller-portal
 ```
 
 Undo: `npx @ct-builders/commercetools-spec-templates remove` — takes back only files it wrote and you did not
@@ -127,6 +134,8 @@ map; skip the bump and you overwrite the map those responses need.
 2. Write capability YAML. Follow
    [`plugin/skills/commercetools-vertical-authoring/SKILL.md`](../plugin/skills/commercetools-vertical-authoring/SKILL.md)
    — it is the procedure, not a summary of one. One file, one capability, one `SHALL`.
+   If `business_models` names **B2B2C** or **B2B2B** you must also declare `sides:`; lint refuses
+   otherwise, because leaving it off silently puts the capability on *both* shops.
 3. A rights record is required **only** for material you did not author. In-house work uses
    `provenance.source: authored`. See the table in that skill.
 4. ```bash
@@ -140,9 +149,40 @@ map; skip the bump and you overwrite the map those responses need.
    node bin/cts.mjs apply --cwd /tmp/probe --industry <industry> --model B2B --no-overlay
    (cd /tmp/probe && npx -y @fission-ai/openspec@latest validate --specs --strict)
    ```
+   For a paired model, probe **each side into its own directory**. The two bundles write the same
+   spec paths, so applying both into one project is refused (exit 6) by design:
+   ```bash
+   node bin/cts.mjs apply --cwd /tmp/portal --industry <i> --model B2B2C --side seller-portal --no-overlay
+   node bin/cts.mjs apply --cwd /tmp/shop   --industry <i> --model B2B2C --side consumer-storefront --no-overlay
+   ```
 6. Commit the sources **and** the regenerated `registry.json`, `dist/` and `rendered/`. CI fails if
    they disagree.
 7. Set `maturity` in `taxonomy/industries.yaml` above `draft` once the vertical is worth offering.
+
+---
+
+## E. Add or change a side of a paired model
+
+A **side** is one of the two shops a B2B2C/B2B2B network runs. Sides are declared once in
+`taxonomy/business-models.yaml` and referenced by each model, so `seller-portal` is shared between
+B2B2C and B2B2B and cannot drift between them.
+
+1. Declare or edit the side under the top-level `sides:` block: `label` (a short chip a developer
+   sees), `description`, `inherits` (which of B2C/B2B its specs come from), `supported_models`,
+   and the `gap_capabilities` every model needs on that side.
+2. Reference it under each model's `sides:` map, adding only that model's **extra** gaps. Those are
+   unioned with the side's shared list.
+3. `node bin/ctsx.mjs build && node bin/ctsx.mjs lint --strict`
+4. `node bin/ctsx.mjs coverage` — every paired model now shows one row per side. A side with no
+   `inherits` resolves only wildcard capabilities, which lint refuses.
+
+Nothing else is authored: the developer question, the industry spec counts, the render paths and
+the registry keys all derive from this file.
+
+**Do not add a side for the brand or network operator.** It has no storefront — in both reference
+implementations the brand's terms are a compile-time constant in the seller's own app config — and
+filing operator capabilities under `seller-portal` renders back-office content to a seller. See
+[ADR 8](./adr/0008-b2b2x-is-a-pair-of-sides.md).
 
 ---
 

@@ -10,6 +10,7 @@ status: published
 visibility: public
 industry: [grocery]
 business_models: [B2C, B2B2C]
+sides: [consumer-storefront]
 priority: P1
 epic: catalog-and-availability
 domains: [catalog, cart, order-management, fulfillment]

@@ -80,6 +80,7 @@
         "Shipping & fulfillment",
         "Order management",
         "Customers & accounts",
+        "Credit & receivables",
         "Other"
       ],
       "max_length": null

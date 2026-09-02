@@ -10,6 +10,7 @@ status: published
 visibility: public
 industry: [grocery]
 business_models: [B2C, B2B, B2B2C]
+sides: [seller-portal, consumer-storefront]
 priority: P1
 epic: basket-and-pricing
 domains: [catalog, pricing, cart, order-management]

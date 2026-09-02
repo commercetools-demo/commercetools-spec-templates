@@ -54,6 +54,11 @@ questions:
     options_append:
       - "Something else — I'll name it in the boxes below"
 
+  # B2B2C and B2B2B are each a PAIR of shops (ADR 8), and this question cannot say which one an
+  # answer is about. That ambiguity is ACCEPTED rather than fixed with a fourth question: a
+  # three-minute form is the reason people answer at all, and a feature described in the free text
+  # almost always names its own shop ("commission statements for sellers" is not a shopper
+  # feature). Triage assigns the side when the capability is authored — it must not guess here.
   - id: business_models
     type: multi
     required: true
