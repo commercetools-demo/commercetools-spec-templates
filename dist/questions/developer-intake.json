@@ -205,8 +205,17 @@
       "type": "single",
       "required": true,
       "header": "Coverage",
-      "prompt": "There are no specs written specifically for {{answers.industry.label}} + {{answers.business_model.label}}, so I will use the closest set that applies. {{len(resolved.gaps)}} things a {{answers.business_model.label}} build usually needs are not covered: {{brief(resolved.gaps)}}. I will write those up as open questions rather than guess at them. Go ahead?\n",
+      "prompt": "{{resolved.capability_count}} specs apply here. {{len(resolved.gaps)}} things a {{answers.business_model.label}} build usually needs have no specs yet, including {{brief(resolved.gaps)}} — I will write those up as open questions rather than guess at them. Go ahead?\n",
       "prompt_when": [
+        {
+          "when": {
+            "eq": [
+              "resolved.gap_count",
+              0
+            ]
+          },
+          "prompt": "{{resolved.capability_count}} specs apply here, but none of them were written specifically for {{answers.business_model.label}} — they are the closest set that applies, and I will say so in each one. Go ahead?\n"
+        },
         {
           "when": {
             "in": [
@@ -214,7 +223,7 @@
               "registry.multi_sided_models"
             ]
           },
-          "prompt": "Nothing has been written specifically for {{answers.industry.label}} yet, so I will use the closest set that applies to {{answers.side.plain}}. {{len(resolved.gaps)}} things this kind of shop usually needs have no specs at all, including {{brief(resolved.gaps)}}. I will write those up as open questions rather than guess at them. Go ahead?\n"
+          "prompt": "{{resolved.capability_count}} specs apply to {{answers.side.label}}. {{len(resolved.gaps)}} things a {{answers.business_model.label}} build usually needs have no specs yet, including {{brief(resolved.gaps)}} — I will write those up as open questions rather than guess at them. Go ahead?\n"
         }
       ],
       "ask_when": {

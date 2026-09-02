@@ -145,20 +145,28 @@ questions:
     type: single
     required: true
     header: Coverage
+    # What makes a resolution inexact is usually the GAPS — things this kind of build needs that
+    # nobody has written specs for yet — not a missing industry. Saying "nothing has been written
+    # for Generic" was simply untrue: Generic is the industry-agnostic set, and it is what you get.
     prompt: >
-      There are no specs written specifically for {{answers.industry.label}} +
-      {{answers.business_model.label}}, so I will use the closest set that applies.
-      {{len(resolved.gaps)}} things a {{answers.business_model.label}} build usually needs are not
-      covered: {{brief(resolved.gaps)}}. I will write those up as open questions rather than
-      guess at them. Go ahead?
+      {{resolved.capability_count}} specs apply here. {{len(resolved.gaps)}} things a
+      {{answers.business_model.label}} build usually needs have no specs yet, including
+      {{brief(resolved.gaps)}} — I will write those up as open questions rather than guess at
+      them. Go ahead?
     prompt_when:
+      # Ordered: first match wins. The no-gaps case comes first because the sentence below would
+      # otherwise read "0 things ... have no specs yet".
+      - when: { eq: [resolved.gap_count, 0] }
+        prompt: >
+          {{resolved.capability_count}} specs apply here, but none of them were written
+          specifically for {{answers.business_model.label}} — they are the closest set that
+          applies, and I will say so in each one. Go ahead?
       - when: { in: [answers.business_model.value, registry.multi_sided_models] }
         prompt: >
-          Nothing has been written specifically for {{answers.industry.label}} yet, so I will use
-          the closest set that applies to {{answers.side.plain}}. {{len(resolved.gaps)}} things
-          this kind of shop usually needs have no specs at all, including
-          {{brief(resolved.gaps)}}. I will write those up as open questions rather than guess at
-          them. Go ahead?
+          {{resolved.capability_count}} specs apply to {{answers.side.label}}.
+          {{len(resolved.gaps)}} things a {{answers.business_model.label}} build usually needs
+          have no specs yet, including {{brief(resolved.gaps)}} — I will write those up as open
+          questions rather than guess at them. Go ahead?
     ask_when: { ne: [resolved.match, exact] }
     options:
       - value: continue

@@ -88,6 +88,9 @@ function build() {
       native: resolved.native,
       derived: resolved.derived,
       gaps: resolved.gaps,
+      // A number as well as the list: `ask_when`/`prompt_when` operate on paths and literals, and
+      // cannot call len() on an array, so without this a prompt cannot ask "are there any gaps?"
+      gap_count: resolved.gaps.length,
       open_questions: resolved.open_questions.length,
       skills: resolved.skills,
       journeys: resolved.journeys,
@@ -437,6 +440,93 @@ function lint({ strict }) {
         errors.push(`collector/forms/${f}: generated script does not parse — ${e.message}`);
       }
     }
+
+  // N: every {{ path }} in the questionnaire must be able to resolve.
+  //
+  // `interpolate`'s own doc comment claimed lint reported unresolved paths. It did not, and that
+  // is how `{{answers.side.plain}}` shipped: `labelled()` wraps an answer with `.value` and
+  // `.label` and nothing else, so the prompt rendered "...applies to ." to a developer. An
+  // unresolved path is invisible by design — it renders as the empty string — so it has to be
+  // caught here or not at all.
+  {
+    const ANSWER_FIELDS = new Set(["value", "label"]);
+    const DETECT_FIELDS = new Set([
+      "cwd", "frameworks", "framework_count", "framework", "framework_label", "framework_state",
+    ]);
+    // Whatever a resolved combination actually carries, read off the registry rather than a list
+    // kept in step by hand, plus the two keys buildState adds itself.
+    const comboSample = Object.values(
+      JSON.parse(fs.readFileSync(path.join(ROOT, "registry.json"), "utf8")).combinations,
+    )[0] ?? {};
+    const RESOLVED_FIELDS = new Set([...Object.keys(comboSample), "framework", "sides"]);
+    const registryJson = JSON.parse(fs.readFileSync(path.join(ROOT, "registry.json"), "utf8"));
+
+    for (const qid of ["developer-intake"]) {
+      const qn = loadQuestionnaire(ROOT, qid);
+      const ids = new Set((qn.questions ?? []).map((q) => q.id));
+      const at = `questions/${qid}.yaml`;
+
+      const checkPath = (raw, where) => {
+        const parts = String(raw).split(".");
+        const [scope, ...rest] = parts;
+        if (scope === "answers") {
+          if (!ids.has(rest[0])) {
+            errors.push(`${at}: ${where} refers to answers.${rest[0]}, which is not a question here`);
+          } else if (rest[1] && !ANSWER_FIELDS.has(rest[1])) {
+            errors.push(`${at}: ${where} reads answers.${rest[0]}.${rest[1]}; an answer only has ` +
+              `${[...ANSWER_FIELDS].join(" and ")} — an unknown field renders as nothing`);
+          }
+          return;
+        }
+        if (scope === "resolved") {
+          if (rest[0] && !RESOLVED_FIELDS.has(rest[0])) {
+            errors.push(`${at}: ${where} reads resolved.${rest[0]}, which no resolution carries`);
+          }
+          return;
+        }
+        if (scope === "detect") {
+          if (rest[0] && !DETECT_FIELDS.has(rest[0])) {
+            errors.push(`${at}: ${where} reads detect.${rest[0]}, which detection does not return`);
+          }
+          return;
+        }
+        if (scope === "registry") {
+          let node = registryJson;
+          for (const seg of rest) {
+            if (node && typeof node === "object" && seg in node) node = node[seg];
+            else { errors.push(`${at}: ${where} reads registry.${rest.join(".")}, which registry.json has no key for`); return; }
+          }
+          return;
+        }
+        // `flags.*` is runtime, and `option.*` only exists inside an option-scoped string.
+        if (scope === "flags" || scope === "option") return;
+        errors.push(`${at}: ${where} starts at '${scope}', which is not a scope ` +
+          `(answers, detect, registry, resolved, flags, option)`);
+      };
+
+      // Every {{ ... }} in every string, and every condition operand that IS a bare path.
+      // Strict shape on purpose: `outputs.as_change` holds an expression
+      // ("answers.openspec_target == 'change'"), which starts with a scope and is not a path.
+      const SCOPES = /^(answers|detect|registry|resolved|flags|option)(\.[A-Za-z0-9_-]+)+$/;
+      const walk = (node, trail) => {
+        if (typeof node === "string") {
+          for (const m of node.matchAll(/\{\{\s*([^}]+?)\s*\}\}/g)) {
+            const body = m[1];
+            const call = body.match(/^([a-z]+)\(\s*([^,)]+?)\s*(?:,\s*(?:'[^']*'|"[^"]*")\s*)?\)$/);
+            checkPath(call ? call[2] : body, `${trail} {{${body}}}`);
+          }
+          if (SCOPES.test(node)) checkPath(node, `${trail} '${node}'`);
+          return;
+        }
+        if (Array.isArray(node)) { node.forEach((v, i) => walk(v, `${trail}[${i}]`)); return; }
+        if (node && typeof node === "object") {
+          for (const [k, v] of Object.entries(node)) walk(v, trail ? `${trail}.${k}` : k);
+        }
+      };
+      walk(qn.questions ?? [], "questions");
+      walk(qn.outputs ?? {}, "outputs");
+    }
+  }
 
   // M: every side a model names must exist in the top-level `sides:` block, and every declared
   // side must be reachable. A side declared and never referenced is dead vocabulary; a side

@@ -352,6 +352,7 @@
       "native": 30,
       "derived": 0,
       "gaps": [],
+      "gap_count": 0,
       "open_questions": 64,
       "skills": [
         "commercetools-storefront",
@@ -428,6 +429,7 @@
       "native": 48,
       "derived": 0,
       "gaps": [],
+      "gap_count": 0,
       "open_questions": 112,
       "skills": [
         "commercetools-platform",
@@ -522,6 +524,7 @@
         "brand-guardrails",
         "seller-customer-roster"
       ],
+      "gap_count": 12,
       "open_questions": 112,
       "skills": [
         "commercetools-platform",
@@ -612,6 +615,7 @@
         "split-fulfillment",
         "assisted-ordering"
       ],
+      "gap_count": 8,
       "open_questions": 64,
       "skills": [
         "commercetools-storefront",
@@ -703,6 +707,7 @@
         "buyer-seller-assignment",
         "reseller-tiered-pricing"
       ],
+      "gap_count": 14,
       "open_questions": 112,
       "skills": [
         "commercetools-platform",
@@ -797,6 +802,7 @@
         "split-fulfillment",
         "assisted-ordering"
       ],
+      "gap_count": 12,
       "open_questions": 112,
       "skills": [
         "commercetools-platform",
@@ -878,6 +884,7 @@
       "native": 33,
       "derived": 0,
       "gaps": [],
+      "gap_count": 0,
       "open_questions": 70,
       "skills": [
         "commercetools-storefront",
@@ -969,6 +976,7 @@
       "native": 50,
       "derived": 0,
       "gaps": [],
+      "gap_count": 0,
       "open_questions": 116,
       "skills": [
         "commercetools-platform",
@@ -1073,6 +1081,7 @@
         "brand-guardrails",
         "seller-customer-roster"
       ],
+      "gap_count": 12,
       "open_questions": 114,
       "skills": [
         "commercetools-platform",
@@ -1168,6 +1177,7 @@
         "split-fulfillment",
         "assisted-ordering"
       ],
+      "gap_count": 8,
       "open_questions": 70,
       "skills": [
         "commercetools-storefront",
