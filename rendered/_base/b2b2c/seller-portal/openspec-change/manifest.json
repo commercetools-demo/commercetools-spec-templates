@@ -9,434 +9,434 @@
   "content_version": "0.2.0",
   "files": [
     {
-      "path": "openspec/changes/add-_base-b2b2c-journeys-1/proposal.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-journeys-1/proposal.md",
       "capability": null,
       "priority": "P1",
       "epic": "journeys-1",
       "sha256": "30fdcad442bfcfa3120634e8dcf7aad22033b1677dbda545aecd5b443e2d4e01"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-journeys-1/tasks.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-journeys-1/tasks.md",
       "capability": null,
       "priority": "P1",
       "epic": "journeys-1",
       "sha256": "8b6ce7611f90e1a7deb795083a07f7f190e052b3c443d3bb6b9294a47e172033"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-journeys-1/specs/journey-b2b-1-company-account-setup/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-journeys-1/specs/journey-b2b-1-company-account-setup/spec.md",
       "capability": "base.journey-b2b-1-company-account-setup",
       "priority": "P1",
       "epic": "journeys",
       "sha256": "ce5b6d7b84c23301eab8869775f352f5e87dad59c542731784c9a5e48edddbe8"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-journeys-1/specs/journey-b2b-2-team-members-access/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-journeys-1/specs/journey-b2b-2-team-members-access/spec.md",
       "capability": "base.journey-b2b-2-team-members-access",
       "priority": "P1",
       "epic": "journeys",
       "sha256": "8cd0d957ab3072e04c4b557395dc9f460bf039bb4f2e9752f438e91bdcb2c0ae"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-journeys-1/specs/journey-b2b-3-contract-account-pricing/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-journeys-1/specs/journey-b2b-3-contract-account-pricing/spec.md",
       "capability": "base.journey-b2b-3-contract-account-pricing",
       "priority": "P1",
       "epic": "journeys",
       "sha256": "259b6d63fe9f1cff9752e84f2e6fe190a8ca92b7f5d1d6bab6142bb9be88ac9f"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-journeys-1/specs/journey-b2b-4-requisition-shopping-lists/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-journeys-1/specs/journey-b2b-4-requisition-shopping-lists/spec.md",
       "capability": "base.journey-b2b-4-requisition-shopping-lists",
       "priority": "P1",
       "epic": "journeys",
       "sha256": "04bc35cbd888c1da1e17930b2224f6da9b369c6710683c9c30b173b69efd7f68"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-journeys-1/specs/journey-b2b-5-quote-request-negotiation/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-journeys-1/specs/journey-b2b-5-quote-request-negotiation/spec.md",
       "capability": "base.journey-b2b-5-quote-request-negotiation",
       "priority": "P1",
       "epic": "journeys",
       "sha256": "71b272d0376bbea226f1a90599d7678e28444325638ecdb260148d5bba94bc08"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-journeys-1/specs/journey-b2b-6-approval-workflows/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-journeys-1/specs/journey-b2b-6-approval-workflows/spec.md",
       "capability": "base.journey-b2b-6-approval-workflows",
       "priority": "P1",
       "epic": "journeys",
       "sha256": "b4d76ba702c4b6a9b1b506b704f9c90955894e4598c6d18f836fda9232c68114"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-journeys-1/specs/journey-b2b-7-purchase-order-payment-terms/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-journeys-1/specs/journey-b2b-7-purchase-order-payment-terms/spec.md",
       "capability": "base.journey-b2b-7-purchase-order-payment-terms",
       "priority": "P1",
       "epic": "journeys",
       "sha256": "6129c2d51d8d274c0d0cabd9737cacd3496b2371a0c71211285a0d0253ad85c7"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-journeys-1/specs/journey-b2b-8-bulk-repeat-ordering/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-journeys-1/specs/journey-b2b-8-bulk-repeat-ordering/spec.md",
       "capability": "base.journey-b2b-8-bulk-repeat-ordering",
       "priority": "P1",
       "epic": "journeys",
       "sha256": "685367bbdc48af8949802aa748479d74057c81de5b08a104924232893210d087"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-journeys-1/specs/journey-b2c-1-discovery-browse/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-journeys-1/specs/journey-b2c-1-discovery-browse/spec.md",
       "capability": "base.journey-b2c-1-discovery-browse",
       "priority": "P1",
       "epic": "journeys",
       "sha256": "3f4bb3cff133ea709a66f4a4b10561b20220582deb012aac7fc042e93724e036"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-journeys-1/specs/journey-b2c-2-cart-management/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-journeys-1/specs/journey-b2c-2-cart-management/spec.md",
       "capability": "base.journey-b2c-2-cart-management",
       "priority": "P1",
       "epic": "journeys",
       "sha256": "c0eb84b6bea56501bd8b23cab9c51017667dc10fd466a7b0699eb6bbae27115c"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-journeys-2/proposal.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-journeys-2/proposal.md",
       "capability": null,
       "priority": "P1",
       "epic": "journeys-2",
       "sha256": "b751b206896cba607d47a96053f2748e8be3cfea4bb8f6ec53d3306a9b9d45ad"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-journeys-2/tasks.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-journeys-2/tasks.md",
       "capability": null,
       "priority": "P1",
       "epic": "journeys-2",
       "sha256": "433489dff6fec12a254c50328c04a34ea0d0c358016a7d841f5f37344de349d9"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-journeys-2/specs/journey-b2c-3-authentication-identity/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-journeys-2/specs/journey-b2c-3-authentication-identity/spec.md",
       "capability": "base.journey-b2c-3-authentication-identity",
       "priority": "P1",
       "epic": "journeys",
       "sha256": "247db63e0abb80a1ffa6010aa60dc63d273e050224d9dcecd938c6323db1c8b0"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-journeys-2/specs/journey-b2c-4-checkout/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-journeys-2/specs/journey-b2c-4-checkout/spec.md",
       "capability": "base.journey-b2c-4-checkout",
       "priority": "P1",
       "epic": "journeys",
       "sha256": "21b9948b5fc3a02a689ed1823e8a752494c3c3f5a604f2f8d643b99f546cd0aa"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-journeys-2/specs/journey-b2b-9-account-level-order-history/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-journeys-2/specs/journey-b2b-9-account-level-order-history/spec.md",
       "capability": "base.journey-b2b-9-account-level-order-history",
       "priority": "P2",
       "epic": "journeys",
       "sha256": "0c241813bc1bd77bcc26cb106308e3fda61157970c05fbe3b51a5ae2bb066125"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-journeys-2/specs/journey-b2c-5-order-management/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-journeys-2/specs/journey-b2c-5-order-management/spec.md",
       "capability": "base.journey-b2c-5-order-management",
       "priority": "P2",
       "epic": "journeys",
       "sha256": "5cb3bd242817de73c14a09f7c8efcea17d023d93db2c9b56c7d646411a720156"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-journeys-2/specs/journey-b2c-6-account-self-service/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-journeys-2/specs/journey-b2c-6-account-self-service/spec.md",
       "capability": "base.journey-b2c-6-account-self-service",
       "priority": "P2",
       "epic": "journeys",
       "sha256": "dd091184ae141c021012c6cec815bda7f9444e24a5aa74d8df05095c6341babe"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-journeys-2/specs/journey-b2c-7-switching-region-or-language/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-journeys-2/specs/journey-b2c-7-switching-region-or-language/spec.md",
       "capability": "base.journey-b2c-7-switching-region-or-language",
       "priority": "P2",
       "epic": "journeys",
       "sha256": "481d526e3f56fa5e746cbb606fa64db3aeddc27b606f4af49bf6a2d39ed54472"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-journeys-2/specs/journey-b2c-8-subscriptions-recurring-orders/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-journeys-2/specs/journey-b2c-8-subscriptions-recurring-orders/spec.md",
       "capability": "base.journey-b2c-8-subscriptions-recurring-orders",
       "priority": "P3",
       "epic": "journeys",
       "sha256": "e8fcc46141eeb261d1f038cdb0bc6a9d52f3910f836d55bae5b86b6acbfb21da"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-core-shopping/proposal.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-core-shopping/proposal.md",
       "capability": null,
       "priority": "P1",
       "epic": "core-shopping",
       "sha256": "b88ae6b5208d5fb66c133d5ed7731f6b41962f1a9cb88a076c4639826fa80f4b"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-core-shopping/tasks.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-core-shopping/tasks.md",
       "capability": null,
       "priority": "P1",
       "epic": "core-shopping",
       "sha256": "530e30a9ca0847f8f5c021e94f36380722ef222af48d6110849d2a0890500003"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-core-shopping/specs/cart-page/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-core-shopping/specs/cart-page/spec.md",
       "capability": "base.cart-page",
       "priority": "P1",
       "epic": "core-shopping",
       "sha256": "39b7300ed99f2396a69d1d40cca1fade094f9be91ad747fe3215ab3299ff659a"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-core-shopping/specs/checkout-page/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-core-shopping/specs/checkout-page/spec.md",
       "capability": "base.checkout-page",
       "priority": "P1",
       "epic": "core-shopping",
       "sha256": "a083fcf17a507a4820093a2be7609a2b9d943f9824a68c8dd143cbb6181e6f56"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-core-shopping/specs/home-landing-page/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-core-shopping/specs/home-landing-page/spec.md",
       "capability": "base.home-landing-page",
       "priority": "P1",
       "epic": "core-shopping",
       "sha256": "d4886b4f78c0f6de6358354ef8ba108a9a79514d6017e992db41c7c4942a2be7"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-core-shopping/specs/order-confirmation-page/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-core-shopping/specs/order-confirmation-page/spec.md",
       "capability": "base.order-confirmation-page",
       "priority": "P1",
       "epic": "core-shopping",
       "sha256": "8587996df97beaf07cd05b3c2f6b291e6662d4ac4715183dfb53cf1d7d7b7974"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-core-shopping/specs/product-detail-page/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-core-shopping/specs/product-detail-page/spec.md",
       "capability": "base.product-detail-page",
       "priority": "P1",
       "epic": "core-shopping",
       "sha256": "97db19b8b4b59e0ab2b8f82eb42438299273e92c0a761bb18ae125f100bfbc47"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-core-shopping/specs/product-listing-page/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-core-shopping/specs/product-listing-page/spec.md",
       "capability": "base.product-listing-page",
       "priority": "P1",
       "epic": "core-shopping",
       "sha256": "1799bc17ac67b14e3dbe56d8290f387893fceb811570c3eba18fec2784186baa"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-core-shopping/specs/search-results-page/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-core-shopping/specs/search-results-page/spec.md",
       "capability": "base.search-results-page",
       "priority": "P2",
       "epic": "core-shopping",
       "sha256": "ffe6d64fc954ca4e391be50fdf5f3852c0689be3ab66f1770d1f937129f1c567"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-account-self-service/proposal.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-account-self-service/proposal.md",
       "capability": null,
       "priority": "P1",
       "epic": "account-self-service",
       "sha256": "5250548226d955e19d62701a07788a7a6fd9b0755e98ac123d3dc8ed65991387"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-account-self-service/tasks.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-account-self-service/tasks.md",
       "capability": null,
       "priority": "P1",
       "epic": "account-self-service",
       "sha256": "26a91f3135c926c5e9562444b9e32d87519b87c72589a31515fcdee5fed86652"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-account-self-service/specs/account-registration-request/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-account-self-service/specs/account-registration-request/spec.md",
       "capability": "base.account-registration-request",
       "priority": "P1",
       "epic": "account-self-service",
       "sha256": "e7829d0701d2dbba4c813b9446871ade9a2e3a09fdd6f5142f31373170fb61bf"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-account-self-service/specs/account-sign-in/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-account-self-service/specs/account-sign-in/spec.md",
       "capability": "base.account-sign-in",
       "priority": "P1",
       "epic": "account-self-service",
       "sha256": "a0767b71d2b0a95cf08c37f3fbf13430d27bb939749a4778ec9b99fbd4b32db2"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-account-self-service/specs/address-book/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-account-self-service/specs/address-book/spec.md",
       "capability": "base.address-book",
       "priority": "P1",
       "epic": "account-self-service",
       "sha256": "6b18aacc98371fefb5f8dca3d9cec7a0c99d0ad8422fa89dacdf097f57ad73da"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-account-self-service/specs/order-history/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-account-self-service/specs/order-history/spec.md",
       "capability": "base.order-history",
       "priority": "P1",
       "epic": "account-self-service",
       "sha256": "10d871f25b7e32ef76dbc95a4a723877faf197903d8fbd25bb26cbf49b8fb377"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-account-self-service/specs/user-and-role-management/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-account-self-service/specs/user-and-role-management/spec.md",
       "capability": "base.user-and-role-management",
       "priority": "P1",
       "epic": "account-self-service",
       "sha256": "b2039b926fbc1a6441dceceec9f9a4b59c0d3c8e2fe9412dd5dc3c22dbd3a2d4"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-account-self-service/specs/account-dashboard/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-account-self-service/specs/account-dashboard/spec.md",
       "capability": "base.account-dashboard",
       "priority": "P2",
       "epic": "account-self-service",
       "sha256": "68e1e395171b14f3c3f5e115cb460ef34d0f97f9ac76f787e98a41b67d26e0a7"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-account-self-service/specs/approval-workflows/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-account-self-service/specs/approval-workflows/spec.md",
       "capability": "base.approval-workflows",
       "priority": "P2",
       "epic": "account-self-service",
       "sha256": "fd87b78f28ec7279a4357b38066a9ff943b374d3e9f97946683618f486009914"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-account-self-service/specs/payment-methods/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-account-self-service/specs/payment-methods/spec.md",
       "capability": "base.payment-methods",
       "priority": "P2",
       "epic": "account-self-service",
       "sha256": "fe2532b9f953ff5617c62e231cbcda821f2a0d52f16d60530e5097aac6589364"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-account-self-service/specs/quote-negotiation/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-account-self-service/specs/quote-negotiation/spec.md",
       "capability": "base.quote-negotiation",
       "priority": "P2",
       "epic": "account-self-service",
       "sha256": "8075a246559eabc531fe415eec222c74df3ed0f2402ed330234d627b67857b51"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-account-self-service/specs/saved-lists/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-account-self-service/specs/saved-lists/spec.md",
       "capability": "base.saved-lists",
       "priority": "P2",
       "epic": "account-self-service",
       "sha256": "38c942fd5d2cc15d68c2d884954fb391685a7c526fa6926c9da9ef73defefe9a"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-b2b-specific/proposal.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-b2b-specific/proposal.md",
       "capability": null,
       "priority": "P1",
       "epic": "b2b-specific",
       "sha256": "b4cbeab78e90f374fbc88b05a648b7766f2d9778ac4a3a0e615dfae85ba46aa7"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-b2b-specific/tasks.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-b2b-specific/tasks.md",
       "capability": null,
       "priority": "P1",
       "epic": "b2b-specific",
       "sha256": "9a6dc547809e6b33d916df3fda6a650571fcf20dee0bd4807a5fe07d95bc0cb5"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-b2b-specific/specs/invoice-and-billing-history/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-b2b-specific/specs/invoice-and-billing-history/spec.md",
       "capability": "base.invoice-and-billing-history",
       "priority": "P1",
       "epic": "b2b-specific",
       "sha256": "558def7d61a08e49bbb8c35e573fbb0f15b5a7e43c1d8be033f2ab88c623d670"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-b2b-specific/specs/quick-order-entry/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-b2b-specific/specs/quick-order-entry/spec.md",
       "capability": "base.quick-order-entry",
       "priority": "P1",
       "epic": "b2b-specific",
       "sha256": "c265e473505c0553d81d22bab2471c3d9eec43480c9ce7b4d42dc28e9939f26e"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-b2b-specific/specs/budget-and-spending-limits/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-b2b-specific/specs/budget-and-spending-limits/spec.md",
       "capability": "base.budget-and-spending-limits",
       "priority": "P2",
       "epic": "b2b-specific",
       "sha256": "20653568dd09c4c99496eb96836c01a0eebdf8784cf6e4f63ca214f93fed0240"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-b2b-specific/specs/company-profile/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-b2b-specific/specs/company-profile/spec.md",
       "capability": "base.company-profile",
       "priority": "P2",
       "epic": "b2b-specific",
       "sha256": "0e2758eeca218a414d0ad3bfc0b05989545d828c6da11d012954d3e15401399f"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-b2b-specific/specs/contract-pricing/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-b2b-specific/specs/contract-pricing/spec.md",
       "capability": "base.contract-pricing",
       "priority": "P2",
       "epic": "b2b-specific",
       "sha256": "0768573627e345acfefc974e3fcc6687cc5cfde8674974e79dbdde91d19af30d"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-b2b-specific/specs/cost-center-management/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-b2b-specific/specs/cost-center-management/spec.md",
       "capability": "base.cost-center-management",
       "priority": "P3",
       "epic": "b2b-specific",
       "sha256": "0d424dca0ac5fca7ed829771462086fa5629e036b5f0e0a0b719ca4dce7befe4"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-content-support/proposal.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-content-support/proposal.md",
       "capability": null,
       "priority": "P1",
       "epic": "content-support",
       "sha256": "9fb2683810a4db94550ff6a9414cadcef78a7ef8dffd9b7ae607d91bf5868fdf"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-content-support/tasks.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-content-support/tasks.md",
       "capability": null,
       "priority": "P1",
       "epic": "content-support",
       "sha256": "6272e0d8d4ba36b13a307839656c0a674d02e26b4b5eac505d268d3590ac9e93"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-content-support/specs/contact-us/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-content-support/specs/contact-us/spec.md",
       "capability": "base.contact-us",
       "priority": "P1",
       "epic": "content-support",
       "sha256": "0b5d1b30973237d72ca8d39434c29c8de3d3d199adb750e0d76ced2bf7cd9389"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-content-support/specs/policy-pages/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-content-support/specs/policy-pages/spec.md",
       "capability": "base.policy-pages",
       "priority": "P1",
       "epic": "content-support",
       "sha256": "8318e9c7981fbf1c2b6c61d9db56621dbe3a2ca3076013152aa55045d6dea5d7"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-content-support/specs/about-us/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-content-support/specs/about-us/spec.md",
       "capability": "base.about-us",
       "priority": "P2",
       "epic": "content-support",
       "sha256": "8bac9c5eb7707aafecef19d463e0abb37a01c884f7aae9398c63c0fc84538074"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-content-support/specs/faq/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-content-support/specs/faq/spec.md",
       "capability": "base.faq",
       "priority": "P2",
       "epic": "content-support",
       "sha256": "05c24b656709ac2be76938697b17b23b5c45a4907802f7e9f7f4a20d48cbea91"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-content-support/specs/blog-resources/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-content-support/specs/blog-resources/spec.md",
       "capability": "base.blog-resources",
       "priority": "P3",
       "epic": "content-support",
       "sha256": "aea4d8fa5ad11f4cc4d6f64eda7f4fccc7a9cab90b43decbb6a694f4d3eb3987"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-utility-system/proposal.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-utility-system/proposal.md",
       "capability": null,
       "priority": "P1",
       "epic": "utility-system",
       "sha256": "4aa17f13593c4107173645ca960894635ed449db8322570c71bfe9639eb967f5"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-utility-system/tasks.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-utility-system/tasks.md",
       "capability": null,
       "priority": "P1",
       "epic": "utility-system",
       "sha256": "60e44890a916c370829f139530c8790e1ed5c2acdd963b2a624fa01ee8d78142"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-utility-system/specs/error-pages/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-utility-system/specs/error-pages/spec.md",
       "capability": "base.error-pages",
       "priority": "P1",
       "epic": "utility-system",
       "sha256": "517bdd4ff94a2746c254785fca6d4463567c3eba8081b934bafa1f080aca6456"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-utility-system/specs/password-reset/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-utility-system/specs/password-reset/spec.md",
       "capability": "base.password-reset",
       "priority": "P1",
       "epic": "utility-system",
       "sha256": "c29aafd10dfb37b55b1682cf1d0e743f986f3b219ee169dc40dedd0012ca2697"
     },
     {
-      "path": "openspec/changes/add-_base-b2b2c-utility-system/specs/email-verification/spec.md",
+      "path": "openspec/changes/add-seller-portal-_base-b2b2c-utility-system/specs/email-verification/spec.md",
       "capability": "base.email-verification",
       "priority": "P2",
       "epic": "utility-system",

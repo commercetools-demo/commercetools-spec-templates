@@ -121,10 +121,18 @@ function tasks(caps) {
  */
 export function render(resolved, { placement = "specs" } = {}) {
   const files = [];
+  // A paired model (B2B2C, B2B2B) is TWO shops, and a project may legitimately hold both — the
+  // reference implementations are one repository with a dealer app and a customer app side by
+  // side. So a paired bundle is namespaced by its side: without it, both shops write
+  // `openspec/specs/cart-page/spec.md` with different content and the second overwrites the
+  // first. OpenSpec is fine with the nesting; the spec id simply becomes `<side>/<capability>`,
+  // which is also what lets an agent working in one app be pointed at one subtree.
+  const nest = resolved.side ? `${resolved.side}/` : "";
+
   if (placement === "specs") {
     for (const cap of resolved.capabilities) {
       files.push({
-        path: `openspec/specs/${slugOf(cap.id)}/spec.md`,
+        path: `openspec/specs/${nest}${slugOf(cap.id)}/spec.md`,
         content: specBody(cap, resolved.model, { all: resolved.capabilities }),
         capability: cap.id,
         priority: cap.priority,
@@ -153,7 +161,8 @@ export function render(resolved, { placement = "specs" } = {}) {
     }
   }
   for (const { epic, slug, caps } of parts) {
-    const dir = `openspec/changes/add-${resolved.industry}-${resolved.model.toLowerCase()}-${slug}`;
+    const dir = `openspec/changes/add-${resolved.side ? `${resolved.side}-` : ""}` +
+      `${resolved.industry}-${resolved.model.toLowerCase()}-${slug}`;
     // An epic's proposal and tasks carry the epic's highest priority, so `--scope mvp` keeps a
     // change reviewable rather than shipping a tasks.md whose spec deltas were filtered away.
     const epicPriority = caps.map((c) => c.priority).sort()[0];

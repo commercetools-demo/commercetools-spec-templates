@@ -22,8 +22,10 @@ Run from the target project, not from this repo.
 2. `npx @ct-builders/commercetools-spec-templates init`
 3. Answer the questions. Pick **Generic** if your industry is not listed.
    If you pick **B2B2C** or **B2B2B**, you are also asked *which shop*: those models are a pair —
-   the seller portal, and the storefront the seller's own customers buy from. They are separate
-   projects with separate specs, so run this again in the other project for the other set.
+   the seller portal, and the storefront the seller's own customers buy from. Answer **Both shops**
+   if this project holds both apps. Each shop's specs go under their own folder
+   (`openspec/specs/<shop>/...`), so they never overwrite each other and you can add the second
+   one later without redoing the first.
 4. Read the file list, then confirm.
 5. Verify: `npx -y @fission-ai/openspec@latest validate --specs --strict`
 
@@ -33,9 +35,10 @@ Skip the questions if you already know the answers:
 npx @ct-builders/commercetools-spec-templates plan  --industry grocery --model B2B   # writes nothing
 npx @ct-builders/commercetools-spec-templates apply --industry grocery --model B2B
 
-# A paired model needs --side. Without it: exit 2, both sides named, nothing written — never a
+# A paired model needs --side. Without it: exit 2, every choice named, nothing written — never a
 # default, because the default used to hand a seller-portal build the consumer specs.
 npx @ct-builders/commercetools-spec-templates apply --industry grocery --model B2B2C --side seller-portal
+npx @ct-builders/commercetools-spec-templates apply --industry grocery --model B2B2C --side both
 ```
 
 Undo: `npx @ct-builders/commercetools-spec-templates remove` — takes back only files it wrote and you did not
@@ -149,11 +152,12 @@ map; skip the bump and you overwrite the map those responses need.
    node bin/cts.mjs apply --cwd /tmp/probe --industry <industry> --model B2B --no-overlay
    (cd /tmp/probe && npx -y @fission-ai/openspec@latest validate --specs --strict)
    ```
-   For a paired model, probe **each side into its own directory**. The two bundles write the same
-   spec paths, so applying both into one project is refused (exit 6) by design:
+   For a paired model, probe each side and then both together — a paired bundle is namespaced
+   under its side, so all three land cleanly in one project:
    ```bash
-   node bin/cts.mjs apply --cwd /tmp/portal --industry <i> --model B2B2C --side seller-portal --no-overlay
-   node bin/cts.mjs apply --cwd /tmp/shop   --industry <i> --model B2B2C --side consumer-storefront --no-overlay
+   node bin/cts.mjs apply --cwd /tmp/probe --industry <i> --model B2B2C --side seller-portal --no-overlay
+   node bin/cts.mjs apply --cwd /tmp/probe --industry <i> --model B2B2C --side consumer-storefront --no-overlay
+   node bin/cts.mjs status --cwd /tmp/probe    # must report both shops, one merged receipt
    ```
 6. Commit the sources **and** the regenerated `registry.json`, `dist/` and `rendered/`. CI fails if
    they disagree.
@@ -178,6 +182,12 @@ B2B2C and B2B2B and cannot drift between them.
 
 Nothing else is authored: the developer question, the industry spec counts, the render paths and
 the registry keys all derive from this file.
+
+**A paired bundle is namespaced by its side** — `openspec/specs/<side>/<capability>/spec.md`, and
+`openspec/changes/add-<side>-...` for the change placement. That is what lets one project hold
+both shops: without it, both write `openspec/specs/cart-page/spec.md` with different content.
+`--side both` writes both in one go, and applying one then the other merges into the same receipt,
+so `cts remove` still takes back everything.
 
 **Do not add a side for the brand or network operator.** It has no storefront — in both reference
 implementations the brand's terms are a compile-time constant in the seller's own app config — and

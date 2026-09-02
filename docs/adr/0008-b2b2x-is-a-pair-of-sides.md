@@ -72,7 +72,12 @@ business_models:
 ```
 
 A combination becomes **(industry × model × side)**. `cts apply --model B2B2C` with no `--side`
-**writes nothing and exits 2**, naming both sides. It never defaults.
+**writes nothing and exits 2**, naming every choice. It never defaults.
+
+A paired bundle is **namespaced by its side** — `openspec/specs/<side>/<capability>/spec.md`, and
+`openspec/changes/add-<side>-…` for the change placement — so one project can hold **both** shops.
+`--side both` is a first-class answer. This corrects the first version of this ADR, which said the
+two shops must be separate projects; see *Revision, 2026-09-02* below.
 
 ### Three findings that changed the design
 
@@ -184,15 +189,12 @@ mirroring the existing per-component and per-scenario `business_models` narrowin
   bar will see all B2B2X content permanently fail it.
 - **`_base|B2B2C` jumps 30 → ~48 capabilities with nothing authored.** Anyone comparing counts across
   content versions sees what looks like new content and is not.
-- **Applying both sides into one repo is refused, not accommodated.** This ADR left it as an
-  either/or; the implementation chose refusal. The two bundles write the *same* spec paths with
-  different content, so there is no per-side receipt scheme that makes a single directory correct —
-  one shop's `openspec/specs/cart-page/spec.md` would still overwrite the other's. `lib/plan.mjs`
-  therefore trusts a receipt only when its `side` matches, so the other side's files read as
-  `foreign`, and `cmdApply` explains *why* rather than reporting a generic overwrite refusal.
-  `--force` remains available and is described as what it is. The natural layout is what the two
-  reference implementations already do: two apps, two directories, `--cwd` each.
-  `RECEIPT_PATH` is unchanged; the receipt gains `side` and `receipt_version` 2.
+- **Both sides can live in one project**, because a paired bundle is namespaced by its side.
+  `RECEIPT_PATH` is unchanged; the receipt carries `sides: string[]` at `receipt_version` 3, and a
+  second apply within the same bundle family merges into it rather than replacing it — so applying
+  one shop and later the other ends in exactly the state `--side both` would have produced, and
+  `cts remove` still takes back everything. See *Revision* below for why the first version of this
+  ADR got this wrong.
 - **An unsupported combination is reported before the side is asked.** Whether content exists
   does not depend on the side, so `grocery x B2B2B` exits 5 with "does not support B2B2B" rather
   than first making the developer choose a side for a dead end.
@@ -228,3 +230,40 @@ Deliberately not done here, and still open:
   therefore resolves 49 specs, none authored for a seller portal, correctly labelled `derived`.
 - The collector questionnaire cannot say which side an expert's answer is about. Accepted
   explicitly, with the reasoning recorded in `collector/questions/expert-intake.yaml`.
+
+---
+
+## Revision, 2026-09-02: both shops in one project
+
+The first version of this ADR concluded that the two shops must be separate projects, on the
+grounds that both bundles write the same spec paths. The premise was right and the conclusion was
+wrong, and the counter-example is the evidence this ADR was derived from: **the reference
+implementations are one repository each**, holding `dealer/` and `customer/` side by side. A
+developer answering the questions there could get specs for one shop XOR the other, and no way to
+get both — a defect, not a design.
+
+Two things had to be checked rather than assumed, and both were, against real OpenSpec:
+
+- a **nested** spec directory validates — `openspec/specs/seller-portal/cart-page/spec.md` is
+  accepted and its item id becomes `spec/seller-portal/cart-page`;
+- a change directory **cannot** nest, but a side-prefixed name validates —
+  `openspec/changes/add-seller-portal-grocery-b2b2c-journeys-1`. That prefix is required, not
+  cosmetic: both sides otherwise derive the same `add-<industry>-<model>-<epic>` name.
+
+So the renderer namespaces a paired bundle by side, and the collision that justified the refusal
+does not exist. Verified end to end: `--side both` writes 82 files into one project and OpenSpec
+validates 82 of 82; applying one shop then the other converges on the identical 82-file receipt;
+`cts remove` takes all 82 back.
+
+Nesting also turns out to be the more useful shape for the thing that reads these specs. An agent
+working in `dealer/` can be pointed at one subtree, and a spec's id says which shop it belongs to.
+
+Two smaller defects surfaced on the way, both the same class — creating directories and never
+taking them back:
+
+- `cts remove` deleted files and left every directory it had created. A namespaced bundle creates
+  one directory per capability under a per-side folder, so what remained was the skeleton of the
+  whole bundle. It now prunes what it emptied, stopping at anything that still has content.
+- `cts status` could not say that a project held only one of the two shops. It now names the
+  missing one and the flag that would add it — without that, there is no way to discover from
+  inside a project that the other half exists.

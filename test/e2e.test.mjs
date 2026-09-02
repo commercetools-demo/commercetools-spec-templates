@@ -143,27 +143,61 @@ test("an unsupported combination says so before asking which side", () => {
   assert.doesNotMatch(outp, /--side/, "picking a side for a dead end is two trips to the same wall");
 });
 
-test("the two sides of a pair cannot be applied over each other", () => {
+const lockOf = (dir) =>
+  JSON.parse(fs.readFileSync(path.join(dir, ".commercetools/spec-templates.lock.json"), "utf8"));
+
+test("a paired bundle is namespaced by side, so one project can hold both shops", () => {
   const dir = project();
-  cts(["apply", "--cwd", dir, "--industry", "grocery", "--model", "B2B2C", "--side", "seller-portal", "--no-overlay"]);
-  const receipt = JSON.parse(fs.readFileSync(path.join(dir, ".commercetools/spec-templates.lock.json"), "utf8"));
-  assert.equal(receipt.side, "seller-portal");
-  assert.equal(receipt.receipt_version, 2);
+  cts(["apply", "--cwd", dir, "--industry", "grocery", "--model", "B2B2C", "--side", "both", "--no-overlay"]);
+  const r = lockOf(dir);
+  assert.equal(r.receipt_version, 3);
+  assert.deepEqual(r.sides, ["seller-portal", "consumer-storefront"]);
 
-  // The two bundles use the SAME spec paths with different content, so the second one must not
-  // quietly replace the first. --force is still offered, but the reason has to be stated.
-  const outp = cts([
-    "apply", "--cwd", dir, "--industry", "grocery", "--model", "B2B2C",
-    "--side", "consumer-storefront", "--no-overlay",
-  ], { expect: 6 });
-  assert.match(outp, /already holds the B2B2C specs/);
-  assert.match(outp, /separate projects/);
-  assert.match(outp, /Nothing has been written/);
+  // Every spec path carries its side, which is what stops the two shops sharing a file.
+  for (const f of r.files) {
+    assert.match(f.path, /^openspec\/specs\/(seller-portal|consumer-storefront)\//, f.path);
+  }
+  const bySide = (sd) => r.files.filter((f) => f.path.startsWith(`openspec/specs/${sd}/`)).length;
+  assert.ok(bySide("seller-portal") > 0 && bySide("consumer-storefront") > 0);
+  assert.equal(bySide("seller-portal") + bySide("consumer-storefront"), r.files.length);
+  // No path appears twice — the whole point.
+  assert.equal(new Set(r.files.map((f) => f.path)).size, r.files.length);
+});
 
-  // And the seller portal's files are untouched.
-  const after = JSON.parse(fs.readFileSync(path.join(dir, ".commercetools/spec-templates.lock.json"), "utf8"));
-  assert.equal(after.side, "seller-portal");
-  assert.deepEqual(after.files.map((f) => f.path).sort(), receipt.files.map((f) => f.path).sort());
+test("applying one shop then the other lands exactly where asking for both would", () => {
+  const together = project();
+  cts(["apply", "--cwd", together, "--industry", "grocery", "--model", "B2B2C", "--side", "both", "--no-overlay"]);
+
+  const stepwise = project();
+  cts(["apply", "--cwd", stepwise, "--industry", "grocery", "--model", "B2B2C", "--side", "seller-portal", "--no-overlay"]);
+  // Halfway: the receipt must already say which shop is missing, or the developer has no way to
+  // discover that the other half exists.
+  const halfway = cts(["status", "--cwd", stepwise]);
+  assert.match(halfway, /holds 1 of 2 shops/);
+  assert.match(halfway, /--side consumer-storefront/);
+
+  cts(["apply", "--cwd", stepwise, "--industry", "grocery", "--model", "B2B2C", "--side", "consumer-storefront", "--no-overlay"]);
+
+  // The second apply must MERGE, not replace: otherwise `remove` forgets the first shop and
+  // leaves its files behind for ever.
+  const a = lockOf(together), b = lockOf(stepwise);
+  assert.deepEqual(b.files.map((f) => f.path).sort(), a.files.map((f) => f.path).sort());
+  assert.deepEqual([...b.sides].sort(), [...a.sides].sort());
+
+  const removed = cts(["remove", "--cwd", stepwise]);
+  assert.match(removed, new RegExp(`Removed ${a.files.length} file`));
+  assert.equal(fs.existsSync(path.join(stepwise, "openspec/specs/seller-portal")), false);
+  assert.equal(fs.existsSync(path.join(stepwise, "openspec/specs/consumer-storefront")), false);
+});
+
+test("a single-storefront model keeps its flat, un-namespaced paths", () => {
+  const dir = project();
+  cts(["apply", "--cwd", dir, "--industry", "grocery", "--model", "B2B", "--no-overlay"]);
+  const r = lockOf(dir);
+  assert.deepEqual(r.sides, [], "B2B is one shop");
+  for (const f of r.files) {
+    assert.match(f.path, /^openspec\/specs\/[^/]+\/spec\.md$/, `${f.path} must not be nested`);
+  }
 });
 
 test("a receipt written before the split explains itself rather than inviting a bad re-apply", () => {
@@ -171,7 +205,8 @@ test("a receipt written before the split explains itself rather than inviting a 
   cts(["apply", "--cwd", dir, "--industry", "grocery", "--model", "B2B2C", "--side", "seller-portal", "--no-overlay"]);
   const lock = path.join(dir, ".commercetools/spec-templates.lock.json");
   const r = JSON.parse(fs.readFileSync(lock, "utf8"));
-  delete r.side;                                  // as a pre-ADR-8 receipt would be
+  delete r.side; delete r.sides;                  // as a pre-ADR-8 receipt would be
+  r.receipt_version = 1;
   fs.writeFileSync(lock, JSON.stringify(r, null, 2));
 
   const outp = cts(["status", "--cwd", dir]);
@@ -306,8 +341,10 @@ test("the side is asked before the industry, because the industry note quotes a 
   const answers = { framework_state: "have", framework: "openspec", business_model: "B2B2C" };
   const asked = JSON.parse(cts(["questions", "--cwd", project(), "--answers", JSON.stringify(answers)]));
   assert.equal(asked.question.id, "side", "a paired model must be split before anything is counted");
-  assert.equal(asked.question.options.length, 2);
-  assert.ok(asked.question.options.every((o) => !/portal|storefront/.test(o.value) === false));
+  // Two shops, plus "both" — a project holding both apps is the layout the reference
+  // implementations actually use, so refusing it was a defect, not a design.
+  assert.deepEqual(asked.question.options.map((o) => o.value),
+    ["seller-portal", "consumer-storefront", "both"]);
 
   const registry = JSON.parse(fs.readFileSync(path.join(ROOT, "registry.json"), "utf8"));
   // The two sides differ by ~18 specs, so a count quoted before the side is chosen is wrong for

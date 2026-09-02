@@ -48,12 +48,12 @@ const USAGE = `cts — commercetools industry spec templates (content ${registry
   cts list [--industry <i>]                   what content is available
   cts questions [--answers '<json>']          drive the intake flow
   cts plan   --industry <i> --model <m> [...] preview what would be written
-                                              a B2B2C/B2B2B model also needs --side
+                                              a B2B2C/B2B2B model also needs --side (or --side both)
   cts apply  [--plan <file>] [...]            write it
   cts status | cts remove                     inspect or undo what we wrote
   cts why    --industry <i> --model <m>       explain a resolution
 
-Options: --framework openspec|speckit · --side <s> · --placement specs|change · --scope all|mvp
+Options: --framework openspec|speckit · --side <s>|both · --placement specs|change · --scope all|mvp
          --cwd <dir> · --force · --dry-run · --json · --no-overlay`;
 
 function parseArgs(argv) {
@@ -79,13 +79,46 @@ const comboKey = (industry, model, side) =>
 /** The sides a model has, or [] when it is a single storefront. */
 const sidesFor = (model) => registry.business_models[model]?.sides ?? [];
 
+/** `both` means every side of the model. A single-storefront model expands to [null]. */
+const expandSides = (model, side) => {
+  const all = sidesFor(model);
+  if (!all.length) return [null];
+  return side === "both" ? all : [side];
+};
+
+/**
+ * One reporting view over several sides. Counts add up, gaps are the union, and `match` is the
+ * worst of them: telling a developer who took both shops that one of them was exact would be
+ * true of half of what they got.
+ */
+function mergeCombos(list) {
+  if (list.length === 1) return list[0];
+  const sum = (k) => list.reduce((n, c) => n + (c[k] ?? 0), 0);
+  const uniq = (k) => [...new Set(list.flatMap((c) => c[k] ?? []))];
+  return {
+    side: "both",
+    sides: list.map((c) => c.side),
+    match: list.every((c) => c.match === "exact") ? "exact" : "derived",
+    capability_count: sum("capability_count"),
+    p1_count: sum("p1_count"),
+    native: sum("native"),
+    derived: sum("derived"),
+    open_questions: sum("open_questions"),
+    gaps: uniq("gaps"),
+    skills: uniq("skills"),
+    journeys: uniq("journeys"),
+    epics: list.flatMap((c) => (c.epics ?? []).map((e) => ({ ...e, side: c.side }))),
+  };
+}
+
 /** The message for "this model is a pair and you did not say which one". Used in three places. */
 function sideRequired(model) {
   const lines = [`${model} is two separate shops, and they get different specs. Pick one:`];
   for (const sd of sidesFor(model)) {
-    lines.push(`  --side ${sd.padEnd(20)} ${registry.sides[sd]?.label ?? ""}`);
+    lines.push(`  --side ${sd.padEnd(22)} ${registry.sides[sd]?.label ?? ""}`);
   }
-  lines.push(`Nothing has been written. Run this again in the other project for the other set.`);
+  lines.push(`  --side ${"both".padEnd(22)} both shops, in this one project`);
+  lines.push(`Nothing has been written.`);
   return lines.join("\n");
 }
 
@@ -113,12 +146,13 @@ function bundle({ industry, model, side, framework, placement }) {
   // Refusing beats defaulting. Before ADR 8 a paired model resolved the consumer set silently,
   // so a developer building a seller portal got 30 consumer page specs and a success message.
   if (sides.length && !side) throw exit(2, sideRequired(model));
-  if (sides.length && !sides.includes(side)) {
+  if (sides.length && side !== "both" && !sides.includes(side)) {
     throw exit(2, `${model} has no side '${side}'.\n${sideRequired(model)}`);
   }
   if (!sides.length && side) {
     throw exit(2, `${model} is one shop, not a pair — drop --side.\nNothing has been written.`);
   }
+  if (side === "both") throw new Error("bundle() takes one side; expand `both` before calling it");
   const combo = registry.combinations[comboKey(industry, model, side)];
   if (!combo) {
     throw exit(5,
@@ -148,7 +182,7 @@ const humanize = (ids) => (ids ?? []).map((g) => g.replace(/-/g, " ")).join(", "
 function describe(plan, combo) {
   const lines = [
     `${label("industries", plan.industry)} · ${label("business_models", plan.model)}` +
-      `${plan.side ? ` · ${registry.sides[plan.side]?.label ?? plan.side}` : ""} · ` +
+      `${(plan.sides ?? []).length ? ` · ${plan.sides.map((sd) => label("sides", sd)).join(" + ")}` : ""} · ` +
       `${registry.compat[plan.framework].label} → ${plan.placement === "change" ? "openspec/changes/" : plan.placement === "specs" ? "openspec/specs/" : "specs/"}`,
   ];
   const n = plan.entries.length;
@@ -157,6 +191,9 @@ function describe(plan, combo) {
       ? `${n} file(s), written for exactly this combination.`
       : `${n} file(s), using the closest set that applies.`,
   );
+  if ((plan.sides ?? []).length > 1) {
+    lines.push(`Both shops, each under its own folder — they never share a spec file.`);
+  }
   if (combo.gaps?.length) {
     lines.push(`${combo.gaps.length} thing(s) not covered, written up as open questions: ${humanize(combo.gaps)}.`);
   }
@@ -233,7 +270,10 @@ function buildState(cwd, answers, flags) {
   // empty, so `scope` and `gap_ack` cannot fire against the wrong bundle's numbers.
   const needsSide = sidesFor(answers.business_model).length > 0;
   if (answers.industry && answers.business_model && (!needsSide || answers.side)) {
-    const c = registry.combinations[comboKey(answers.industry, answers.business_model, answers.side ?? null)];
+    const found = expandSides(answers.business_model, answers.side ?? null)
+      .map((sd) => registry.combinations[comboKey(answers.industry, answers.business_model, sd)])
+      .filter(Boolean);
+    const c = found.length ? mergeCombos(found) : undefined;
     resolved = c
       ? { ...c, framework: answers.framework ?? d.framework }
       : { match: "none", capability_count: 0, p1_count: 0, gaps: [], framework: answers.framework ?? d.framework };
@@ -381,10 +421,18 @@ function resolveTarget(cwd, flags) {
 function makePlan(cwd, flags) {
   const t = resolveTarget(cwd, flags);
   if (!t.industry || !t.model) throw exit(2, "--industry and --model are required.");
-  const { manifest, base, combo } = bundle(t);
-  const files = rebase(filesFor({ manifest, base, scope: t.scope }), t.framework, cwd);
-  const plan = buildPlan({ cwd, ...t, files, contentVersion: registry.content_version });
-  return { plan, files, combo, target: t };
+  // `--side both` is two bundles in one plan. Their paths are disjoint — each paired bundle is
+  // namespaced under its side — so concatenating them cannot have one shop overwrite the other.
+  const sides = expandSides(t.model, t.side);
+  const bundles = sides.map((sd) => bundle({ ...t, side: sd }));
+  const files = rebase(
+    bundles.flatMap((b) => filesFor({ manifest: b.manifest, base: b.base, scope: t.scope })),
+    t.framework, cwd,
+  );
+  const plan = buildPlan({
+    cwd, ...t, sides: sides.filter(Boolean), files, contentVersion: registry.content_version,
+  });
+  return { plan, files, combo: mergeCombos(bundles.map((b) => b.combo)), target: t };
 }
 
 function cmdPlan(cwd, flags) {
@@ -425,21 +473,6 @@ function cmdApply(cwd, flags) {
 
   const b = blockers(plan);
   if (b.length && !flags.force) {
-    // The commonest way to hit this now is applying both shops of a pair into one project: the
-    // two bundles use the SAME spec paths with different content, so the second one reads as
-    // foreign. Saying "we did not write these" would be misleading — we wrote them, for the
-    // other shop — and --force would silently replace one shop's specs with the other's.
-    const prior = readReceipt(cwd);
-    if (prior && prior.model === target.model && (prior.side ?? null) !== (target.side ?? null)) {
-      warn(`This project already holds the ${target.model} specs for "${label("sides", prior.side)}", ` +
-           `and the two shops use the same paths with different content.`);
-      warn(`Nothing has been written.`);
-      warn(`The two shops are separate projects. Apply this one somewhere else:`);
-      warn(`  --cwd <the other project>`);
-      warn(`Or, if this project really should switch shops: \`cts remove\` first, then apply.`);
-      warn(`--force would overwrite ${b.length} of those ${b.length === 1 ? "spec" : "specs"} in place.`);
-      return 6;
-    }
     warn(`Refusing to overwrite ${b.length} file(s) we did not write, or that you edited. ` +
          `Nothing has been written.`);
     for (const e of b) warn(`  ${e.action} ${e.path}`);
@@ -479,18 +512,24 @@ function cmdStatus(cwd, flags) {
   if (!r) { out(`No receipt at ${RECEIPT_PATH} — nothing was written here by this tool.`); return 0; }
   const states = r.files.map((f) => ({ ...f, state: fileState(cwd, f) }));
   if (flags.json) return json({ ...r, files: states }), 0;
-  out(`${r.industry} x ${r.model}${r.side ? ` x ${r.side}` : ""} -> ${r.framework}/${r.placement}, ` +
-      `content ${r.content_version}, applied ${r.applied_at}`);
+  const held = r.sides ?? (r.side ? [r.side] : []);
+  out(`${r.industry} x ${r.model}${held.length ? ` x ${held.join(" + ")}` : ""} -> ` +
+      `${r.framework}/${r.placement}, content ${r.content_version}, applied ${r.applied_at}`);
   const current = registry.content_version === r.content_version;
   // A receipt written before ADR 8 has no side, and its model may now be a pair. Saying
   // "content N is available" would invite a re-apply that exits 2 with no explanation.
-  if (!r.side && sidesFor(r.model).length) {
+  if (!held.length && sidesFor(r.model).length) {
     out(`${r.model} has since been split into two separate shops, each with its own specs:`);
     for (const sd of sidesFor(r.model)) out(`  ${sd.padEnd(20)} ${registry.sides[sd]?.label ?? ""}`);
     out(`What is here was written before that split. \`cts remove\` still takes it back, and`);
-    out(`re-applying now needs --side. Nothing has changed on disk.`);
+    out(`re-applying now needs --side (or --side both). Nothing has changed on disk.`);
   } else {
     out(current ? `Content is current.` : `Content ${registry.content_version} is available (you have ${r.content_version}).`);
+    const missing = sidesFor(r.model).filter((sd) => !held.includes(sd));
+    if (held.length && missing.length) {
+      out(`This project holds ${held.length} of ${sidesFor(r.model).length} shops. Also available here:`);
+      for (const sd of missing) out(`  --side ${sd.padEnd(22)} ${label("sides", sd)}`);
+    }
   }
   for (const f of states) out(`  ${f.state.padEnd(10)} ${f.path}`);
   return 0;
@@ -507,6 +546,21 @@ function cmdRemove(cwd, flags) {
       removed.push(f.path);
     } else kept.push(`${state} ${f.path}`);
   }
+  // Prune the directories we emptied. `apply` created them, so `remove` owes them back — and a
+  // namespaced bundle creates one directory per capability under a per-side folder, so skipping
+  // this leaves a whole skeleton behind. Stops at anything that still has content, and never
+  // climbs past the project root.
+  if (!flags.dryRun) {
+    const root = path.resolve(cwd);
+    for (const rel of removed) {
+      let dir = path.dirname(path.resolve(cwd, rel));
+      while (dir.startsWith(root) && dir !== root) {
+        if (!fs.existsSync(dir) || fs.readdirSync(dir).length) break;
+        fs.rmdirSync(dir);
+        dir = path.dirname(dir);
+      }
+    }
+  }
   if (!flags.dryRun && !kept.length) fs.rmSync(path.join(cwd, RECEIPT_PATH), { force: true });
   out(`${flags.dryRun ? "Would remove" : "Removed"} ${removed.length} file(s).`);
   if (kept.length) {
@@ -520,9 +574,12 @@ function cmdRemove(cwd, flags) {
 
 function cmdWhy(flags) {
   if (sidesFor(flags.model).length && !flags.side) { warn(sideRequired(flags.model)); return 2; }
-  const key = comboKey(flags.industry, flags.model, flags.side ?? null);
-  const c = registry.combinations[key];
-  if (!c) { warn(`No combination ${key}. Try \`cts list\`.`); return 5; }
+  const keys = expandSides(flags.model, flags.side ?? null)
+    .map((sd) => comboKey(flags.industry, flags.model, sd));
+  const found = keys.map((k) => registry.combinations[k]).filter(Boolean);
+  if (!found.length) { warn(`No combination ${keys.join(" or ")}. Try \`cts list\`.`); return 5; }
+  const key = keys.length > 1 ? keys.join(" + ") : keys[0];
+  const c = mergeCombos(found);
   if (flags.json) return json(c), 0;
   out(`${key}: ${c.match} match`);
   if (c.side) out(`  side: ${registry.sides[c.side]?.label ?? c.side}`);

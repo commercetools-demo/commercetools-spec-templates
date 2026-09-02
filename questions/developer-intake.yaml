@@ -76,11 +76,18 @@ questions:
     header: Which shop
     prompt: "A {{answers.business_model.label}} setup is two shops. Which one are you building here?"
     hint: >
-      They are separate projects with separate specs. Run this again in the other project to get
-      the other set.
+      Pick one if this project is just that shop. Pick both if it holds both apps — the specs go
+      in separate folders either way, so you can add the other one later.
     ask_when: { in: [answers.business_model.value, registry.multi_sided_models] }
     options_from: registry.sides
     options_filter: { supports_model: answers.business_model.value }
+    options_append:
+      - value: both
+        label: "Both shops"
+        plain: "both shops"
+        description: >
+          One project holding both. You get both sets of specs, each under its own folder, so
+          they never overwrite each other.
 
   - id: industry
     type: single

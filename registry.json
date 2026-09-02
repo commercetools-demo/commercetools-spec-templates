@@ -585,12 +585,12 @@
         "openspec:specs": {
           "path": "rendered/_base/b2b2c/seller-portal/openspec-specs",
           "files": 48,
-          "sha256": "efbbd2616d4d1d2a74f758b469b4200e2685378bb0a92ae82802d6e9a0967416"
+          "sha256": "11006bd9e484ab9226f7dd49ff05401177b3a80af281dd325e650e0142037ed5"
         },
         "openspec:change": {
           "path": "rendered/_base/b2b2c/seller-portal/openspec-change",
           "files": 62,
-          "sha256": "cb9f67d68a37be93da3b04f0fc887eaf4ffd49cfd85a0ac2590e54a828dd61c7"
+          "sha256": "b707a433d52d540808c628ef8c9548d7ae6ddd6fb2f4c697d38bca6e80e4afcf"
         }
       }
     },
@@ -670,12 +670,12 @@
         "openspec:specs": {
           "path": "rendered/_base/b2b2c/consumer-storefront/openspec-specs",
           "files": 30,
-          "sha256": "93259e50e76056656fcef39132364e2cf28e17b42188364a2840046204063b86"
+          "sha256": "8354fc1ec3ff1e0830de60b24e61f74f13b2aea883c30989e7f4ed3282c0ae33"
         },
         "openspec:change": {
           "path": "rendered/_base/b2b2c/consumer-storefront/openspec-change",
           "files": 40,
-          "sha256": "2c7c0d9f61b41e5b11aa7f07cfc71f3e13d22af73193a288450dd281f76bbcf7"
+          "sha256": "9458ebc2e93b9458e0c8eff51c145709ec3b4e553cd0d1315cc42eb2e6a013a1"
         }
       }
     },
@@ -766,12 +766,12 @@
         "openspec:specs": {
           "path": "rendered/_base/b2b2b/seller-portal/openspec-specs",
           "files": 48,
-          "sha256": "efbbd2616d4d1d2a74f758b469b4200e2685378bb0a92ae82802d6e9a0967416"
+          "sha256": "11006bd9e484ab9226f7dd49ff05401177b3a80af281dd325e650e0142037ed5"
         },
         "openspec:change": {
           "path": "rendered/_base/b2b2b/seller-portal/openspec-change",
           "files": 62,
-          "sha256": "3cb15adb3d8bbbdadde3ec1f33d8c7a16a3c1b335fb6bcd54df86911c00390e3"
+          "sha256": "72a0d240658359b57688a73881afb02b0585649ae6419c9a2bc293f1a32de008"
         }
       }
     },
@@ -860,12 +860,12 @@
         "openspec:specs": {
           "path": "rendered/_base/b2b2b/business-storefront/openspec-specs",
           "files": 48,
-          "sha256": "efbbd2616d4d1d2a74f758b469b4200e2685378bb0a92ae82802d6e9a0967416"
+          "sha256": "4b4f9ed4f05f078ac4bbb11e07cf04d619ba5b135be8313596400679a0103091"
         },
         "openspec:change": {
           "path": "rendered/_base/b2b2b/business-storefront/openspec-change",
           "files": 62,
-          "sha256": "d466ad29b0d701774df506977fe76cb083f0b6a8ac5c69a3029734b0066c3f32"
+          "sha256": "7e51328a899b70d60d3232d4672fcc4a1ad64981510a827d8562faff6431141c"
         }
       }
     },
@@ -1141,12 +1141,12 @@
         "openspec:specs": {
           "path": "rendered/grocery/b2b2c/seller-portal/openspec-specs",
           "files": 49,
-          "sha256": "2c980c6b2e9f4c737bf15295f99fa20b81ab7eac9a074e464a0c5140ab1183b4"
+          "sha256": "5330a839e19ace1d055871bf3e47250107f79dee0dd3a1e0153f3f198e4c39b2"
         },
         "openspec:change": {
           "path": "rendered/grocery/b2b2c/seller-portal/openspec-change",
           "files": 65,
-          "sha256": "ead99d4cc8259230c619dcd327029571d320c482ac9c2e470d594acc2b8413e5"
+          "sha256": "d60b6f6afbef61db13e710989732b77199ebf27c8efeaecd0502a5f07dc198d7"
         }
       }
     },
@@ -1241,12 +1241,12 @@
         "openspec:specs": {
           "path": "rendered/grocery/b2b2c/consumer-storefront/openspec-specs",
           "files": 33,
-          "sha256": "fe438a4f66efd954eb290608218eb559e0ea655ef1680d8a16186911cb3d3a45"
+          "sha256": "250118e457a57da3c795ec8a510fd2fc9974b64e9a3a26b21d805191eb45d7d9"
         },
         "openspec:change": {
           "path": "rendered/grocery/b2b2c/consumer-storefront/openspec-change",
           "files": 49,
-          "sha256": "78c9e48bde09176acec5228a729654ab460db34e6ad10ebc65241b261d20e97f"
+          "sha256": "4659fe22363b99101ca5a1952f066c48b33b8d7186f276acb33d578070b3fdf6"
         }
       }
     }

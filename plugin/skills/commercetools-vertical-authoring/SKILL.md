@@ -129,8 +129,8 @@ industry vertical. Renderers own OpenSpec and Spec Kit shape; you never write fr
 
    ```bash
    node bin/cts.mjs apply --cwd /tmp/probe --industry <v> --model <m> --no-overlay
-   # a paired model needs --side, and each side needs its own directory
-   node bin/cts.mjs apply --cwd /tmp/probe-portal --industry <v> --model B2B2C --side seller-portal --no-overlay
+   # a paired model needs --side; `both` writes both shops, namespaced so they cannot collide
+   node bin/cts.mjs apply --cwd /tmp/probe --industry <v> --model B2B2C --side both --no-overlay
    (cd /tmp/probe && openspec validate --specs --strict)
    ```
 
